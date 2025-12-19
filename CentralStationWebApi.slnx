@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Demo/">
+    <Project Path="Demo/CentralStationConsole/CentralStationConsole.csproj" Id="2621c761-639a-4762-a10d-f1ae57ddd6dc" />
+  </Folder>
+  <Folder Name="/Extern/">
+    <Project Path="../WebServiceClient/Src/WebServiceClientShare/WebServiceClientShare.shproj" Id="8caacb04-9656-4b7c-a692-422fca51474b" />
+  </Folder>
+  <Folder Name="/Src/">
+    <Project Path="Src/CentralStationWebApi90/CentralStationWebApi90.csproj" />
+    <Project Path="Src/CentralStationWebApiShare/CentralStationWebApiShare.shproj" Id="16266f29-bc26-4edd-acc7-3d09422c0e74" />
+  </Folder>
+</Solution>
