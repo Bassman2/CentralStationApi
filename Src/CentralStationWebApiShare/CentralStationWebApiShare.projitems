@@ -6,9 +6,15 @@
     <SharedGUID>16266f29-bc26-4edd-acc7-3d09422c0e74</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>CentralStationWebApiShare</Import_RootNamespace>
+    <Import_RootNamespace>CentralStationWebApi</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CentralStation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\CANMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\Command.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\Prioerity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\SystemCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\SystemMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Usings.cs" />
   </ItemGroup>
 </Project>

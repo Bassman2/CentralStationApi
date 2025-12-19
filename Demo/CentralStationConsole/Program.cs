@@ -1,10 +1,18 @@
-﻿namespace CentralStationConsole
+﻿using CentralStationWebApi;
+
+namespace CentralStationConsole
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+
+            using var cs = new CentralStation();
+
+            
+            await cs.SystemStopAsync();
+
+            Console.WriteLine("End");
         }
     }
 }
