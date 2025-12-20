@@ -14,7 +14,23 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid>
-            
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Button Grid.Column="0" Grid.Row="0" Content="Stop" Command="{Binding SystemStopCommand}" Margin="3" />
+            <Button Grid.Column="0" Grid.Row="1" Content="Go" Command="{Binding SystemGoCommand}" Margin="3" />
+            <Button Grid.Column="0" Grid.Row="2" Content="Halt" Command="{Binding SystemHaltCommand}" Margin="3" />
+
         </Grid>
         <DataGrid 
             Grid.Row="1" 

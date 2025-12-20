@@ -1,4 +1,6 @@
-﻿namespace CentralStationDemo.ViewModel;
+﻿using CommunityToolkit.Mvvm.Input;
+
+namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
@@ -23,5 +25,26 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     [ObservableProperty]
     private ObservableCollection<MessageViewModel> messages = [];
+
+    [RelayCommand]
+    private async Task OnSystemStop()
+    { 
+        await cs.SystemStopAsync();
+    }
+
+
+    [RelayCommand]
+    private async Task OnSystemGoCommand()
+    {
+        await cs.SystemGoAsync();
+    }
+
+    [RelayCommand]
+    private async Task OnSystemHaltCommand()
+    {
+        await cs.SystemHaltAsync();
+    }
+
+
 
 }

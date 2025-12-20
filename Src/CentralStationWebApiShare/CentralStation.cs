@@ -45,6 +45,7 @@ public sealed class CentralStation : IDisposable
     {
         Debug.WriteLine($"Send: {message}");
         //int x = await sender.SendAsync(message.Data, 13, host, 15731);
+        MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message));
         int x = await sender.SendAsync(message.Data, 13);
     }
     private async Task ReceiveAsync()
@@ -80,13 +81,19 @@ public sealed class CentralStation : IDisposable
 
     public async Task<bool> SystemGoAsync(CancellationToken cancellationToken = default)                            
     {
-        await Task.Delay(1000, cancellationToken);  
+        var message = new SystemMessage(SystemCommand.Go, 0);
+
+        await SendMessageAsync(message, cancellationToken);
+
         return true;
     }
 
     public async Task<bool> SystemHaltAsync(CancellationToken cancellationToken = default)
     {
-        await Task.Delay(1000, cancellationToken);
+        var message = new SystemMessage(SystemCommand.Halt, 0);
+
+        await SendMessageAsync(message, cancellationToken);
+
         return true;
     }
 
