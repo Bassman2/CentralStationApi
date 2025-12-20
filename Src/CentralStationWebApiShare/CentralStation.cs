@@ -49,7 +49,7 @@ public sealed class CentralStation : IDisposable
             {
                 var result = await listener.ReceiveAsync();
                 var msg = new CANMessage(result.Buffer);
-                Debug.WriteLine($"Received: {msg} {msg.ToDetails}");
+                Debug.WriteLine($"Received: {msg}");
             }
         }
         catch (ObjectDisposedException)

@@ -52,18 +52,18 @@ internal class CANMessage
 
     public byte[] Data => buffer;
 
-    public Priority Priority => (Priority)buffer[0];
+    public Priority Priority => (Priority)GetBits(GetHeader(), 25, 4);
 
-    public Command Command => (Command)buffer[1];
+    public Command Command => (Command)GetBits(GetHeader(), 17, 8);
+
+    public bool IsResponse => GetBits(GetHeader(), 16, 1) == 1;
+
+    public ushort Hash => (ushort)GetBits(GetHeader(), 0, 16);
 
     public override string ToString()
     {
-        return $"{buffer[0]:X2}{buffer[1]:X2}{buffer[2]:X2}{buffer[3]:X2} {buffer[4]:X} {buffer[5]:X2} {buffer[6]:X2} {buffer[7]:X2} {buffer[8]:X2} {buffer[9]:X2} {buffer[10]:X2} {buffer[11]:X2} {buffer[12]:X2}";
-    }
-    
-    public string ToDetails()
-    {
-        return $"Prio.: {Priority}";
+        return $"{buffer[0]:X2}{buffer[1]:X2}{buffer[2]:X2}{buffer[3]:X2} {buffer[4]:X} {buffer[5]:X2} {buffer[6]:X2} {buffer[7]:X2} {buffer[8]:X2} {buffer[9]:X2} {buffer[10]:X2} {buffer[11]:X2} {buffer[12]:X2} - " +
+            $"Prio.: {Priority} Command: {Command} IsResp: {IsResponse} Hash: {Hash:X4}";
     }
 
     private void SetHeader(Priority priority, Command command, uint hash)
@@ -85,6 +85,14 @@ internal class CANMessage
         Array.Copy(msgId, 0, buffer, 0, 4);
     }
 
+    private uint GetHeader()
+    {
+        var msgId = new byte[4];
+        Array.Copy(buffer, 0, msgId, 0, 4);
+        Array.Reverse(msgId);
+        return BitConverter.ToUInt32(msgId, 0);
+    }
+
     private void SetData(byte[] bytes, int length)
     {
         // set DLC
@@ -98,4 +106,10 @@ internal class CANMessage
         uint mask = ((1u << length) - 1u) << position;
         value = (value & ~mask) | ((bits << position) & mask);
     }   
+
+    private static uint GetBits(uint value, int position, int length)
+    {
+        uint mask = (1u << length) - 1u;
+        return (value >> position) & mask;
+    }
 }
