@@ -1,6 +1,7 @@
 ﻿using CentralStationWebApi.Internal;
 using System.Diagnostics;
 using System.Runtime.Intrinsics.Arm;
+using System;
 
 namespace CentralStationWebApi;
 
@@ -33,7 +34,12 @@ public sealed class CentralStation : IDisposable
     {
         sender.Close();
         sender.Dispose();
+        // stop listening
+        listener?.Close();
+        listener?.Dispose();
     }
+
+    public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
 
     private async Task SendMessageAsync(CANMessage message, CancellationToken cancellationToken = default)
     {
@@ -48,8 +54,9 @@ public sealed class CentralStation : IDisposable
             while (true)
             {
                 var result = await listener.ReceiveAsync();
-                var msg = new CANMessage(result.Buffer);
+                var msg = new CANMessage(result);
                 Debug.WriteLine($"Received: {msg}");
+                MessageReceived?.Invoke(this, new MessageReceivedEventArgs(msg));
             }
         }
         catch (ObjectDisposedException)
@@ -88,16 +95,3 @@ public sealed class CentralStation : IDisposable
 }
 
 
-
-//var message = Encoding.UTF8.GetBytes("Hello from CentralStation");
-
-//// send to localhost:5000
-//await udp.SendAsync(message, message.Length, "127.0.0.1", 5000);
-
-//            using var public void Dispose()
-//    {
-//        throw new NotImplementedException();
-//    }
-//}
-
-//cts = new CentralStation();

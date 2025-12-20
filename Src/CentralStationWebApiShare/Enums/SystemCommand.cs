@@ -1,6 +1,6 @@
-﻿namespace CentralStationWebApi.Internal;
+﻿namespace CentralStationWebApi;
 
-internal enum SystemCommand : byte
+public enum SystemCommand : byte
 {
     SystemStop = 0,
     SystemGo = 1,

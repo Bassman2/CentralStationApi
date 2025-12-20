@@ -1,6 +1,6 @@
-﻿namespace CentralStationWebApi.Internal;
+﻿namespace CentralStationWebApi;
 
-internal enum Priority : byte
+public enum Priority : byte
 {
     Proirity1 = 0,      // Prio 1: Stopp / Go / Kurzschluss-Meldung
     Proirity2 = 1,      // Rückmeldungen

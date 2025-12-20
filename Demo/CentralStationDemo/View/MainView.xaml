@@ -9,6 +9,38 @@
         mc:Ignorable="d"
         Height="800" Width="1200">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            
+        </Grid>
+        <DataGrid 
+            Grid.Row="1" 
+            ItemsSource="{Binding Messages}" 
+            AutoGenerateColumns="False" 
+            IsReadOnly="True"
+            HeadersVisibility="Column"
+            GridLinesVisibility="None"
+            CanUserAddRows="False"
+            CanUserDeleteRows="False"
+            CanUserResizeColumns="True"
+            CanUserReorderColumns="True"
+            CanUserSortColumns="True"
+            IsSynchronizedWithCurrentItem="True"
+            ClipboardCopyMode="IncludeHeader"
+            Margin="3">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="100"/>
+                <DataGridTextColumn Header="Sender" Binding="{Binding Sender}" Width="100"/>
+                <DataGridTextColumn Header="Binary" Binding="{Binding Binary}" Width="210"/>
+                <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="80"/>
+                <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="140"/>
+                <DataGridTextColumn Header="IsResponse" Binding="{Binding IsResponse}" Width="70"/>
+                <DataGridTextColumn Header="Hash" Binding="{Binding Hash}" Width="50"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </AppWindowView>

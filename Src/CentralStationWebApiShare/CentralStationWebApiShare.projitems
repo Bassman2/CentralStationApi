@@ -10,11 +10,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CentralStation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\CANMessage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\Command.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\Priority.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\SystemCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CANMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\Command.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\Priority.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\SystemCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\SystemMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MessageReceivedEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Usings.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Enums\" />
   </ItemGroup>
 </Project>

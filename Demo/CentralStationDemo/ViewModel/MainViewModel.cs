@@ -2,11 +2,26 @@
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
+    private CentralStation cs; 
     public MainViewModel()
-    { }
+    {
+        cs = new CentralStation();
+        cs.MessageReceived += (s, e) =>
+        {
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                Messages.Add(new MessageViewModel(e.Message));
+            });
+        };
+    }
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        //cs.Close();
+        cs.Dispose();
     }
+
+    [ObservableProperty]
+    private ObservableCollection<MessageViewModel> messages = [];
+
 }
