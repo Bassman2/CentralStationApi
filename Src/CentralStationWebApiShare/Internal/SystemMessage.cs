@@ -3,7 +3,7 @@
 internal class SystemMessage : CANMessage
 {
     public SystemMessage(SystemCommand systemCommand, uint device)
-        : base(Priority.Proirity1, Command.SystemCommand, CreateData(systemCommand, device))
+        : base(Priority.Proirity1, Command.SystemCommand, 0x4711, CreateData(systemCommand, device))
     {
     }
 

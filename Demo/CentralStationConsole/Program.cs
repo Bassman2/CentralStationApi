@@ -12,6 +12,10 @@ namespace CentralStationConsole
             
             await cs.SystemStopAsync();
 
+            Console.WriteLine("Ready");
+
+            await Task.Delay(TimeSpan.FromSeconds(30));
+
             Console.WriteLine("End");
         }
     }

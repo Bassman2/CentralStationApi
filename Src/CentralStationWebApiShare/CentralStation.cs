@@ -6,6 +6,8 @@ namespace CentralStationWebApi;
 
 public sealed class CentralStation : IDisposable
 {
+    private const int PortSend = 15731;
+    private const int PortReceive = 15730;
 
     private UdpClient sender;
     private UdpClient listener;
@@ -15,9 +17,16 @@ public sealed class CentralStation : IDisposable
     public CentralStation(string host = "CS3") 
     {
         this.host = host;
-        this.sender = new UdpClient(15731);
-        this.listener = new UdpClient(15730);
+
+        this.listener = new UdpClient(PortReceive);
+        
+        //this.listener.Connect(host, PortReceive);
+
         this.receiver = Task.Run(async () => await ReceiveAsync());
+
+        this.sender = new UdpClient();
+        this.sender.Connect(host, PortSend);
+
     }
 
     public void Dispose()
@@ -26,6 +35,12 @@ public sealed class CentralStation : IDisposable
         sender.Dispose();
     }
 
+    private async Task SendMessageAsync(CANMessage message, CancellationToken cancellationToken = default)
+    {
+        Debug.WriteLine($"Send: {message}");
+        //int x = await sender.SendAsync(message.Data, 13, host, 15731);
+        int x = await sender.SendAsync(message.Data, 13);
+    }
     private async Task ReceiveAsync()
     {         
         try
@@ -33,8 +48,8 @@ public sealed class CentralStation : IDisposable
             while (true)
             {
                 var result = await listener.ReceiveAsync();
-                var text = Encoding.UTF8.GetString(result.Buffer);
-                Console.WriteLine($"Received from {result.RemoteEndPoint}: {text}");
+                var msg = new CANMessage(result.Buffer);
+                Debug.WriteLine($"Received: {msg} {msg.ToDetails}");
             }
         }
         catch (ObjectDisposedException)
@@ -68,11 +83,7 @@ public sealed class CentralStation : IDisposable
         return true;
     }
 
-    private async Task SendMessageAsync(CANMessage message, CancellationToken cancellationToken = default)
-    {
-        Debug.WriteLine(message);
-        int x = await sender.SendAsync(message.Data, 13, host, 15731);
-    }
+    
 
 }
 

@@ -6,8 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <Import Project="..\..\..\WebServiceClient\Src\WebServiceClientShare\WebServiceClientShare.projitems" Label="Shared" />
-
   <Import Project="..\CentralStationWebApiShare\CentralStationWebApiShare.projitems" Label="Shared" />
 
 </Project>
