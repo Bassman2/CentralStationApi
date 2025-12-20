@@ -34,13 +34,13 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
 
     [RelayCommand]
-    private async Task OnSystemGoCommand()
+    private async Task OnSystemGo()
     {
         await cs.SystemGoAsync();
     }
 
     [RelayCommand]
-    private async Task OnSystemHaltCommand()
+    private async Task OnSystemHalt()
     {
         await cs.SystemHaltAsync();
     }

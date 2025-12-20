@@ -66,6 +66,8 @@ public class CANMessage
 
     public string Binary => $"{buffer[0]:X2}{buffer[1]:X2}{buffer[2]:X2}{buffer[3]:X2} {buffer[4]:X} " + string.Join(" ", buffer[5..(5 + Math.Min(buffer[4], (byte)8))].Select(b => b.ToString("X2")));
 
+    public int DataLength => buffer[4];
+
     public string Description => 
         Command switch
         {
@@ -94,7 +96,13 @@ public class CANMessage
             Command.Discovery => "Discovery",
             Command.Bind => "Bind",
             Command.Verify => "Verify",
-            Command.LocoSpeed => "Loco Speed",
+            Command.LocoSpeed =>
+                DataLength switch
+                {
+                    4 => $"Loco Speed - Loco: {UInt0}",
+                    6 => $"Loco Speed - Loco: {UInt0} Speed: {UShort2}",
+                    _ => "Loco Speed unknown data size"
+                },
             Command.LocoDirection => "Loco Direction",
             Command.LocoFunction => "Loco Function",
             Command.ReadConfig => "Read Config",
