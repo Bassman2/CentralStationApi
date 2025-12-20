@@ -71,7 +71,7 @@ public sealed class CentralStation : IDisposable
 
     public async Task<bool> SystemStopAsync(CancellationToken cancellationToken = default)
     {   
-        var message = new SystemMessage(SystemCommand.SystemStop, 0);
+        var message = new SystemMessage(SystemCommand.Stop, 0);
 
         await SendMessageAsync(message, cancellationToken);
 

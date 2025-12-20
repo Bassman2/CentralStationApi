@@ -10,7 +10,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             App.Current.Dispatcher.Invoke(() =>
             {
-                Messages.Add(new MessageViewModel(e.Message));
+                Messages.Insert(0, new MessageViewModel(e.Message));
             });
         };
     }

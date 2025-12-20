@@ -30,11 +30,13 @@
             CanUserSortColumns="True"
             IsSynchronizedWithCurrentItem="True"
             ClipboardCopyMode="IncludeHeader"
+            FontFamily="Courier"
+            
             Margin="3">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="100"/>
-                <DataGridTextColumn Header="Sender" Binding="{Binding Sender}" Width="100"/>
-                <DataGridTextColumn Header="Binary" Binding="{Binding Binary}" Width="210"/>
+                <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="110"/>
+                <DataGridTextColumn Header="Sender" Binding="{Binding Sender}" Width="110"/>
+                <DataGridTextColumn Header="Binary" Binding="{Binding Binary}" Width="260"/>
                 <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="80"/>
                 <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="140"/>
                 <DataGridTextColumn Header="IsResponse" Binding="{Binding IsResponse}" Width="70"/>

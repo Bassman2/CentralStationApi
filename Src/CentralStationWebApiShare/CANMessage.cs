@@ -69,10 +69,31 @@ public class CANMessage
     public string Description => 
         Command switch
         {
-            Command.SystemCommand => "System Command",
+            Command.SystemCommand =>
+                SystemCommand switch
+                {
+                    SystemCommand.Stop => $"System Stop - Device: {UInt0}",
+                    SystemCommand.Go => $"System Go - Device: {UInt0}",
+                    SystemCommand.Halt => $"System Halt - Device: {UInt0}",
+                    SystemCommand.LocoHalt => $"System Loco Halt - Device: {UInt0}",
+                    SystemCommand.LocoCycleStop => $"Loco Cycle Stop - Device: {UInt0}",
+                    SystemCommand.LocoDataProtocol => $"Loco Data Protocol - Device: {UInt0}",
+                    SystemCommand.SwitchingTime => $"Switching Time - Device: {UInt0}",
+                    SystemCommand.FastRead => $"Fast Read - Device: {UInt0}",
+                    SystemCommand.TrackProtocol => $"Track Protocol - Device: {UInt0}",
+                    SystemCommand.NewRegistrationCounter => $"New Registration Counter - Device: {UInt0}",
+                    SystemCommand.Overload => $"Overload - Device: {UInt0}",
+                    SystemCommand.Status => $"Status - Device: {UInt0}",
+                    SystemCommand.Identifier => $"Identifier - Device: {UInt0}",
+                    SystemCommand.MfxSeek => $"Mfx Seek - Device: {UInt0}",
+                    SystemCommand.Reset => $"System Reset - Device: {UInt0}",
+                    _ => $"Unknown System Command 0x{buffer[9]:X2}" 
+                },
+
+
             Command.Discovery => "Discovery",
             Command.Bind => "Bind",
-            Command.Versify => "Verify",
+            Command.Verify => "Verify",
             Command.LocoSpeed => "Loco Speed",
             Command.LocoDirection => "Loco Direction",
             Command.LocoFunction => "Loco Function",
@@ -146,6 +167,8 @@ public class CANMessage
             return BitConverter.ToUInt32(mem, 0);
         }
     }
+
+    private SystemCommand SystemCommand => (SystemCommand)buffer[9];
         
     private uint UInt01
     {

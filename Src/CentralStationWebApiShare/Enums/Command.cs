@@ -5,7 +5,7 @@ public enum Command : byte
     SystemCommand = 0,
     Discovery = 1,
     Bind = 2,
-    Versify = 3,
+    Verify = 3,
     LocoSpeed = 4,
     LocoDirection = 5,
     LocoFunction = 6,

@@ -12,9 +12,9 @@ internal class SystemMessage : CANMessage
         byte[] data;
         switch (command)
         {
-        case SystemCommand.SystemStop:
-        case SystemCommand.SystemGo:
-        case SystemCommand.SystemHalt:
+        case SystemCommand.Stop:
+        case SystemCommand.Go:
+        case SystemCommand.Halt:
 
             data = new byte[5];
             Array.Clear(data, 0, 5);
