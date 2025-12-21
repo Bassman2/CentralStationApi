@@ -21,6 +21,7 @@ PPPPxxxCCCCCCCCRHHHHHHHHHHHHHHHH
 */
 public class CANMessage
 {
+    // ReadOnlySpan<Byte>
     private byte[] buffer = new byte[13];
 
     internal CANMessage(Priority priority, Command command, uint hash, byte[] data)
@@ -50,7 +51,7 @@ public class CANMessage
         Array.Copy(udpReceiveResult.Buffer, buffer, 13);
     }
 
-    public byte[] Data => buffer;
+    public byte[] Buffer => buffer;
 
     public DateTime Timestamp { get; } = DateTime.Now;
 
@@ -66,7 +67,19 @@ public class CANMessage
 
     public string Binary => $"{buffer[0]:X2}{buffer[1]:X2}{buffer[2]:X2}{buffer[3]:X2} {buffer[4]:X} " + string.Join(" ", buffer[5..(5 + Math.Min(buffer[4], (byte)8))].Select(b => b.ToString("X2")));
 
+    public string Filename => Encoding.ASCII.GetString(buffer, 5, buffer[4]);
     public int DataLength => buffer[4];
+
+    public byte[] Data
+    {
+        get
+        {
+            byte[] data = new byte[DataLength];
+            Array.Copy(buffer, 5, data, 0, DataLength);
+            return data;
+        }
+    }
+    
 
     public string Description => 
         Command switch
@@ -79,7 +92,7 @@ public class CANMessage
                     SystemCommand.Halt => $"System Halt - Device: {UInt0}",
                     SystemCommand.LocoHalt => $"System Loco Halt - Device: {UInt0}",
                     SystemCommand.LocoCycleStop => $"Loco Cycle Stop - Device: {UInt0}",
-                    SystemCommand.LocoDataProtocol => $"Loco Data Protocol - Device: {UInt0}",
+                    SystemCommand.LocoDataProtocol => $"Loco Buffer Protocol - Device: {UInt0}",
                     SystemCommand.SwitchingTime => $"Switching Time - Device: {UInt0}",
                     SystemCommand.FastRead => $"Fast Read - Device: {UInt0}",
                     SystemCommand.TrackProtocol => $"Track Protocol - Device: {UInt0}",
@@ -103,7 +116,21 @@ public class CANMessage
                     6 => $"Loco Speed - Loco: {UInt0} Speed: {UShort2}",
                     _ => "Loco Speed unknown data size"
                 },
-            Command.LocoDirection => "Loco Direction",
+            Command.LocoDirection => 
+                DataLength switch
+                {
+                    4 => $"Loco Direction - Loco: {UInt0}",
+                    5 => $"Loco Direction - Loco: {UInt0} Direction: " +
+                        buffer[10] switch
+                        {
+                            0x00 => "Stay",
+                            0x01 => "Forward",
+                            0x02 => "Backward",
+                            0x03 => "Switch",
+                            _ => $"Unknown Direction 0x{buffer[10]:X2}"
+                        },
+                    _ => "Loco Direction unknown data size"
+                },
             Command.LocoFunction => "Loco Function",
             Command.ReadConfig => "Read Config",
             Command.WriteConfig => "Write Config",
@@ -113,13 +140,20 @@ public class CANMessage
             Command.SX1Event => "SX1 Event",
             Command.SoftwareVersion => IsResponse ? $"Software Version - Sender: {UInt0} Version: {UShort2} Device: 0x{buffer[11]:X2} 0x{buffer[12]:X2}" : "Software Version",
             Command.UpdateOffer => "Update Offer",
-            Command.ReadConfigData => "Read Config Data",
+            Command.ReadConfigData => "Read Config Buffer",
             Command.BootloaderCANBound => "Bootloader CAN Bound",
             Command.BootloaderRailBound => "Bootloader Rail Bound",
-            Command.StatusData => "Status Data",
-            Command.ConfigData => "Config Data",
-            Command.ConfigDataStream => "Config Data Stream",
-            Command.DataStream6021Adapter => "Data Stream 6021 Adapter",
+            Command.StatusData => "Status Buffer",
+            Command.ConfigData => $"Config Buffer - Filename: {Filename}",
+            Command.ConfigDataStream =>
+                DataLength switch
+                {
+                    6 => $"Config Buffer Stream - Start Response Length {UInt0}",
+                    7 => $"Config Buffer Stream - Start Broadcast Length {UInt0}",
+                    8 => "Config Buffer Stream - Buffer",
+                    _ => "Config Buffer Stream - Break"
+                },
+            Command.DataStream6021Adapter => "Buffer Stream 6021 Adapter",
             Command.AutomaticTransmission => "Automatic Transmission",
             _ => $"Unknown Command 0x{((byte)Command):X2}"
         };
@@ -165,7 +199,10 @@ public class CANMessage
         Array.Copy(bytes, 0, buffer, 5, length);
     }
 
-    private uint UInt0
+    private SystemCommand SystemCommand => (SystemCommand)buffer[9];
+
+
+    public uint UInt0
     {
         get
         {
@@ -176,7 +213,6 @@ public class CANMessage
         }
     }
 
-    private SystemCommand SystemCommand => (SystemCommand)buffer[9];
         
     private uint UInt01
     {

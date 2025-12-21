@@ -31,6 +31,9 @@
             <Button Grid.Column="0" Grid.Row="1" Content="Go" Command="{Binding SystemGoCommand}" Margin="3" />
             <Button Grid.Column="0" Grid.Row="2" Content="Halt" Command="{Binding SystemHaltCommand}" Margin="3" />
 
+            <Button Grid.Column="0" Grid.Row="3" Content="LocoInfo" Command="{Binding LocoInfoCommand}" Margin="3" />
+            <Button Grid.Column="0" Grid.Row="4" Content="Locos" Command="{Binding LocosCommand}" Margin="3" />
+
         </Grid>
         <DataGrid 
             Grid.Row="1" 
@@ -48,7 +51,7 @@
             ClipboardCopyMode="IncludeHeader"
             FontFamily="Courier"
             
-            Margin="3">
+            Margin="3,3,3,3" Grid.ColumnSpan="2">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="110"/>
                 <DataGridTextColumn Header="Sender" Binding="{Binding Sender}" Width="110"/>

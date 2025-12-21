@@ -1,7 +1,14 @@
 ﻿using CentralStationWebApi.Internal;
-using System.Diagnostics;
-using System.Runtime.Intrinsics.Arm;
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Runtime.Intrinsics.Arm;
 
 namespace CentralStationWebApi;
 
@@ -40,14 +47,21 @@ public sealed class CentralStation : IDisposable
     }
 
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
+    public event EventHandler<FileReceivedEventArgs>? FileReceived;
 
     private async Task SendMessageAsync(CANMessage message, CancellationToken cancellationToken = default)
     {
         Debug.WriteLine($"Send: {message}");
-        //int x = await sender.SendAsync(message.Data, 13, host, 15731);
+        //int x = await sender.SendAsync(message.Buffer, 13, host, 15731);
         MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message));
-        int x = await sender.SendAsync(message.Data, 13);
+        int x = await sender.SendAsync(message.Buffer, 13);
     }
+
+    private string fileName;
+    private uint streamLength;
+    private List<byte> stream;
+    private string streamText;
+
     private async Task ReceiveAsync()
     {         
         try
@@ -58,6 +72,42 @@ public sealed class CentralStation : IDisposable
                 var msg = new CANMessage(result);
                 Debug.WriteLine($"Received: {msg}");
                 MessageReceived?.Invoke(this, new MessageReceivedEventArgs(msg));
+
+                if (msg.Command == Command.ConfigDataStream)
+                {
+                    if (msg.DataLength != 8)
+                    {
+                        stream = [];
+                        streamLength = msg.UInt0;
+                    }
+                    else
+                    {
+                        stream.AddRange(msg.Data);
+                        Debug.WriteLine($"Streamed {stream.Count} / {streamLength} bytes");
+                        if (stream.Count >= streamLength)
+                        {
+                            using var file = File.Create("File.zlib");
+                            file.Write(stream.ToArray(), 0, (int)streamLength);
+                            file.Close();
+                                
+                            // Decompress zlib-compressed data
+                            using var compressed = new MemoryStream(stream.ToArray(), 4, (int)streamLength);
+                            //using var zls = new Ionic.Zlib.ZlibStream(compressed, Ionic.Zlib.CompressionMode.Decompress);
+                            using var zls = new ZLibStream(compressed, CompressionMode.Decompress);
+                            using var outMs = new MemoryStream();
+                            await zls.CopyToAsync(outMs);
+                            var decompressedBytes = outMs.ToArray();
+
+                            // Convert to string (assume UTF8); adjust if another encoding is used
+                            streamText = Encoding.UTF8.GetString(decompressedBytes);
+
+                            FileReceived?.Invoke(this, new FileReceivedEventArgs(fileName, streamText));
+                            //autoResetEventConfigDataStream.Set();
+                        }
+                    }
+                    // handle system command response if needed
+                }
+
             }
         }
         catch (ObjectDisposedException)
@@ -97,7 +147,26 @@ public sealed class CentralStation : IDisposable
         return true;
     }
 
+    public async Task<string> ConfigDataLocoInfo(CancellationToken cancellationToken = default)
+    {
+        var message = new ConfigDataMessage("lokinfo");
+
+        await SendMessageAsync(message, cancellationToken);
+
+        return "lokinfo";
+    }
+
+    private AutoResetEvent autoResetEventConfigDataStream = new AutoResetEvent(false);
     
+    public async Task<string> ConfigDataLocos(CancellationToken cancellationToken = default)
+    {
+        var message = new ConfigDataMessage("loks");
+
+        await SendMessageAsync(message, cancellationToken);
+
+        //autoResetEventConfigDataStream.WaitOne();
+        return streamText;
+    }
 
 }
 

@@ -45,6 +45,17 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         await cs.SystemHaltAsync();
     }
 
+    [RelayCommand]
+    private async Task OnLocoInfo()
+    {
+        await cs.ConfigDataLocoInfo();
+    }
 
+    [RelayCommand]
+    private async Task OnLocos()
+    {
+        string file = await cs.ConfigDataLocos();
+    }
 
+    
 }

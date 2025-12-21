@@ -11,9 +11,11 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CentralStation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CANMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConfigDataMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Priority.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\SystemCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileReceivedEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\SystemMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessageReceivedEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Usings.cs" />

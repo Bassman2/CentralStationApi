@@ -8,4 +8,8 @@
 
   <Import Project="..\CentralStationWebApiShare\CentralStationWebApiShare.projitems" Label="Shared" />
 
+  <ItemGroup>
+    <PackageReference Include="Iconic.Zlib.Netstandard" Version="1.0.0" />
+  </ItemGroup>
+
 </Project>
