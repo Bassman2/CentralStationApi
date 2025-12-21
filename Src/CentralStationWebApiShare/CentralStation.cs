@@ -91,7 +91,7 @@ public sealed class CentralStation : IDisposable
                             file.Close();
                                 
                             // Decompress zlib-compressed data
-                            using var compressed = new MemoryStream(stream.ToArray(), 4, (int)streamLength);
+                            using var compressed = new MemoryStream(stream.ToArray(), 4, (int)streamLength - 4);
                             //using var zls = new Ionic.Zlib.ZlibStream(compressed, Ionic.Zlib.CompressionMode.Decompress);
                             using var zls = new ZLibStream(compressed, CompressionMode.Decompress);
                             using var outMs = new MemoryStream();
