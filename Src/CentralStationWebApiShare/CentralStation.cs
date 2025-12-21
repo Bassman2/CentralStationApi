@@ -1,16 +1,5 @@
 ﻿using CentralStationWebApi.Internal;
-using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
-using System.Net.Sockets;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace CentralStationWebApi;
 
@@ -142,32 +131,117 @@ public sealed class CentralStation : IDisposable
         }
     }
 
-    public async Task<bool> SystemStopAsync(CancellationToken cancellationToken = default)
+    #region System Commands
+
+    public async Task<bool> SystemStopAsync(uint device = 0, CancellationToken cancellationToken = default)
     {   
-        var message = new SystemMessage(SystemCommand.Stop, 0);
+        var message = new SystemMessage(SystemCommand.Stop, device);
 
         await SendMessageAsync(message, cancellationToken);
 
         return true;
     }
 
-    public async Task<bool> SystemGoAsync(CancellationToken cancellationToken = default)                            
+    public async Task<bool> SystemGoAsync(uint device = 0, CancellationToken cancellationToken = default)                            
     {
-        var message = new SystemMessage(SystemCommand.Go, 0);
+        var message = new SystemMessage(SystemCommand.Go, device);
 
         await SendMessageAsync(message, cancellationToken);
 
         return true;
     }
 
-    public async Task<bool> SystemHaltAsync(CancellationToken cancellationToken = default)
+    public async Task<bool> SystemHaltAsync(uint device = 0, CancellationToken cancellationToken = default)
     {
-        var message = new SystemMessage(SystemCommand.Halt, 0);
+        var message = new SystemMessage(SystemCommand.Halt, device);
 
         await SendMessageAsync(message, cancellationToken);
 
         return true;
     }
+
+    public async Task<bool> SystemLocoHaltAsync(uint device, CancellationToken cancellationToken = default)
+    {
+        var message = new SystemMessage(SystemCommand.LocoHalt, device);
+
+        await SendMessageAsync(message, cancellationToken);
+
+        return true;
+    }
+
+    public async Task<bool> SystemLocoCycleStopAsync(uint device, CancellationToken cancellationToken = default)
+    {
+        var message = new SystemMessage(SystemCommand.LocoCycleStop, device);
+
+        await SendMessageAsync(message, cancellationToken);
+
+        return true;
+    }
+
+    public async Task<bool> SystemLocoDataProtocolAsync(uint device, byte protocoll, CancellationToken cancellationToken = default)
+    {
+        var message = new SystemMessage(SystemCommand.LocoDataProtocol, device, protocoll);
+
+        await SendMessageAsync(message, cancellationToken);
+
+        return true;
+    }
+
+    //public async Task<bool> SystemSwitchingTimeAsync(uint device, ushort time, CancellationToken cancellationToken = default)
+    //{
+    //    var message = new SystemMessage(SystemCommand.LocoDataProtocol, device, time);
+
+    //    await SendMessageAsync(message, cancellationToken);
+
+    //    return true;
+    //}
+
+    //public async Task<bool> SystemFastReadAsync(uint deviceUID, ushort mfxSID, CancellationToken cancellationToken = default)
+    //{
+    //    var message = new SystemMessage(SystemCommand.FastRead, deviceUID, mfxSID);
+
+    //    await SendMessageAsync(message, cancellationToken);
+
+    //    return true;
+    //}
+
+    public async Task<bool> SystemTrackProtocolAsync(uint deviceUID, byte param, CancellationToken cancellationToken = default)
+    {
+        var message = new SystemMessage(SystemCommand.TrackProtocol, deviceUID, param);
+
+        await SendMessageAsync(message, cancellationToken);
+
+        return true;
+    }
+
+    //public async Task<bool> SystemNewRegistrationCounterAsync(uint deviceUID, ushort counter, CancellationToken cancellationToken = default)
+    //{
+    //    var message = new SystemMessage(SystemCommand.FastRead, deviceUID, counter);
+
+    //    await SendMessageAsync(message, cancellationToken);
+
+    //    return true;
+    //}
+
+    public async Task<bool> SystemOverloadAsync(uint deviceUID, byte channel, CancellationToken cancellationToken = default)
+    {
+        var message = new SystemMessage(SystemCommand.Overload, deviceUID, channel);
+
+        await SendMessageAsync(message, cancellationToken);
+
+        return true;
+    }
+
+    public async Task<bool> SystemResetAsync(uint deviceUID, byte target, CancellationToken cancellationToken = default)
+    {
+        var message = new SystemMessage(SystemCommand.Overload, deviceUID, target);
+
+        await SendMessageAsync(message, cancellationToken);
+
+        return true;
+    }
+
+    #endregion
 
     public async Task<string> ConfigDataLocoInfo(CancellationToken cancellationToken = default)
     {
