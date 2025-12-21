@@ -1,10 +1,15 @@
 ﻿namespace CentralStationWebApi;
 
-public class FileReceivedEventArgs(string fileName, string file) : EventArgs
+public class FileReceivedEventArgs : EventArgs
 {
-    
-    public string FileName => fileName;
+    internal FileReceivedEventArgs(CSFile scFile)
+    {
+        FileName = scFile.FileName;
+        FileText = scFile.FileText;
+    }
 
-    public string File => file;
+    public string FileName { get; }
+
+    public string FileText { get; }
 
 }
