@@ -1,14 +1,16 @@
 ﻿using CentralStationWebApi.Internal;
 using System;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Sockets;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Runtime.Intrinsics.Arm;
 
 namespace CentralStationWebApi;
 
@@ -22,9 +24,15 @@ public sealed class CentralStation : IDisposable
     private Task receiver;
     private string host;
 
+    private readonly Thread messageEventThread;
+    private readonly BlockingCollection<CANMessage> messageEventQueue = [];
+
     public CentralStation(string host = "CS3") 
     {
         this.host = host;
+
+        messageEventThread = new Thread(MessageEventWorkLoop) { Name = "MessageEventThread", IsBackground = true };
+        messageEventThread.Start();
 
         this.listener = new UdpClient(PortReceive);
         
@@ -39,11 +47,24 @@ public sealed class CentralStation : IDisposable
 
     public void Dispose()
     {
+        messageEventQueue.CompleteAdding();
+        messageEventThread.Join();
+        messageEventQueue.Dispose();
+
         sender.Close();
         sender.Dispose();
         // stop listening
         listener?.Close();
         listener?.Dispose();
+    }
+
+    private void MessageEventWorkLoop()
+    {
+        foreach (var message in messageEventQueue.GetConsumingEnumerable())
+        {
+            try { MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message)); }
+            catch (Exception ex) { Debug.WriteLine(ex); }
+        }
     }
 
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
@@ -71,7 +92,8 @@ public sealed class CentralStation : IDisposable
                 var result = await listener.ReceiveAsync();
                 var msg = new CANMessage(result);
                 Debug.WriteLine($"Received: {msg}");
-                MessageReceived?.Invoke(this, new MessageReceivedEventArgs(msg));
+                //MessageReceived?.Invoke(this, new MessageReceivedEventArgs(msg));
+                messageEventQueue.Add(msg);
 
                 if (msg.Command == Command.ConfigDataStream)
                 {
@@ -101,8 +123,8 @@ public sealed class CentralStation : IDisposable
                             // Convert to string (assume UTF8); adjust if another encoding is used
                             streamText = Encoding.UTF8.GetString(decompressedBytes);
 
-                            FileReceived?.Invoke(this, new FileReceivedEventArgs(fileName, streamText));
-                            //autoResetEventConfigDataStream.Set();
+                            //FileReceived?.Invoke(this, new FileReceivedEventArgs(fileName, streamText));
+                            autoResetEventConfigDataStream.Set();
                         }
                     }
                     // handle system command response if needed
@@ -164,7 +186,7 @@ public sealed class CentralStation : IDisposable
 
         await SendMessageAsync(message, cancellationToken);
 
-        //autoResetEventConfigDataStream.WaitOne();
+        autoResetEventConfigDataStream.WaitOne();
         return streamText;
     }
 
