@@ -1,6 +1,5 @@
 ﻿using CentralStationWebApi.Internal;
 
-
 namespace CentralStationWebApi;
 
 public sealed class CentralStation : IDisposable
@@ -13,15 +12,19 @@ public sealed class CentralStation : IDisposable
     private Task receiver;
     private string host;
 
-    private readonly Thread messageEventThread;
-    private readonly BlockingCollection<CANMessage> messageEventQueue = [];
+    public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
+
+    private readonly MessageQueue<CANMessage> messageReceivedQueue;
+
+    private TimeSpan receiveTimeout = TimeSpan.FromSeconds(30);
 
     public CentralStation(string host = "CS3") 
     {
         this.host = host;
 
-        messageEventThread = new Thread(MessageEventWorkLoop) { Name = "MessageEventThread", IsBackground = true };
-        messageEventThread.Start();
+        messageReceivedQueue = new MessageQueue<CANMessage>((m) => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(m)));
+        //messageEventThread = new Thread(MessageEventWorkLoop) { Name = "MessageEventThread", IsBackground = true };
+        //messageEventThread.Start();
 
         this.listener = new UdpClient(PortReceive);
         
@@ -36,36 +39,62 @@ public sealed class CentralStation : IDisposable
 
     public void Dispose()
     {
-        messageEventQueue.CompleteAdding();
-        messageEventThread.Join();
-        messageEventQueue.Dispose();
+        //messageEventQueue.CompleteAdding();
+        //messageEventThread.Join();
+        //messageEventQueue.Dispose();
 
         sender.Close();
         sender.Dispose();
         // stop listening
         listener?.Close();
         listener?.Dispose();
+
+        messageReceivedQueue.Dispose();
     }
 
-    private void MessageEventWorkLoop()
-    {
-        foreach (var message in messageEventQueue.GetConsumingEnumerable())
-        {
-            try { MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message)); }
-            catch (Exception ex) { Debug.WriteLine(ex); }
-        }
-    }
+    #region Message Received Event
 
-    public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
+   
+
+    //private readonly Thread messageEventThread;
+    //private readonly BlockingCollection<CANMessage> messageEventQueue = [];
+    //private void MessageEventWorkLoop()
+    //{
+    //    foreach (var message in messageEventQueue.GetConsumingEnumerable())
+    //    {
+    //        try { MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message)); }
+    //        catch (Exception ex) { Debug.WriteLine(ex); }
+    //    }
+    //}
+
+    #endregion
+
+    #region File Received Event
+
     public event EventHandler<FileReceivedEventArgs>? FileReceived;
 
-    private async Task SendMessageAsync(CANMessage message, CancellationToken cancellationToken = default)
+    #endregion
+
+    #region Send Message
+
+    private List<MessageRequest> messageQueue = [];
+
+    private async Task<CANMessage> SendMessageAsync(CANMessage message, CancellationToken cancellationToken = default)
     {
-        Debug.WriteLine($"Send: {message}");
-        //int x = await sender.SendAsync(message.Buffer, 13, host, 15731);
-        MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message));
+        messageReceivedQueue.Add(message);
         int x = await sender.SendAsync(message.Buffer, 13);
+        return message;
     }
+
+    private void SendMessage(CANMessage message)
+    {
+        messageReceivedQueue.Add(message);
+        sender.Send(message.Buffer, 13);
+    }
+
+    #endregion
+
+    #region Receive Message
 
     private string fileName;
     private uint streamLength;
@@ -82,18 +111,24 @@ public sealed class CentralStation : IDisposable
                 var msg = new CANMessage(result);
                 Debug.WriteLine($"Received: {msg}");
                 //MessageReceived?.Invoke(this, new MessageReceivedEventArgs(msg));
-                messageEventQueue.Add(msg);
+                messageReceivedQueue.Add(msg);
 
+                if (msg.IsResponse && msg.Command == Command.SystemCommand && msg.SystemCommand == SystemCommand.Stop)
+                {
+                    systemStopResMessage = msg;
+                    systemStopRespEvent.Set();
+                }
+                
                 if (msg.Command == Command.ConfigDataStream)
                 {
                     if (msg.DataLength != 8)
                     {
                         stream = [];
-                        streamLength = msg.UInt0;
+                        streamLength = msg.GetDataUInt(5);
                     }
                     else
                     {
-                        stream.AddRange(msg.Data);
+                        stream.AddRange(msg.GetData());
                         Debug.WriteLine($"Streamed {stream.Count} / {streamLength} bytes");
                         if (stream.Count >= streamLength)
                         {
@@ -131,21 +166,40 @@ public sealed class CentralStation : IDisposable
         }
     }
 
+    #endregion
+
     #region System Commands
 
-    public async Task<bool> SystemStopAsync(uint device = 0, CancellationToken cancellationToken = default)
+    private uint hash = 0x4711;
+
+    private CANMessage systemStopReqMessage;
+    private CANMessage systemStopResMessage;
+    private AutoResetEvent systemStopRespEvent = new AutoResetEvent(false);
+
+    public void SystemStop(uint device = 0)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.Stop);
+        SendMessage(message);
+    }
+
+    public async Task<CANMessage> SystemStopAsync(uint device = 0, CancellationToken cancellationToken = default)
     {   
-        var message = new SystemMessage(SystemCommand.Stop, device);
-
-        await SendMessageAsync(message, cancellationToken);
-
-        return true;
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.Stop);
+        return await SendMessageAsync(message, cancellationToken);
     }
 
     public async Task<bool> SystemGoAsync(uint device = 0, CancellationToken cancellationToken = default)                            
     {
-        var message = new SystemMessage(SystemCommand.Go, device);
-
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.Go);
         await SendMessageAsync(message, cancellationToken);
 
         return true;
@@ -153,26 +207,32 @@ public sealed class CentralStation : IDisposable
 
     public async Task<bool> SystemHaltAsync(uint device = 0, CancellationToken cancellationToken = default)
     {
-        var message = new SystemMessage(SystemCommand.Halt, device);
-
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.Halt);
         await SendMessageAsync(message, cancellationToken);
-
+       
         return true;
     }
 
     public async Task<bool> SystemLocoHaltAsync(uint device, CancellationToken cancellationToken = default)
     {
-        var message = new SystemMessage(SystemCommand.LocoHalt, device);
-
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.LocoHalt);
         await SendMessageAsync(message, cancellationToken);
-
+        
         return true;
     }
 
     public async Task<bool> SystemLocoCycleStopAsync(uint device, CancellationToken cancellationToken = default)
     {
-        var message = new SystemMessage(SystemCommand.LocoCycleStop, device);
-
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.LocoCycleStop);
         await SendMessageAsync(message, cancellationToken);
 
         return true;
@@ -180,8 +240,10 @@ public sealed class CentralStation : IDisposable
 
     public async Task<bool> SystemLocoDataProtocolAsync(uint device, byte protocoll, CancellationToken cancellationToken = default)
     {
-        var message = new SystemMessage(SystemCommand.LocoDataProtocol, device, protocoll);
-
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.LocoDataProtocol);
         await SendMessageAsync(message, cancellationToken);
 
         return true;
@@ -207,8 +269,11 @@ public sealed class CentralStation : IDisposable
 
     public async Task<bool> SystemTrackProtocolAsync(uint deviceUID, byte param, CancellationToken cancellationToken = default)
     {
-        var message = new SystemMessage(SystemCommand.TrackProtocol, deviceUID, param);
-
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 6;
+        message.SetData(deviceUID, 5);
+        message.SetData(SystemCommand.TrackProtocol);
+        message.SetData(param, 10);
         await SendMessageAsync(message, cancellationToken);
 
         return true;
@@ -225,19 +290,25 @@ public sealed class CentralStation : IDisposable
 
     public async Task<bool> SystemOverloadAsync(uint deviceUID, byte channel, CancellationToken cancellationToken = default)
     {
-        var message = new SystemMessage(SystemCommand.Overload, deviceUID, channel);
-
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 6;
+        message.SetData(deviceUID, 5);
+        message.SetData(SystemCommand.Overload);
+        message.SetData(channel, 10);
         await SendMessageAsync(message, cancellationToken);
-
+       
         return true;
     }
 
     public async Task<bool> SystemResetAsync(uint deviceUID, byte target, CancellationToken cancellationToken = default)
     {
-        var message = new SystemMessage(SystemCommand.Overload, deviceUID, target);
-
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 6;
+        message.SetData(deviceUID, 5);
+        message.SetData(SystemCommand.Overload);
+        message.SetData(target, 10);
         await SendMessageAsync(message, cancellationToken);
-
+       
         return true;
     }
 
@@ -245,8 +316,9 @@ public sealed class CentralStation : IDisposable
 
     public async Task<string> ConfigDataLocoInfo(CancellationToken cancellationToken = default)
     {
-        var message = new ConfigDataMessage("lokinfo");
-
+        var message = new CANMessage(Priority.Proirity1, Command.ConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("lokinfo");
         await SendMessageAsync(message, cancellationToken);
 
         return "lokinfo";
@@ -256,8 +328,9 @@ public sealed class CentralStation : IDisposable
     
     public async Task<string> ConfigDataLocos(CancellationToken cancellationToken = default)
     {
-        var message = new ConfigDataMessage("loks");
-
+        var message = new CANMessage(Priority.Proirity1, Command.ConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("loks");
         await SendMessageAsync(message, cancellationToken);
 
         autoResetEventConfigDataStream.WaitOne();

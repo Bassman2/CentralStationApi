@@ -2,7 +2,9 @@
 
 public class MessageBuffer
 {
-    private readonly byte[] buffer = [13];
+    private readonly byte[] buffer = new byte[13];
+
+    public byte[] Buffer => buffer; 
 
     #region Header
 
@@ -21,20 +23,26 @@ public class MessageBuffer
         SetData(header, 0);
     }
 
-    public Priority Priority => (Priority)GetBits(GetDataUint(0), 25, 4);
+    public Priority Priority => (Priority)GetBits(GetDataUInt(0), 25, 4);
 
-    public Command Command => (Command)GetBits(GetDataUint(0), 17, 8);
+    public Command Command => (Command)GetBits(GetDataUInt(0), 17, 8);
 
-    public bool IsResponse => GetBits(GetDataUint(0), 16, 1) == 1;
+    public bool IsResponse => GetBits(GetDataUInt(0), 16, 1) == 1;
 
-    public ushort Hash => (ushort)GetBits(GetDataUint(0), 0, 16);
+    public ushort Hash => (ushort)GetBits(GetDataUInt(0), 0, 16);
+
+    public string Binary => $"{buffer[0]:X2}{buffer[1]:X2}{buffer[2]:X2}{buffer[3]:X2} {buffer[4]:X} " + string.Join(" ", buffer[5..(5 + Math.Min(buffer[4], (byte)8))].Select(b => b.ToString("X2")));
 
 
     #endregion
 
     #region Data
 
-    public void SetDataLength(byte length) => buffer[4] = length;
+    public int DataLength
+    {
+        get => buffer[4];
+        set => buffer[4] = (byte)value;
+    }
 
     public void SetData(byte value, int index) => buffer[index] = value;
 
@@ -54,7 +62,17 @@ public class MessageBuffer
         Array.Copy(mem, 0, buffer, index, 4);
     }
 
-    public int GetDataLength() => buffer[4];
+    public void SetData(string value, int index = 5, int length = 8)
+    {
+        Encoding.ASCII.GetString(buffer, index, length);
+    }
+
+    public void SetData(SystemCommand systemCommand, int index = 9)
+    {
+        buffer[index] = (byte)systemCommand;
+    }
+
+    
 
     public byte GetDataByte(int index) => buffer[index];
 
@@ -66,7 +84,7 @@ public class MessageBuffer
         return BitConverter.ToUInt16(mem, 0);
     }
 
-    public uint GetDataUint(int index)
+    public uint GetDataUInt(int index)
     {
         byte[] mem = new byte[4];
         Array.Copy(buffer, index, mem, 0, 4);
@@ -74,18 +92,30 @@ public class MessageBuffer
         return BitConverter.ToUInt32(mem, 0);
     }
 
+    public string GetDataString(int index = 5, int length = 8)
+    {
+        return Encoding.ASCII.GetString(buffer, index, length);
+    }
+
+    public byte[] GetData(int index = 5, int length = 8)
+    {
+        byte[] mem = new byte[length];
+        Array.Copy(buffer, index, mem, 0, length);
+        return mem;
+    }
+
     #endregion
 
 
     #region Private
 
-    private static void SetBits(ref uint value, int position, int length, uint bits)
+    protected static void SetBits(ref uint value, int position, int length, uint bits)
     {
         uint mask = ((1u << length) - 1u) << position;
         value = (value & ~mask) | ((bits << position) & mask);
     }
 
-    private static uint GetBits(uint value, int position, int length)
+    protected static uint GetBits(uint value, int position, int length)
     {
         uint mask = (1u << length) - 1u;
         return (value >> position) & mask;
