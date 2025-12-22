@@ -15,12 +15,23 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
                 UpdateStatus(e.Message);
             });
         };
+        cs.FileReceived += (s, e) =>
+        {
+            string text = e.CSFileStream.GetFileText();
+            ScanStreams(text); 
+
+        };
     }
 
     public void Dispose()
     {
         //cs.Close();
         cs.Dispose();
+    }
+
+    protected override void OnStartup()
+    {
+        cs.RequestConfigDataLocos();
     }
 
     private void UpdateStatus(CANMessage message)
@@ -32,6 +43,14 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         if (message.Command == Command.SystemCommand && message.SystemCommand == SystemCommand.Go && message.Device == CentralStation.AllDevices)
         {
             SystemStatus = SystemStatus.GO;
+        }
+    }
+
+    private void ScanStreams(string text)
+    {
+        if (text.StartsWith("[lokomotive]"))
+        {
+
         }
     }
 
@@ -103,17 +122,17 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     #endregion
 
-    [RelayCommand]
-    private async Task OnLocoInfo()
-    {
-        await cs.ConfigDataLocoInfo();
-    }
+    //[RelayCommand]
+    //private async Task OnLocoInfo()
+    //{
+    //    await cs.ConfigDataLocoInfo();
+    //}
 
-    [RelayCommand]
-    private async Task OnLocos()
-    {
-        string file = await cs.ConfigDataLocos();
-    }
+    //[RelayCommand]
+    //private async Task OnLocos()
+    //{
+    //    string file = await cs.RequestConfigDataLocos();
+    //}
 
     
 }

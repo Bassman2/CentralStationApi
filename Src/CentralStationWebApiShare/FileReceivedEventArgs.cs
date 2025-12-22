@@ -2,14 +2,13 @@
 
 public class FileReceivedEventArgs : EventArgs
 {
-    internal FileReceivedEventArgs(CSFile scFile)
+    internal FileReceivedEventArgs(CSFileStream scFileStream)
     {
-        FileName = scFile.FileName;
-        FileText = scFile.FileText;
+        CSFileStream = scFileStream;
     }
 
-    public string FileName { get; }
+    public CSFileStream CSFileStream { get; }
 
-    public string FileText { get; }
+    
 
 }

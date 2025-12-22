@@ -21,7 +21,7 @@ public enum Command : byte
     BootloaderCANBound = 0x1B,
     BootloaderRailBound = 0x1C,
     StatusData = 0x1D,
-    ConfigData = 0x20,
+    RequestConfigData = 0x20,
     ConfigDataStream = 0x21,
     DataStream6021Adapter = 0x22,
     AutomaticTransmission = 0x30 

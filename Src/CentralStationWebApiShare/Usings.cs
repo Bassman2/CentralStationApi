@@ -9,4 +9,6 @@ global using System.Threading;
 global using System.Threading.Tasks;
 
 global using CentralStationWebApi.Internal;
+global using CentralStationWebApi.Serializer;
+
 

@@ -5,18 +5,18 @@ public sealed class CentralStation : IDisposable
     private const int PortSend = 15731;
     private const int PortReceive = 15730;
 
-    private UdpClient sender;
-    private UdpClient listener;
-    private Task receiver;
-    private string host;
+    private readonly UdpClient sender;
+    private readonly UdpClient listener;
+    private readonly Task receiver;
+    private readonly string host;
 
     public const uint AllDevices = 0x0000;  
 
-    public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+    public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
     private readonly MessageQueue<CANMessage> messageReceivedQueue;
 
-    public event EventHandler<FileReceivedEventArgs> FileReceived;
-    private readonly MessageQueue<CSFile> fileReceivedQueue;
+    public event EventHandler<FileReceivedEventArgs>? FileReceived;
+    private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
     private TimeSpan receiveTimeout = TimeSpan.FromSeconds(30);
 
@@ -25,7 +25,7 @@ public sealed class CentralStation : IDisposable
         this.host = host;
 
         messageReceivedQueue = new MessageQueue<CANMessage>((m) => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(m)));
-        fileReceivedQueue = new MessageQueue<CSFile>((f) => FileReceived?.Invoke(this, new FileReceivedEventArgs(f)));
+        fileReceivedQueue = new MessageQueue<CSFileStream>((f) => FileReceived?.Invoke(this, new FileReceivedEventArgs(f)));
 
         this.listener = new UdpClient(PortReceive);
         this.receiver = Task.Run(async () => await ReceiveAsync());
@@ -48,7 +48,7 @@ public sealed class CentralStation : IDisposable
     
     #region Send Message
 
-    private List<MessageRequest> messageQueue = [];
+    private readonly List<MessageRequest> messageQueue = [];
 
     private async Task<CANMessage> SendMessageAsync(CANMessage message, CancellationToken cancellationToken = default)
     {
@@ -67,10 +67,10 @@ public sealed class CentralStation : IDisposable
 
     #region Receive Message
 
-    private string fileName;
-    private uint streamLength;
-    private List<byte> stream;
-    private string streamText;
+    //private string fileName;
+    //private uint streamLength;
+    //private List<byte> stream;
+    //private string streamText;
 
     private async Task ReceiveAsync()
     {         
@@ -84,47 +84,7 @@ public sealed class CentralStation : IDisposable
                 //MessageReceived?.Invoke(this, new MessageReceivedEventArgs(msg));
                 messageReceivedQueue.Add(msg);
 
-                if (msg.IsResponse && msg.Command == Command.SystemCommand && msg.SystemCommand == SystemCommand.Stop)
-                {
-                    //systemStopResMessage = msg;
-                    //systemStopRespEvent.Set();
-                }
-                
-                if (msg.Command == Command.ConfigDataStream)
-                {
-                    if (msg.DataLength != 8)
-                    {
-                        stream = [];
-                        streamLength = msg.GetDataUInt(5);
-                    }
-                    else
-                    {
-                        stream.AddRange(msg.GetData());
-                        Debug.WriteLine($"Streamed {stream.Count} / {streamLength} bytes");
-                        if (stream.Count >= streamLength)
-                        {
-                            using var file = File.Create("CSFile.zlib");
-                            file.Write(stream.ToArray(), 0, (int)streamLength);
-                            file.Close();
-                                
-                            // Decompress zlib-compressed data
-                            using var compressed = new MemoryStream(stream.ToArray(), 4, (int)streamLength - 4);
-                            //using var zls = new Ionic.Zlib.ZlibStream(compressed, Ionic.Zlib.CompressionMode.Decompress);
-                            using var zls = new ZLibStream(compressed, CompressionMode.Decompress);
-                            using var outMs = new MemoryStream();
-                            await zls.CopyToAsync(outMs);
-                            var decompressedBytes = outMs.ToArray();
-
-                            // Convert to string (assume UTF8); adjust if another encoding is used
-                            streamText = Encoding.UTF8.GetString(decompressedBytes);
-
-                            //FileReceived?.Invoke(this, new FileReceivedEventArgs(fileName, streamText));
-                            autoResetEventConfigDataStream.Set();
-                        }
-                    }
-                    // handle system command response if needed
-                }
-
+                HandleStreams(msg); 
             }
         }
         catch (ObjectDisposedException)
@@ -134,6 +94,37 @@ public sealed class CentralStation : IDisposable
         catch (Exception ex)
         {
             Console.WriteLine($"Receiver error: {ex}");
+        }
+    }
+
+    private readonly Dictionary<ushort, CSFileStream> fileDictionary = [];
+
+    private void HandleStreams(CANMessage msg)
+    {
+        if (/*msg.IsResponse && */ msg.Command == Command.ConfigDataStream)
+        {
+            if (msg.DataLength == 6)
+            {
+                // overwrite existing
+                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, msg.GetDataUInt(5), msg.GetDataUShort(9));
+            }
+            else if (msg.DataLength == 7)
+            {
+                // overwrite existing
+                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, msg.GetDataUInt(5), msg.GetDataUShort(9), msg.GetDataByte(11));
+            }
+            else if(msg.DataLength == 8 && fileDictionary.TryGetValue(msg.Hash, out var fileStream))
+            {
+                if (fileStream.AddData(msg.GetData()))
+                {
+                    fileReceivedQueue.Add(fileStream);
+                    fileDictionary.Remove(msg.Hash);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Invalid ConfigDataStream message length");
+            }
         }
     }
 
@@ -257,18 +248,18 @@ public sealed class CentralStation : IDisposable
 
     //public async Task<bool> SystemSwitchingTimeAsync(uint device, ushort time, CancellationToken cancellationToken = default)
     //{
-    //    var message = new SystemMessage(SystemCommand.LocoDataProtocol, device, time);
+    //    var msg = new SystemMessage(SystemCommand.LocoDataProtocol, device, time);
 
-    //    await SendMessageAsync(message, cancellationToken);
+    //    await SendMessageAsync(msg, cancellationToken);
 
     //    return true;
     //}
 
     //public async Task<bool> SystemFastReadAsync(uint deviceUID, ushort mfxSID, CancellationToken cancellationToken = default)
     //{
-    //    var message = new SystemMessage(SystemCommand.FastRead, deviceUID, mfxSID);
+    //    var msg = new SystemMessage(SystemCommand.FastRead, deviceUID, mfxSID);
 
-    //    await SendMessageAsync(message, cancellationToken);
+    //    await SendMessageAsync(msg, cancellationToken);
 
     //    return true;
     //}
@@ -285,9 +276,9 @@ public sealed class CentralStation : IDisposable
 
     //public async Task<bool> SystemNewRegistrationCounterAsync(uint deviceUID, ushort counter, CancellationToken cancellationToken = default)
     //{
-    //    var message = new SystemMessage(SystemCommand.FastRead, deviceUID, counter);
+    //    var msg = new SystemMessage(SystemCommand.FastRead, deviceUID, counter);
 
-    //    await SendMessageAsync(message, cancellationToken);
+    //    await SendMessageAsync(msg, cancellationToken);
 
     //    return true;
     //}
@@ -316,7 +307,7 @@ public sealed class CentralStation : IDisposable
 
     public async Task<string> ConfigDataLocoInfo(CancellationToken cancellationToken = default)
     {
-        var message = new CANMessage(Priority.Proirity1, Command.ConfigData, hash);
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
         message.DataLength = 8;
         message.SetData("lokinfo");
         await SendMessageAsync(message, cancellationToken);
@@ -325,16 +316,24 @@ public sealed class CentralStation : IDisposable
     }
 
     private AutoResetEvent autoResetEventConfigDataStream = new AutoResetEvent(false);
-    
+
+    public void RequestConfigDataLocos()
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("loks");
+        SendMessage(message);
+    }
+
     public async Task<string> ConfigDataLocos(CancellationToken cancellationToken = default)
     {
-        var message = new CANMessage(Priority.Proirity1, Command.ConfigData, hash);
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
         message.DataLength = 8;
         message.SetData("loks");
         await SendMessageAsync(message, cancellationToken);
 
         autoResetEventConfigDataStream.WaitOne();
-        return streamText;
+        return ""; 
     }
 
     #region Static

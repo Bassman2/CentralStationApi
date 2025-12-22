@@ -1,7 +1,7 @@
 ﻿namespace CentralStationWebApi;
 
 //public class ConfigDataMessage(string fileName) :
-//    CANMessage(Priority.Proirity1, Command.ConfigData, 0x4711, CreateData(fileName))
+//    CANMessage(Priority.Proirity1, Command.RequestConfigData, 0x4711, CreateData(fileName))
 //{
 //    private static byte[] CreateData(string fileName)
 //    {

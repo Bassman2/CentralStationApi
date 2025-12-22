@@ -64,7 +64,9 @@ public class MessageBuffer
 
     public void SetData(string value, int index = 5, int length = 8)
     {
-        Encoding.ASCII.GetString(buffer, index, length);
+        byte[] mem = Encoding.ASCII.GetBytes(value);
+        Array.Clear(buffer, index, length);
+        Array.Copy(mem, 0, buffer, index, Math.Min(length, mem.Length));
     }
 
     public void SetData(SystemCommand systemCommand, int index = 9)

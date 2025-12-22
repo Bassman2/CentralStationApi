@@ -113,7 +113,7 @@ public class CANMessage : MessageBuffer
             Command.BootloaderCANBound => "Bootloader CAN Bound",
             Command.BootloaderRailBound => "Bootloader Rail Bound",
             Command.StatusData => "Status Buffer",
-            Command.ConfigData => $"Config Buffer - Filename: {GetDataString()}",
+            Command.RequestConfigData => $"Config Buffer - Filename: {GetDataString()}",
             Command.ConfigDataStream =>
                 DataLength switch
                 {

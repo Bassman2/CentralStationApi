@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Text;
 
-namespace CentralStationWebApi.Internal;
+//namespace CentralStationWebApi.Internal;
 
-internal class CSFile(string fileName, string file)
-{
-    public  string FileName { get; } = fileName;
+//internal class CSFile(string fileName, string file)
+//{
+//    public  string FileName { get; } = fileName;
 
-    public string FileText { get; } = file;   
-}
+//    public string FileText { get; } = file;   
+//}
