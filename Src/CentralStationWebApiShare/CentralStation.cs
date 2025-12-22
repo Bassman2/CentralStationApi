@@ -1,5 +1,7 @@
 ﻿
 
+using System.Globalization;
+
 namespace CentralStationWebApi;
 
 public sealed class CentralStation : IDisposable
@@ -292,6 +294,45 @@ public sealed class CentralStation : IDisposable
         return streamText;
     }
 
+    #region Static
+
+    public static string DeviceDescription(uint device)
+    {
+        string description = $"Invalid Device Type {device:X4}";
+
+        CheckRange(ref description, device, 0x0000, 0x0000, "All");
+        CheckRange(ref description, device, 0x0001, 0x03FF, "MM Loco / functiondecoder");
+        CheckRange(ref description, device, 0x0400, 0x07FF, "Reserved");
+        CheckRange(ref description, device, 0x0800, 0x0BFF, "SX1");
+        CheckRange(ref description, device, 0x0C00, 0x0FFF, "Reserved");
+        CheckRange(ref description, device, 0x1000, 0x13FF, "Res. MM functiondecoder");
+        CheckRange(ref description, device, 0x1400, 0x17FF, "Reserved");
+        CheckRange(ref description, device, 0x1800, 0x1BFF, "Private / Club");
+        CheckRange(ref description, device, 0x1C00, 0x1FFF, "Company");
+        CheckRange(ref description, device, 0x2000, 0x23FF, "Reserved");
+        CheckRange(ref description, device, 0x2400, 0x27FF, "Reserved MM Loco decoder");
+        CheckRange(ref description, device, 0x2800, 0x2BFF, "SX1 Accessories");
+        CheckRange(ref description, device, 0x2C00, 0x2FFF, "Reserved traction");
+        CheckRange(ref description, device, 0x3000, 0x33FF, "MM Accessories");
+        CheckRange(ref description, device, 0x3400, 0x37FF, "Reserved");
+        CheckRange(ref description, device, 0x3800, 0x3BFF, "DCC Accessories A");
+        CheckRange(ref description, device, 0x3C00, 0x3FFF, "DCC Accessories B");
+        CheckRange(ref description, device, 0x4000, 0x7FFF, "MFX");
+        CheckRange(ref description, device, 0x8000, 0xBFFF, "SX2");
+        CheckRange(ref description, device, 0xC000, 0xFFFF, "DCC");
+        
+        return description;
+    }
+
+    private static void CheckRange(ref string description, uint device, uint start, uint end, string descriptionPrefix)
+    {
+        if (device >= start && device <= end)
+        {
+            description = $"{descriptionPrefix} {device - start}";
+        }
+    }
+
+    #endregion
 }
 
 
