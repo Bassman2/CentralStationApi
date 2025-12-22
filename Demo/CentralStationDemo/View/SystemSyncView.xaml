@@ -8,7 +8,7 @@
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <GroupBox Header="System Syncron">
+    <GroupBox Header="System Synchronous">
         <Grid>
 
             <Grid.ColumnDefinitions>
@@ -25,21 +25,17 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Button Grid.Column="0" Grid.Row="0" Content="Stop All" Command="{Binding SystemSyncStopAllCommand}" Margin="3" />
-            <Button Grid.Column="1" Grid.Row="0" Content="Go All" Command="{Binding SystemSyncGoAllCommand}" Margin="3" />
-            <Button Grid.Column="2" Grid.Row="0" Content="Halt All" Command="{Binding SystemSyncHaltAllCommand}" Margin="3" />
-            <Button Grid.Column="3" Grid.Row="0" Content="Loco Halt All" Command="{Binding SystemSyncLocoHaltAllCommand}" Margin="3" />
-            <Button Grid.Column="4" Grid.Row="0" Content="Loco Cycle Stop All" Command="{Binding SystemSyncLocoCycleStopAllCommand}" Margin="3" />
+            <Button Grid.Column="0" Grid.Row="0" Content="Stop" Command="{Binding SystemStopCommand}" Margin="3" />
+            <Button Grid.Column="1" Grid.Row="0" Content="Go" Command="{Binding SystemGoCommand}" Margin="3" />
+            <Button Grid.Column="2" Grid.Row="0" Content="Halt" Command="{Binding SystemHaltCommand}" Margin="3" />
+            <Button Grid.Column="3" Grid.Row="0" Content="Loco Halt" Command="{Binding SystemLocoHaltCommand}" Margin="3" />
+            <Button Grid.Column="4" Grid.Row="0" Content="Loco Cycle Stop" Command="{Binding SystemLocoCycleStopCommand}" Margin="3" />
 
-            <Button Grid.Column="0" Grid.Row="1" Content="Stop Device" Command="{Binding SystemSyncStopDeviceCommand}" Margin="3" />
-            <Button Grid.Column="1" Grid.Row="1" Content="Go Device" Command="{Binding SystemSyncGoDeviceCommand}" Margin="3" />
-            <Button Grid.Column="2" Grid.Row="1" Content="Halt Device" Command="{Binding SystemSyncHaltDeviceCommand}" Margin="3" />
-            <Button Grid.Column="3" Grid.Row="1" Content="Loco Halt Device" Command="{Binding SystemSyncLocoHaltDeviceCommand}" Margin="3" />
-            <Button Grid.Column="4" Grid.Row="1" Content="Loco Cycle Stop Device" Command="{Binding SystemSyncLocoCycleStopDeviceCommand}" Margin="3" />
+            
 
-            <Label Grid.Column="1" Grid.Row="2" Content="Device Address:" />
-            <TextBox Grid.Column="2" Grid.Row="2" Text="{Binding Device, StringFormat=X4}" Margin="3" />
-            <TextBlock Grid.Column="3" Grid.Row="2" Text="{Binding Device, Converter={StaticResource DeviceToDescriptionConverter}}" Margin="3" />
+            <Label Grid.Column="1" Grid.Row="1" Content="Device Address:" />
+            <TextBox Grid.Column="2" Grid.Row="1" Text="{Binding Device, StringFormat=X4}" Margin="3" />
+            <TextBlock Grid.Column="3" Grid.Row="1" Text="{Binding Device, Converter={StaticResource DeviceToDescriptionConverter}, UpdateSourceTrigger=PropertyChanged}" Margin="3" />
 
 
         </Grid>

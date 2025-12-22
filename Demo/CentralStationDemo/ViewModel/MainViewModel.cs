@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Input;
-
-namespace CentralStationDemo.ViewModel;
+﻿namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
@@ -13,6 +11,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             App.Current.Dispatcher.Invoke(() =>
             {
                 Messages.Insert(0, new MessageViewModel(e.Message));
+
+                UpdateStatus(e.Message);
             });
         };
     }
@@ -23,27 +23,85 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.Dispose();
     }
 
+    private void UpdateStatus(CANMessage message)
+    { 
+        if (message.Command == Command.SystemCommand && message.SystemCommand == SystemCommand.Stop && message.Device == CentralStation.AllDevices)
+        {
+            SystemStatus = SystemStatus.STOP;
+        }
+        if (message.Command == Command.SystemCommand && message.SystemCommand == SystemCommand.Go && message.Device == CentralStation.AllDevices)
+        {
+            SystemStatus = SystemStatus.GO;
+        }
+    }
+
+    [ObservableProperty]
+    private SystemStatus systemStatus = SystemStatus.STOP;
+
+    [ObservableProperty]
+    private uint device = 0;
+
+    //partial void OnDeviceChanged(uint value)
+    //{ 
+    //}
+
     [ObservableProperty]
     private ObservableCollection<MessageViewModel> messages = [];
 
+    #region System Sync Commands
+
     [RelayCommand]
-    private async Task OnSystemStop()
-    { 
+    private void OnSystemStop() => cs.SystemStop();
+    
+    [RelayCommand]
+    private void OnSystemGo() => cs.SystemGo();
+    
+    [RelayCommand]
+    private void OnSystemHalt() => cs.SystemHalt();
+
+    [RelayCommand]
+    private void OnSystemLocoHalt() => cs.SystemLocoHalt();
+
+    [RelayCommand]
+    private void OnSystemLocoCycleStop() => cs.SystemLocoCycleStop();
+
+
+    #endregion
+
+    #region System Async Commands
+
+    [RelayCommand]
+    private async Task OnSystemStopAsyncAsync()
+    {
         await cs.SystemStopAsync();
     }
 
 
     [RelayCommand]
-    private async Task OnSystemGo()
+    private async Task OnSystemGoAsyncAsync()
     {
         await cs.SystemGoAsync();
     }
 
     [RelayCommand]
-    private async Task OnSystemHalt()
+    private async Task OnSystemHaltAsyncAsync()
     {
         await cs.SystemHaltAsync();
     }
+
+    [RelayCommand]
+    private async Task OnSystemLocoHaltAsyncAsync()
+    {
+        await cs.SystemLocoHaltAsync();
+    }
+
+    [RelayCommand]
+    private async Task OnSystemLocoCycleStopAsyncAsync()
+    {
+        await cs.SystemLocoCycleStopAsync();
+    }
+
+    #endregion
 
     [RelayCommand]
     private async Task OnLocoInfo()

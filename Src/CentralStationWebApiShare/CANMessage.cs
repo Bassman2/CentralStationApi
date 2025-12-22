@@ -48,7 +48,7 @@ public class CANMessage : MessageBuffer
         set => SetData((byte)value, 9);
     }
 
-    private uint Device => GetDataUInt(5);
+    public uint Device => GetDataUInt(5);
 
     public string Description => 
         Command switch

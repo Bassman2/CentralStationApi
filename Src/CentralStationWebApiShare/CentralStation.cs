@@ -1,8 +1,4 @@
-﻿
-
-using System.Globalization;
-
-namespace CentralStationWebApi;
+﻿namespace CentralStationWebApi;
 
 public sealed class CentralStation : IDisposable
 {
@@ -13,6 +9,8 @@ public sealed class CentralStation : IDisposable
     private UdpClient listener;
     private Task receiver;
     private string host;
+
+    public const uint AllDevices = 0x0000;  
 
     public event EventHandler<MessageReceivedEventArgs> MessageReceived;
     private readonly MessageQueue<CANMessage> messageReceivedQueue;
@@ -149,7 +147,7 @@ public sealed class CentralStation : IDisposable
     //private CANMessage systemStopResMessage;
     //private AutoResetEvent systemStopRespEvent = new AutoResetEvent(false);
 
-    public void SystemStop(uint device = 0)
+    public void SystemStop(uint device = AllDevices)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -158,7 +156,7 @@ public sealed class CentralStation : IDisposable
         SendMessage(message);
     }
 
-    public async Task<CANMessage> SystemStopAsync(uint device = 0, CancellationToken cancellationToken = default)
+    public async Task<CANMessage> SystemStopAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
     {   
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -167,7 +165,16 @@ public sealed class CentralStation : IDisposable
         return await SendMessageAsync(message, cancellationToken);
     }
 
-    public async Task<CANMessage> SystemGoAsync(uint device = 0, CancellationToken cancellationToken = default)                            
+    public void SystemGo(uint device = AllDevices)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.Go);
+        SendMessage(message);
+    }
+
+    public async Task<CANMessage> SystemGoAsync(uint device = AllDevices, CancellationToken cancellationToken = default)                            
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -176,7 +183,16 @@ public sealed class CentralStation : IDisposable
         return await SendMessageAsync(message, cancellationToken);
     }
 
-    public async Task<CANMessage> SystemHaltAsync(uint device = 0, CancellationToken cancellationToken = default)
+    public void SystemHalt(uint device = AllDevices)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.Halt);
+        SendMessage(message);
+    }
+
+    public async Task<CANMessage> SystemHaltAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -185,7 +201,16 @@ public sealed class CentralStation : IDisposable
         return await SendMessageAsync(message, cancellationToken);
     }
 
-    public async Task<CANMessage> SystemLocoHaltAsync(uint device, CancellationToken cancellationToken = default)
+    public void SystemLocoHalt(uint device = AllDevices)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.LocoHalt);
+        SendMessage(message);
+    }
+
+    public async Task<CANMessage> SystemLocoHaltAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -194,7 +219,16 @@ public sealed class CentralStation : IDisposable
         return await SendMessageAsync(message, cancellationToken);
     }
 
-    public async Task<CANMessage> SystemLocoCycleStopAsync(uint device, CancellationToken cancellationToken = default)
+    public void SystemLocoCycleStop(uint device = AllDevices)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.LocoCycleStop);
+        SendMessage(message);
+    }
+
+    public async Task<CANMessage> SystemLocoCycleStopAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -203,7 +237,16 @@ public sealed class CentralStation : IDisposable
         return await SendMessageAsync(message, cancellationToken);
     }
 
-    public async Task<CANMessage> SystemLocoDataProtocolAsync(uint device, byte protocoll, CancellationToken cancellationToken = default)
+    public void SystemLocoDataProtocol(uint device = AllDevices, byte protocoll = 0xff)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
+        message.DataLength = 5;
+        message.SetData(device, 5);
+        message.SetData(SystemCommand.LocoDataProtocol);
+        SendMessage(message);
+    }
+
+    public async Task<CANMessage> SystemLocoDataProtocolAsync(uint device = AllDevices, byte protocoll = 0xff, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -300,8 +343,8 @@ public sealed class CentralStation : IDisposable
     {
         string description = $"Invalid Device Type {device:X4}";
 
-        CheckRange(ref description, device, 0x0000, 0x0000, "All");
-        CheckRange(ref description, device, 0x0001, 0x03FF, "MM Loco / functiondecoder");
+        CheckRange(ref description, device, 0x0000, 0x0000, "All", false);
+        CheckRange(ref description, device, 0x0001, 0x03FF, "MM2");
         CheckRange(ref description, device, 0x0400, 0x07FF, "Reserved");
         CheckRange(ref description, device, 0x0800, 0x0BFF, "SX1");
         CheckRange(ref description, device, 0x0C00, 0x0FFF, "Reserved");
@@ -317,18 +360,18 @@ public sealed class CentralStation : IDisposable
         CheckRange(ref description, device, 0x3400, 0x37FF, "Reserved");
         CheckRange(ref description, device, 0x3800, 0x3BFF, "DCC Accessories A");
         CheckRange(ref description, device, 0x3C00, 0x3FFF, "DCC Accessories B");
-        CheckRange(ref description, device, 0x4000, 0x7FFF, "MFX");
+        CheckRange(ref description, device, 0x4000, 0x7FFF, "MFX SID");
         CheckRange(ref description, device, 0x8000, 0xBFFF, "SX2");
-        CheckRange(ref description, device, 0xC000, 0xFFFF, "DCC");
+        CheckRange(ref description, device, 0xC000, 0xFFFF, "DCC Adr.");
         
         return description;
     }
 
-    private static void CheckRange(ref string description, uint device, uint start, uint end, string descriptionPrefix)
+    private static void CheckRange(ref string description, uint device, uint start, uint end, string descriptionPrefix, bool addNum = true)
     {
         if (device >= start && device <= end)
         {
-            description = $"{descriptionPrefix} {device - start}";
+            description = addNum ? $"{descriptionPrefix} {device - start}" : descriptionPrefix;
         }
     }
 

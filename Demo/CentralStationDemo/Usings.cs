@@ -12,6 +12,7 @@ global using System.Windows.Data;
 
 global using CommunityToolkit.Mvvm.ComponentModel;
 global using CommunityToolkit.Mvvm.DependencyInjection;
+global using CommunityToolkit.Mvvm.Input;
 
 global using Microsoft.Extensions.DependencyInjection;
 
@@ -19,7 +20,9 @@ global using WpfToolbox.ViewModel;
 
 global using CentralStationWebApi;
 
+global using CentralStationDemo.Enums;
 global using CentralStationDemo.ViewModel;
+
 
 
 
