@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MessageBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\SystemMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessageReceivedEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\CsFunction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\CsLocomotive.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\CsLokomotiveFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\CsVersion.cs" />

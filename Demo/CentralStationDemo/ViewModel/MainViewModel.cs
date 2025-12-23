@@ -1,4 +1,6 @@
-﻿namespace CentralStationDemo.ViewModel;
+﻿using CentralStationWebApi.Model;
+
+namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
@@ -17,9 +19,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         };
         cs.FileReceived += (s, e) =>
         {
-            string text = e.CSFileStream.GetFileText();
-            ScanStreams(text); 
-
+            ScanStreams(e.CSFileStream); 
         };
     }
 
@@ -46,12 +46,9 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         }
     }
 
-    private void ScanStreams(string text)
+    private void ScanStreams(CSFileStream cSFileStream)
     {
-        if (text.StartsWith("[lokomotive]"))
-        {
-
-        }
+        var data = CsSerializer.Deserialize<CsLokomotiveFile>(cSFileStream.GetFileStream(), "[lokomotive]");
     }
 
     [ObservableProperty]

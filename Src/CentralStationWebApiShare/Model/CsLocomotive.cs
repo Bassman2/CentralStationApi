@@ -1,81 +1,76 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 
 namespace CentralStationWebApi.Model;
 
 public class CsLocomotive : ICsSerialize
 {
-    //public void Deserialize(StreamReader reader, int level)
-    //{
-    //    string? line;
-    //    while ((line = reader.ReadLine()) != null)
-    //    {
-    //        // subclasses
-    //        if (!line.Contains('='))
-    //        {
-                
-    //            throw new InvalidDataException($"Unknown section {line}");
-    //        }
-    //        else
-    //        {
-    //            var parts = line.Split('=', 2);
-    //            switch (parts[0])
-    //            {
-    //            case " .uid":
-    //                UID = uint.Parse(parts[1], NumberStyles.HexNumber );
-    //                break;
-    //            case " .name":
-    //                Name = parts[1];
-    //                break;
-    //            default:
-    //                throw new InvalidDataException($"Unknown lokomotive section {line}");
-    //            }
-    //        }
-    //    }
-
-    //}
-
     public ICsSerialize DeserializeLeave(string line)
     {
         switch (line.Trim(' ', '.'))
         {
-        //case "funktionen":
-        //    return Version = new CsVersion();
-        //case "lokomotive":
-        //    var leave = new CsLocomotive();
-        //    Locomotives ??= [];
-        //    Locomotives.Add(leave);
-        //    return leave;
+        case "funktionen":
+            var function = new CsFunction();
+            Functions ??= [];
+            Functions.Add(function);
+            return function;
+        case "funktionen_2":
+            var function2 = new CsFunction();
+            Functions2 ??= [];
+            Functions2.Add(function2);
+            return function2;
         default:
-            throw new InvalidDataException($"Unknown lokomotive section {line}");
+            throw new InvalidDataException($"Unknown locomotive section {line}");
         }
     }
 
     public void DeserializeProperty(string name, string value)
     {
-        switch (name.Trim(' ', '.'))
+        switch (name)
         {
-        case "major":
-            UID = uint.Parse(value, NumberStyles.HexNumber); 
+        case "name":
+            Name = value; 
             break;
-        case "minor":
-            Name = value;
+        case "uid":
+            Uid = Convert.ToUInt32(value, 16); 
             break;
+        case "mfxuid":
+            MfxUid = Convert.ToUInt32(value, 16);
+            break;
+        case "adresse":
+            Adresse = Convert.ToUInt32(value, 16);
+            break;
+        case "icon":
+            Icon = value;
+            break;
+        case "typ":
+            Type = value;
+            break;
+
+
+
         case "mfxtyp":
             MfxTyp = byte.Parse(value);
             break;
         case "blocks":
-            Blocks = value.Split(' ', StringSplitOptions.TrimEntries).Select(i => byte.Parse(i)).ToArray();
+            Blocks = value.Split(' ', StringSplitOptions.TrimEntries).Select(i => uint.Parse(i)).ToArray();
             break;
         default:
-            throw new InvalidDataException($"Unknown property {name}");
+            //throw new InvalidDataException($"Unknown locomotive property {name}");
+            break;
         }
     }
 
-    public uint UID { get; private set; }
-
+    public List<CsFunction>? Functions { get; private set; }
+    public List<CsFunction>? Functions2 { get; private set; }
     public string? Name { get; private set; }
+    public uint Uid { get; private set; }
+    public uint MfxUid { get; private set; }
+    public uint Adresse { get; private set; }
+    public string? Icon { get; private set; }
+    public string? Type { get; private set; }
 
+    //
     public byte MfxTyp { get; private set; }
-
-    public byte[] Blocks { get; private set; }
+    public uint[]? Blocks { get; private set; }
 }
