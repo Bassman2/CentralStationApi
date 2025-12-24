@@ -17,8 +17,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Enums\CSFileStreamMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Priority.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\SystemCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\SystemStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileReceivedEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\CSFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\MessageQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\MessageRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessageBuffer.cs" />
@@ -28,8 +28,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\CsLocomotive.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\CsLokomotiveFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\CsVersion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsArrayAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsPropertyAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsSerializeAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\ICsSerialize.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TraceSwitches.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Usings.cs" />
   </ItemGroup>
 </Project>

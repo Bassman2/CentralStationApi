@@ -1,24 +1,12 @@
-﻿using System.Diagnostics;
-
-namespace CentralStationWebApi.Serializer;
+﻿namespace CentralStationWebApi.Serializer;
 
 public static class CsSerializer
 {
-    //public static T Deserialize<T>(Stream stream) where T : ICsSerialize, new()
-    //{
-    //    var main = new T();
-
-    //    StreamReader reader = new StreamReader(stream);
-
-    //    main.Deserialize(reader);
-    //    return main;
-    //}
-
     public static T Deserialize<T>(Stream stream, string id) where T : ICsSerialize, new()
     {
         stream.Position = 0; 
 
-        Debug.WriteLine($"Deserialize {typeof(T).Name} {id}");
+        Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Deserialize {typeof(T).Name} {id}");
         Debug.IndentLevel = 2;
 
         var main = new T();
@@ -37,18 +25,18 @@ public static class CsSerializer
         {
             throw new InvalidDataException("Invalid lokomotive file data");
         }
-        Debug.WriteLine($"{lineNum++} {line}");
+        Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"{lineNum++} {line}");
 
         while ((line = reader.ReadLine()) != null)
         {
             int lineLevel = GetLevel(line);
             
-            Debug.WriteLine($"{lineNum++} {curLevel} {line}");
+            Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"{lineNum++} {curLevel} {line}");
 
             if (lineLevel < curLevel)
             {
                 Debug.Unindent();
-                Debug.WriteLine($"End {leave.GetType().Name}");
+                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"End {leave.GetType().Name}");
                 leave = stack[lineLevel];
                 curLevel = lineLevel;
             }
@@ -58,7 +46,7 @@ public static class CsSerializer
             {
                 stack[lineLevel] = leave;
                 leave = leave.DeserializeLeave(line);
-                Debug.WriteLine($"Begin {leave.GetType().Name}");
+                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Begin {leave.GetType().Name}");
                 Debug.Indent();
                 curLevel++;
             }
@@ -68,7 +56,7 @@ public static class CsSerializer
                 leave.DeserializeProperty(parts[0].TrimLevel(), parts[1]);
             }
         }
-        Debug.WriteLine("Deserialize End");
+        Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, "Deserialize End");
 
         return main;
     }
@@ -91,5 +79,12 @@ public static class CsSerializer
     private static bool IsSubitem(this string line)
     {
         return !line.Contains('=');
+    }
+
+    public static ICsSerialize AddToList<T>(ref List<T>? list, T value) where T : ICsSerialize, new()
+    {
+        list ??= [];
+        list.Add(value);
+        return value;
     }
 }

@@ -4,10 +4,11 @@ namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
+    private const string host = "CS3";
     private CentralStation cs; 
     public MainViewModel()
     {
-        cs = new CentralStation();
+        cs = new CentralStation(host);
         cs.MessageReceived += (s, e) =>
         {
             App.Current.Dispatcher.Invoke(() =>
@@ -38,11 +39,11 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     { 
         if (message.Command == Command.SystemCommand && message.SystemCommand == SystemCommand.Stop && message.Device == CentralStation.AllDevices)
         {
-            SystemStatus = SystemStatus.STOP;
+            SystemStatus = SystemStatus.Stop;
         }
         if (message.Command == Command.SystemCommand && message.SystemCommand == SystemCommand.Go && message.Device == CentralStation.AllDevices)
         {
-            SystemStatus = SystemStatus.GO;
+            SystemStatus = SystemStatus.Go;
         }
     }
 
@@ -52,7 +53,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     }
 
     [ObservableProperty]
-    private SystemStatus systemStatus = SystemStatus.STOP;
+    private SystemStatus systemStatus = SystemStatus.Default;
 
     [ObservableProperty]
     private uint device = 0;

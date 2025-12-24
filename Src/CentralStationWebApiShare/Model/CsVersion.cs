@@ -1,6 +1,7 @@
 ﻿namespace CentralStationWebApi.Model;
 
-public class CsVersion : ICsSerialize
+[CsSerialize]
+public partial class CsVersion : ICsSerialize
 {
     public ICsSerialize DeserializeLeave(string line)
     {
@@ -22,8 +23,10 @@ public class CsVersion : ICsSerialize
         }
     }
 
+    [CsProperty("major")]
     public int Major { get; private set; } = 0;
 
+    [CsProperty("minor")]
     public int Minor { get; private set; } = 0;
 
 }

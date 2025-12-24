@@ -3,6 +3,9 @@
     <Project Path="Demo/CentralStationConsole/CentralStationConsole.csproj" Id="2621c761-639a-4762-a10d-f1ae57ddd6dc" />
     <Project Path="Demo/CentralStationDemo/CentralStationDemo.csproj" Id="919214bd-a8a3-4a96-8b95-65325919fb84" />
   </Folder>
+  <Folder Name="/Generator/">
+    <Project Path="Generator/CsSerializerGenerator/CsSerializerGenerator.csproj" />
+  </Folder>
   <Folder Name="/Src/">
     <Project Path="Src/CentralStationWebApi90/CentralStationWebApi90.csproj" />
     <Project Path="Src/CentralStationWebApiShare/CentralStationWebApiShare.shproj" Id="16266f29-bc26-4edd-acc7-3d09422c0e74" />

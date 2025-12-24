@@ -1,7 +1,9 @@
 ﻿namespace CentralStationWebApi.Model;
 
-public class CsLokomotiveFile : ICsSerialize
+public partial class CsLokomotiveFile : ICsSerialize
 {
+    private List<CsLocomotive>? locomotives;
+
     public ICsSerialize DeserializeLeave(string line)
     {
         switch (line)
@@ -9,10 +11,11 @@ public class CsLokomotiveFile : ICsSerialize
         case "version":
             return Version = new CsVersion();
         case "lokomotive":
-            var locomotive = new CsLocomotive();
-            Locomotives ??= [];
-            Locomotives.Add(locomotive);
-            return locomotive;
+            //var locomotive = new CsLocomotive();
+            //Locomotives ??= [];
+            //Locomotives.Add(locomotive);
+            //return locomotive;
+            return CsSerializer.AddToList(ref locomotives, new CsLocomotive());
         default:
             throw new InvalidDataException($"Unknown lokomotive file section {line}");
         }
@@ -26,5 +29,5 @@ public class CsLokomotiveFile : ICsSerialize
 
     public CsVersion? Version { get; private set; }
 
-    public List<CsLocomotive>? Locomotives { get; private set; }
+    public List<CsLocomotive>? Locomotives => locomotives;
 }

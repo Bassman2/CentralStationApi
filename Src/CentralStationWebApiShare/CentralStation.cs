@@ -9,7 +9,7 @@ public sealed class CentralStation : IDisposable
     private readonly UdpClient listener;
     private readonly Task receiver;
     private readonly string host;
-
+        
     public const uint AllDevices = 0x0000;  
 
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
@@ -20,7 +20,7 @@ public sealed class CentralStation : IDisposable
 
     private TimeSpan receiveTimeout = TimeSpan.FromSeconds(30);
 
-    public CentralStation(string host = "CS3") 
+    public CentralStation(string host, SystemStatus systemStatus = SystemStatus.Default) 
     {
         this.host = host;
 
@@ -32,6 +32,18 @@ public sealed class CentralStation : IDisposable
 
         this.sender = new UdpClient();
         this.sender.Connect(host, PortSend);
+
+        switch (systemStatus)
+        {
+            case SystemStatus.Stop:
+                SystemStop();
+                break;
+            case SystemStatus.Go:
+                SystemGo();
+                break;
+            default:
+                break;  
+        }
     }
 
     public void Dispose()
@@ -80,10 +92,8 @@ public sealed class CentralStation : IDisposable
             {
                 var result = await listener.ReceiveAsync();
                 var msg = new CANMessage(result);
-                Debug.WriteLine($"Received: {msg}");
-                //MessageReceived?.Invoke(this, new MessageReceivedEventArgs(msg));
+                Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceInfo, $"Received: {msg}");
                 messageReceivedQueue.Add(msg);
-
                 HandleStreams(msg); 
             }
         }
@@ -93,7 +103,7 @@ public sealed class CentralStation : IDisposable
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Receiver error: {ex}");
+            Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceError, $"Receiver error: {ex}");
         }
     }
 
@@ -123,6 +133,7 @@ public sealed class CentralStation : IDisposable
             }
             else
             {
+                Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceError, "Invalid ConfigDataStream message length");
                 throw new InvalidOperationException("Invalid ConfigDataStream message length");
             }
         }
