@@ -4,8 +4,14 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>CentralStationWebApi</AssemblyName>
+    <RootNamespace>CentralStationWebApi</RootNamespace>
   </PropertyGroup>
 
   <Import Project="..\CentralStationWebApiShare\CentralStationWebApiShare.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Generator\CsSerializerGenerator\CsSerializerGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
 
 </Project>

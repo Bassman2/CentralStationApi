@@ -87,4 +87,24 @@ public static class CsSerializer
         list.Add(value);
         return value;
     }
+
+    public static uint ToUInt(string value)
+    {
+        return value.StartsWith("0x") ? Convert.ToUInt32(value, 16) : uint.Parse(value);
+    }
+
+    public static int ToInt(string value)
+    {
+        return value.StartsWith("0x") ? Convert.ToInt32(value, 16) : int.Parse(value);
+    }
+
+    public static uint[] ToUIntArray(string value)
+    {
+        return value.Split(' ', StringSplitOptions.TrimEntries).Select(i => ToUInt(i)).ToArray(); 
+    }
+
+    public static int[] ToIntArray(string value)
+    {
+        return value.Split(' ', StringSplitOptions.TrimEntries).Select(i => ToInt(i)).ToArray();
+    }
 }
