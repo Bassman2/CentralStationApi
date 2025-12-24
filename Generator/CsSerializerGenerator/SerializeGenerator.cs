@@ -100,22 +100,22 @@ namespace CsSerializerGenerator
                 var arg = prop.GetAttribute("CentralStationWebApi.Serializer.CsPropertyAttribute")?.ConstructorArguments.First();
                 if (arg == null) continue;
 
-                switch (prop.Type.Name)
+                switch (prop.Type.FullName)
                 {
                 case "List":
                     sb.AppendLine($"// List {prop.Name} {prop.Type.FullName}");
                     break;
-                case "String":
+                case "string?":
                     sb.AppendLine($"        case {arg.Value}:");
                     sb.AppendLine($"            {prop.Name} = value;");
                     sb.AppendLine("            break;");
                     break;
-                case "Int32":
+                case "int":
                     sb.AppendLine($"        case {arg.Value}:");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToInt(value);");
                     sb.AppendLine("            break;");
                     break;
-                case "UInt32":
+                case "uint":
                     sb.AppendLine($"        case {arg.Value}:");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToUInt(value);");
                     sb.AppendLine("            break;");
@@ -130,9 +130,19 @@ namespace CsSerializerGenerator
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToUIntArray(value);");
                     sb.AppendLine("            break;");
                     break;
+                case "int[]?":
+                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"            {prop.Name} = CsSerializer.ToIntArray(value);");
+                    sb.AppendLine("            break;");
+                    break;
+                case "uint[]?":
+                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"            {prop.Name} = CsSerializer.ToUIntArray(value);");
+                    sb.AppendLine("            break;");
+                    break;
 
                 default:
-                    sb.AppendLine($"// {prop.Name}  {prop.Type.Name} {prop.Type.FullName} not defined");
+                    sb.AppendLine($"// {prop.Name} - {prop.Type.Name} - {prop.Type.FullName} not defined");
                     break;
                 }                   
                     
