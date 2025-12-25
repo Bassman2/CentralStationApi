@@ -55,7 +55,7 @@ public class CSFileStream
             return outputStream;
 
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             throw;
         }

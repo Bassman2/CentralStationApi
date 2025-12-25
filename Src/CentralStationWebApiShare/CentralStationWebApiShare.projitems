@@ -28,7 +28,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\CsLocomotive.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\CsLokomotiveFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\CsVersion.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsArrayAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsPropertyAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsSerializeAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsSerializer.cs" />

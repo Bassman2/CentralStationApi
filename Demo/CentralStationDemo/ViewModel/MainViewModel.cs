@@ -1,6 +1,4 @@
-﻿using CentralStationWebApi.Model;
-
-namespace CentralStationDemo.ViewModel;
+﻿namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {

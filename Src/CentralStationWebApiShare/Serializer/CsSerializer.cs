@@ -9,16 +9,15 @@ public static class CsSerializer
         Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Deserialize {typeof(T).Name} {id}");
         Debug.IndentLevel = 2;
 
-        var main = new T();
+        var root = new T();
+        ICsSerialize? leave = root;
 
         ICsSerialize[] stack = new ICsSerialize[8];
+        stack[0] = root;
 
         StreamReader reader = new StreamReader(stream);
-        ICsSerialize? leave = main;
-        int curLevel = 0;
-
-        stack[0] = main;
-
+        
+        int curLevel = 0;        
         int lineNum = 1;
         string? line = reader.ReadLine();
         if (line == null || !line.StartsWith(id))
@@ -31,34 +30,35 @@ public static class CsSerializer
         {
             int lineLevel = GetLevel(line);
             
-            Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"{lineNum++} {curLevel} {line}");
+            Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"{lineNum++} ({lineLevel}/{curLevel}) '{line}' ---- [{TraceStack}]\"");
 
             if (lineLevel < curLevel)
             {
                 Debug.Unindent();
-                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"End {leave.GetType().Name}");
+                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"End ({lineLevel}/{curLevel}) {leave.GetType().Name} ---- [{TraceStack}]\"");
                 leave = stack[lineLevel];
-                curLevel = lineLevel;
+                //curLevel = lineLevel;
             }
             
             // subclasses
             if (line.IsSubitem())
             {
                 stack[lineLevel] = leave;
-                leave = leave.DeserializeLeave(line);
-                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Begin {leave.GetType().Name}");
+                leave = leave.DeserializeLeave(line.TrimLevel());
+                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Begin ({lineLevel}/{curLevel}) {leave.GetType().Name} ---- [{TraceStack}]");
                 Debug.Indent();
-                curLevel++;
+                //curLevel++;
             }
             else
             {
                 var parts = line.Split('=', 2);
                 leave.DeserializeProperty(parts[0].TrimLevel(), parts[1]);
             }
+            curLevel = lineLevel;
         }
         Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, "Deserialize End");
 
-        return main;
+        return root;
     }
 
     private static int GetLevel(this string line)
@@ -81,11 +81,18 @@ public static class CsSerializer
         return !line.Contains('=');
     }
 
-    public static ICsSerialize AddToList<T>(ref List<T>? list, T value) where T : ICsSerialize, new()
+    //public static ICsSerialize AddToList<T>(ref List<T>? list, T value) where T : ICsSerialize, new()
+    //{
+    //    list ??= [];
+    //    list.Add(value);
+    //    return value;
+    //}
+
+    private static string TraceStack(ICsSerialize[] stack)
     {
-        list ??= [];
-        list.Add(value);
-        return value;
+        var x = stack.Select(i => i.GetType().Name).ToList();
+        var y = x.Aggregate("", (a, b) => $"{a}, {b}");
+        return y;
     }
 
     public static uint ToUInt(string value)
