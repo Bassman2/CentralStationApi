@@ -336,7 +336,7 @@ public sealed class CentralStation : IDisposable
         SendMessage(message);
     }
 
-    public async Task<string> ConfigDataLocos(CancellationToken cancellationToken = default)
+    public async Task<string> ConfigDataLocosAsync(CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
         message.DataLength = 8;
@@ -355,11 +355,49 @@ public sealed class CentralStation : IDisposable
         SendMessage(message);
     }
 
-    public async Task<string> ConfigDataMagneticItems(CancellationToken cancellationToken = default)
+    public async Task<string> ConfigDataMagneticItemsAsync(CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
         message.DataLength = 8;
         message.SetData("mags");
+        await SendMessageAsync(message, cancellationToken);
+
+        autoResetEventConfigDataStream.WaitOne();
+        return "";
+    }
+
+    public void RequestConfigDataRailwayRoute()
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("fs");
+        SendMessage(message);
+    }
+
+    public async Task<string> ConfigDataRailwayRouteAsync(CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("fs");
+        await SendMessageAsync(message, cancellationToken);
+
+        autoResetEventConfigDataStream.WaitOne();
+        return "";
+    }
+
+    public void RequestConfigDataTrackDiagramRoute()
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("gbsstat“");
+        SendMessage(message);
+    }
+
+    public async Task<string> ConfigDataTrackDiagramAsync(CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("gbsstat“");
         await SendMessageAsync(message, cancellationToken);
 
         autoResetEventConfigDataStream.WaitOne();

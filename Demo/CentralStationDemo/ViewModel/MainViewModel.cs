@@ -36,8 +36,9 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     protected override void OnStartup()
     {
         cs.RequestConfigDataLocos();
-
-        //cs.RequestConfigDataMagneticItems();
+        cs.RequestConfigDataMagneticItems();
+        cs.RequestConfigDataRailwayRoute();
+        cs.RequestConfigDataTrackDiagramRoute();
     }
 
     private void UpdateStatus(CANMessage message)

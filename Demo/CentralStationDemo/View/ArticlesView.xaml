@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CentralStationDemo.View.LocomotivesView"
+﻿<UserControl x:Class="CentralStationDemo.View.ArticlesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,10 +8,10 @@
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <GroupBox Header="Locomotives">
+    <GroupBox Header="Articles">
         <DataGrid 
             Grid.Row="4" 
-            ItemsSource="{Binding Locomotives}" 
+            ItemsSource="{Binding MagneticItems}" 
             AutoGenerateColumns="False" 
             IsReadOnly="True"
             HeadersVisibility="Column"
@@ -24,20 +24,13 @@
             IsSynchronizedWithCurrentItem="True"
             ClipboardCopyMode="IncludeHeader">
             <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="110" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="110" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Uid" Binding="{Binding Uid}" Width="110" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Mfx Uid" Binding="{Binding MfxUid}" Width="260" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Address" Binding="{Binding Address}" Width="80" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Icon Name" Binding="{Binding IconName}" Width="140" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="70" IsReadOnly="True"/>
-                <DataGridTextColumn Header="MfxType" Binding="{Binding MfxType}" Width="50" IsReadOnly="True"/>
-                <DataGridTemplateColumn Header="Icon" Width="SizeToCells" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Image Source="{Binding Icon}" Width="100" Height="20" Stretch="Uniform" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="110" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="110" IsReadOnly="True"/>
+                <DataGridTextColumn Header="SwitchingTime" Binding="{Binding SwitchingTime}" Width="110" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Odd" Binding="{Binding Odd}" Width="110" IsReadOnly="True"/>
+                <DataGridTextColumn Header="DecoderType" Binding="{Binding DecoderType}" Width="110" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
     </GroupBox>
