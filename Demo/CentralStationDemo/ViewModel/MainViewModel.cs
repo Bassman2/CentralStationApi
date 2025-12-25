@@ -51,7 +51,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         Locomotives = [];
         foreach (var locomotive in data.Locomotives ?? [])
         {
-            Locomotives.Add(new LocomotiveViewModel(locomotive!));
+            Locomotives.Add(new LocomotiveViewModel(host, locomotive!));
         }
     }
 

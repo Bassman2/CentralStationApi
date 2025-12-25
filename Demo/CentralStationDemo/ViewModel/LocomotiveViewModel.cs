@@ -1,13 +1,11 @@
-﻿using System.IO;
-using System.Windows.Controls;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace CentralStationDemo.ViewModel;
 
 public partial class LocomotiveViewModel : ObservableObject
 {
-    public LocomotiveViewModel(CsLocomotive loco)
+    public LocomotiveViewModel(string host, CsLocomotive loco)
     {
         Name = loco.Name;
         Uid = loco.Uid;
@@ -21,17 +19,12 @@ public partial class LocomotiveViewModel : ObservableObject
 
         if (!string.IsNullOrEmpty(IconName))
         {
-            Icon = DownloadImage();
+            Icon = App.Current.Dispatcher.Invoke(() =>
+            {
+                var uri = new Uri($"http://{host}/app/assets/lok/{IconName}.png");
+                return new BitmapImage(uri);
+            });
         }
-    }
-
-    private ImageSource DownloadImage()
-    {
-        return App.Current.Dispatcher.Invoke(() =>
-        {
-            var uri = new Uri($"http://cs3/app/assets/lok/{IconName}.png");
-            return new BitmapImage(uri);
-        });
     }
 
     [ObservableProperty]
