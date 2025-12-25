@@ -13,14 +13,16 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <local:SystemSyncView Grid.Row="0" />
-        <local:SystemAsyncView Grid.Row="1" />
+        <local:SystemSyncView Grid.Row="0"/>
+        <local:SystemAsyncView Grid.Row="1"/>
         <local:StatusView Grid.Row="2"/>
+        <local:LocomotivesView Grid.Row="3"/>
 
         <DataGrid 
-            Grid.Row="3" 
+            Grid.Row="4" 
             ItemsSource="{Binding Messages}" 
             AutoGenerateColumns="False" 
             IsReadOnly="True"

@@ -1,7 +1,4 @@
-﻿
-using System.Net;
-
-namespace CentralStationDemo.ViewModel;
+﻿namespace CentralStationDemo.ViewModel;
 
 public class MessageViewModel
 {

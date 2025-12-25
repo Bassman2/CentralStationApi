@@ -48,6 +48,11 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private void ScanStreams(CSFileStream cSFileStream)
     {
         var data = CsSerializer.Deserialize<CsLokomotiveFile>(cSFileStream.GetFileStream(), "[lokomotive]");
+        Locomotives = [];
+        foreach (var locomotive in data.Locomotives ?? [])
+        {
+            Locomotives.Add(new LocomotiveViewModel(locomotive!));
+        }
     }
 
     [ObservableProperty]
@@ -59,6 +64,9 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     //partial void OnDeviceChanged(uint value)
     //{ 
     //}
+
+    [ObservableProperty]
+    private List<LocomotiveViewModel>? locomotives;
 
     [ObservableProperty]
     private ObservableCollection<MessageViewModel> messages = [];

@@ -4,6 +4,7 @@ global using System.Collections.ObjectModel;
 global using System.ComponentModel;
 global using System.Diagnostics;
 global using System.Globalization;
+global using System.Net;
 global using System.Linq;
 global using System.Text;
 global using System.Threading.Tasks;
@@ -21,6 +22,7 @@ global using WpfToolbox.ViewModel;
 global using CentralStationWebApi;
 global using CentralStationWebApi.Serializer;
 global using CentralStationWebApi.Model;
+
 
 global using CentralStationDemo.ViewModel;
 
