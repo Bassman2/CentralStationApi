@@ -347,6 +347,25 @@ public sealed class CentralStation : IDisposable
         return ""; 
     }
 
+    public void RequestConfigDataMagneticItems()
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("mags");
+        SendMessage(message);
+    }
+
+    public async Task<string> ConfigDataMagneticItems(CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("mags");
+        await SendMessageAsync(message, cancellationToken);
+
+        autoResetEventConfigDataStream.WaitOne();
+        return "";
+    }
+
     #region Static
 
     public static string DeviceDescription(uint device)
