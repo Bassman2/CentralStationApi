@@ -1,7 +1,7 @@
 ﻿namespace CentralStationWebApi.Model;
 
 [CsSerialize]
-public partial class CsRailwayRoute
+public partial class RailwayRoute
 {
 
     [CsProperty("id")]

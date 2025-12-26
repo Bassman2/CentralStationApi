@@ -1,7 +1,7 @@
 ﻿namespace CentralStationWebApi.Model;
 
 [CsSerialize]
-public partial class CsArticle
+public partial class Article
 {
     /// <summary>
     /// Address of the article

@@ -1,7 +1,4 @@
-﻿using CentralStationWebApi;
-using CentralStationWebApi.Model;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using System.IO;
+﻿using System.IO;
 
 namespace CentralStationDemo.ViewModel;
 
@@ -21,10 +18,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
                 UpdateStatus(e.Message);
             });
         };
-        cs.FileReceived += (s, e) =>
-        {
-            ScanStreams(e.CSFileStream.GetFileStream()); 
-        };
+        cs.PropertyChanged += (s, e) => OnCsPropertyChanged(e.PropertyName);
+        
+        //cs.FileReceived += (s, e) =>
+        //{
+        //    ScanStreams(e.CSFileStream.GetFileStream()); 
+        //};
     }
 
     public void Dispose()
@@ -53,6 +52,26 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         }
     }
 
+    private void OnCsPropertyChanged(string? propertyName)
+    {
+        switch (propertyName)
+        {
+        case "Locomotives":
+            Locomotives = cs.Locomotives?.Locomotives_?.Select(i => new LocomotiveViewModel(host, i))?.ToList(); 
+            break;
+        case "MagneticItems":
+            MagneticItems = cs.MagneticItems?.Articles?.Select(i => new MagneticItemViewModel(i))?.ToList();
+            break;
+        case "RailwayRoutes":
+            RailwayRoutes = cs.RailwayRoutes?.RailwayRoutes_?.Select(i => new RailwayRouteViewModel(i))?.ToList();
+            break;
+        case "TrackDiagram":
+            TrackDiagram = cs.TrackDiagram;
+            break;
+
+        }
+    }
+
     private void ScanStreams(Stream stream)
     {
         stream.Position = 0;
@@ -62,16 +81,16 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         switch (line)
         {
         case "[lokomotive]":
-            Locomotives = CsSerializer.Deserialize<CsLokomotiveFile>(stream, "[lokomotive]").Locomotives?.Select(i => new LocomotiveViewModel(host, i))?.ToList(); 
+            Locomotives = CsSerializer.Deserialize<Locomotives>(stream, "[lokomotive]").Locomotives_?.Select(i => new LocomotiveViewModel(host, i))?.ToList(); 
             break;
         case "[magnetartikel]":
-            MagneticItems = CsSerializer.Deserialize<CsMagneticItems>(stream, "[magnetartikel]")?.Articles?.Select(i => new MagneticItemViewModel(i))?.ToList();
+            MagneticItems = CsSerializer.Deserialize<MagneticItems>(stream, "[magnetartikel]")?.Articles?.Select(i => new MagneticItemViewModel(i))?.ToList();
             break;
         case "[fahrstrassen]":
-            RailwayRoutes = CsSerializer.Deserialize<CsRailwayRoutes>(stream, "[fahrstrassen]")?.RailwayRoutes?.Select(i => new RailwayRouteViewModel(i))?.ToList();
+            RailwayRoutes = CsSerializer.Deserialize<RailwayRoutes>(stream, "[fahrstrassen]")?.RailwayRoutes_?.Select(i => new RailwayRouteViewModel(i))?.ToList();
             break;
         case "[gleisbild]":
-            TrackDiagram = CsSerializer.Deserialize<CsTrackDiagram>(stream, "[gleisbild]]");
+            TrackDiagram = CsSerializer.Deserialize<TrackDiagram>(stream, "[gleisbild]]");
             break;
         }
             
@@ -100,7 +119,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private ObservableCollection<MessageViewModel> messages = [];
 
     [ObservableProperty]
-    private CsTrackDiagram? trackDiagram;
+    private TrackDiagram? trackDiagram;
 
     #region System Sync Commands
 

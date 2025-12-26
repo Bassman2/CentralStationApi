@@ -5,7 +5,7 @@ namespace CentralStationDemo.ViewModel;
 
 public partial class LocomotiveViewModel : ObservableObject
 {
-    public LocomotiveViewModel(string host, CsLocomotive loco)
+    public LocomotiveViewModel(string host, Locomotive loco)
     {
         Name = loco.Name;
         Uid = loco.Uid;

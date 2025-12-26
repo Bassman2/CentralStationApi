@@ -1,7 +1,7 @@
 ﻿namespace CentralStationWebApi.Model;
 
 [CsSerialize]
-public partial class CsFunction 
+public partial class Function 
 {
     [CsProperty("nr")]
     public int Num { get; private set; }

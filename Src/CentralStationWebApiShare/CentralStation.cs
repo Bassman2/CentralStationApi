@@ -1,6 +1,12 @@
-﻿namespace CentralStationWebApi;
+﻿
 
-public sealed class CentralStation : IDisposable
+using CentralStationWebApi.Model;
+using System.Collections.ObjectModel;
+using System.IO;
+
+namespace CentralStationWebApi;
+
+public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
     private const int PortSend = 15731;
     private const int PortReceive = 15730;
@@ -16,6 +22,9 @@ public sealed class CentralStation : IDisposable
     private readonly MessageQueue<CANMessage> messageReceivedQueue;
 
     public event EventHandler<FileReceivedEventArgs>? FileReceived;
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangingEventHandler? PropertyChanging;
+
     private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
     private TimeSpan receiveTimeout = TimeSpan.FromSeconds(30);
@@ -57,7 +66,19 @@ public sealed class CentralStation : IDisposable
         messageReceivedQueue.Dispose();
         fileReceivedQueue.Dispose();
     }
-    
+
+    #region Properties
+
+    public Locomotives? Locomotives;
+
+    public MagneticItems? MagneticItems;
+
+    public RailwayRoutes? RailwayRoutes;
+
+    public TrackDiagram? TrackDiagram;
+
+    #endregion
+
     #region Send Message
 
     private readonly List<MessageRequest> messageQueue = [];
@@ -128,6 +149,7 @@ public sealed class CentralStation : IDisposable
                 if (fileStream.AddData(msg.GetData()))
                 {
                     fileReceivedQueue.Add(fileStream);
+                    SetFile(fileStream.GetFileStream());
                     fileDictionary.Remove(msg.Hash);
                 }
             }
@@ -136,6 +158,37 @@ public sealed class CentralStation : IDisposable
                 Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceError, "Invalid ConfigDataStream message length");
                 throw new InvalidOperationException("Invalid ConfigDataStream message length");
             }
+        }
+    }
+
+    private void SetFile(Stream stream)
+    {
+        stream.Position = 0;
+        StreamReader reader = new StreamReader(stream);
+        string? line = reader.ReadLine();
+
+        switch (line)
+        {
+        case "[lokomotive]":
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Locomotives)));
+            Locomotives = CsSerializer.Deserialize<Locomotives>(stream, "[lokomotive]");
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locomotives)));
+            break;
+        case "[magnetartikel]":
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(MagneticItems)));
+            MagneticItems = CsSerializer.Deserialize<MagneticItems>(stream, "[magnetartikel]");
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MagneticItems)));
+            break;
+        case "[fahrstrassen]":
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(RailwayRoutes)));
+            RailwayRoutes = CsSerializer.Deserialize<RailwayRoutes>(stream, "[fahrstrassen]");
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RailwayRoutes)));
+            break;
+        case "[gleisbild]":
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackDiagram)));
+            TrackDiagram = CsSerializer.Deserialize<TrackDiagram>(stream, "[gleisbild]]");
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackDiagram)));
+            break;
         }
     }
 

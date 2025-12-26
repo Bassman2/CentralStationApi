@@ -2,7 +2,7 @@
 
 public partial class MagneticItemViewModel : ObservableObject
 {
-    public MagneticItemViewModel(CsArticle article)
+    public MagneticItemViewModel(Article article)
     {
         Id = article.Id;
         Name = article.Name;

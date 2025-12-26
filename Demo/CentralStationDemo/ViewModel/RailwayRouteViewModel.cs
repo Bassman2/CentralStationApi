@@ -2,6 +2,6 @@
 
 public partial class RailwayRouteViewModel
 {
-    public RailwayRouteViewModel(CsRailwayRoute route)
+    public RailwayRouteViewModel(RailwayRoute route)
     { }
 }

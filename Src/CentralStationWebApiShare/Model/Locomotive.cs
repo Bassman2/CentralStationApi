@@ -1,7 +1,7 @@
 ﻿namespace CentralStationWebApi.Model;
 
 [CsSerialize]
-public partial class CsLocomotive 
+public partial class Locomotive 
 {
     [CsProperty("name")]
     public string? Name { get; private set; }
@@ -101,8 +101,8 @@ public partial class CsLocomotive
     public uint[]? Blocks { get; private set; }
 
     [CsProperty("funktionen")]
-    public List<CsFunction>? Functions { get; private set; }
+    public List<Function>? Functions { get; private set; }
 
     [CsProperty("funktionen_2")]
-    public List<CsFunction>? Functions2 { get; private set; }
+    public List<Function>? Functions2 { get; private set; }
 }
