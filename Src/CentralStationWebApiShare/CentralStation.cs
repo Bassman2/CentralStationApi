@@ -1,10 +1,4 @@
-﻿
-
-using CentralStationWebApi.Model;
-using System.Collections.ObjectModel;
-using System.IO;
-
-namespace CentralStationWebApi;
+﻿namespace CentralStationWebApi;
 
 public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
@@ -21,11 +15,10 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
     private readonly MessageQueue<CANMessage> messageReceivedQueue;
 
-    public event EventHandler<FileReceivedEventArgs>? FileReceived;
     public event PropertyChangedEventHandler? PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    private readonly MessageQueue<CSFileStream> fileReceivedQueue;
+    //private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
     private TimeSpan receiveTimeout = TimeSpan.FromSeconds(30);
 
@@ -34,7 +27,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         this.host = host;
 
         messageReceivedQueue = new MessageQueue<CANMessage>((m) => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(m)));
-        fileReceivedQueue = new MessageQueue<CSFileStream>((f) => FileReceived?.Invoke(this, new FileReceivedEventArgs(f)));
+        //fileReceivedQueue = new MessageQueue<CSFileStream>((f) => FileReceived?.Invoke(this, new FileReceivedEventArgs(f)));
 
         this.listener = new UdpClient(PortReceive);
         this.receiver = Task.Run(async () => await ReceiveAsync());
@@ -64,7 +57,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         listener?.Dispose();
 
         messageReceivedQueue.Dispose();
-        fileReceivedQueue.Dispose();
+        //fileReceivedQueue.Dispose();
     }
 
     #region Properties
@@ -148,7 +141,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
             {
                 if (fileStream.AddData(msg.GetData()))
                 {
-                    fileReceivedQueue.Add(fileStream);
+                    //fileReceivedQueue.Add(fileStream);
                     SetFile(fileStream.GetFileStream());
                     fileDictionary.Remove(msg.Hash);
                 }
@@ -164,9 +157,12 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     private void SetFile(Stream stream)
     {
         stream.Position = 0;
+        string text = new StreamReader(stream).ReadToEnd();
+
+
+        stream.Position = 0;
         StreamReader reader = new StreamReader(stream);
         string? line = reader.ReadLine();
-
         switch (line)
         {
         case "[lokomotive]":
@@ -369,7 +365,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     #endregion
 
-    public async Task<string> ConfigDataLocoInfo(CancellationToken cancellationToken = default)
+    public async Task<string> ConfigDataLocomotivesInfo(CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
         message.DataLength = 8;
@@ -381,7 +377,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     private AutoResetEvent autoResetEventConfigDataStream = new AutoResetEvent(false);
 
-    public void RequestConfigDataLocos()
+    public void RequestConfigDataLocomotives()
     {
         var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
         message.DataLength = 8;
@@ -442,7 +438,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     {
         var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
         message.DataLength = 8;
-        message.SetData("gbsstat“");
+        message.SetData("gbs");
         SendMessage(message);
     }
 
@@ -450,7 +446,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     {
         var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
         message.DataLength = 8;
-        message.SetData("gbsstat“");
+        message.SetData("gbs");
         await SendMessageAsync(message, cancellationToken);
 
         autoResetEventConfigDataStream.WaitOne();

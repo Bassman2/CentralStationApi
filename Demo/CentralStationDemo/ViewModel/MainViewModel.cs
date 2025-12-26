@@ -19,11 +19,6 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             });
         };
         cs.PropertyChanged += (s, e) => OnCsPropertyChanged(e.PropertyName);
-        
-        //cs.FileReceived += (s, e) =>
-        //{
-        //    ScanStreams(e.CSFileStream.GetFileStream()); 
-        //};
     }
 
     public void Dispose()
@@ -34,9 +29,9 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     protected override void OnStartup()
     {
-        cs.RequestConfigDataLocos();
-        cs.RequestConfigDataMagneticItems();
-        cs.RequestConfigDataRailwayRoute();
+        //cs.RequestConfigDataLocomotives();
+        //cs.RequestConfigDataMagneticItems();
+        //cs.RequestConfigDataRailwayRoute();
         cs.RequestConfigDataTrackDiagramRoute();
     }
 
@@ -70,30 +65,6 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             break;
 
         }
-    }
-
-    private void ScanStreams(Stream stream)
-    {
-        stream.Position = 0;
-        StreamReader reader = new StreamReader(stream);
-        string? line = reader.ReadLine();
-
-        switch (line)
-        {
-        case "[lokomotive]":
-            Locomotives = CsSerializer.Deserialize<Locomotives>(stream, "[lokomotive]").Locomotives_?.Select(i => new LocomotiveViewModel(host, i))?.ToList(); 
-            break;
-        case "[magnetartikel]":
-            MagneticItems = CsSerializer.Deserialize<MagneticItems>(stream, "[magnetartikel]")?.Articles?.Select(i => new MagneticItemViewModel(i))?.ToList();
-            break;
-        case "[fahrstrassen]":
-            RailwayRoutes = CsSerializer.Deserialize<RailwayRoutes>(stream, "[fahrstrassen]")?.RailwayRoutes_?.Select(i => new RailwayRouteViewModel(i))?.ToList();
-            break;
-        case "[gleisbild]":
-            TrackDiagram = CsSerializer.Deserialize<TrackDiagram>(stream, "[gleisbild]]");
-            break;
-        }
-            
     }
 
     [ObservableProperty]
@@ -179,13 +150,13 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     //[RelayCommand]
     //private async Task OnLocoInfo()
     //{
-    //    await cs.ConfigDataLocoInfo();
+    //    await cs.ConfigDataLocomotivesInfo();
     //}
 
     //[RelayCommand]
     //private async Task OnLocos()
     //{
-    //    string file = await cs.RequestConfigDataLocos();
+    //    string file = await cs.RequestConfigDataLocomotives();
     //}
 
     

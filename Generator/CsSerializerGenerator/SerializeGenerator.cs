@@ -157,6 +157,11 @@ namespace CsSerializerGenerator
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToUIntArray(value);");
                     sb.AppendLine("            break;");
                     break;
+                case "bool":
+                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"            {prop.Name} = CsSerializer.ToBool(value);");
+                    sb.AppendLine("            break;");
+                    break;
 
                 default:
                     //sb.AppendLine($"// {prop.Name} - {prop.Type.Name} - {prop.Type.FullName} not defined");

@@ -30,6 +30,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\Locomotives.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\MagneticItems.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\RailwayRoute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\RailwayRouteItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\RailwayRoutes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Size.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Version.cs" />

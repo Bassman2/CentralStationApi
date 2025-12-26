@@ -114,4 +114,9 @@ public static class CsSerializer
     {
         return value.Split(' ', StringSplitOptions.TrimEntries).Select(i => ToInt(i)).ToArray();
     }
+
+    public static bool ToBool(string value)
+    {
+        return ToInt(value) == 0 ? false : true;
+    }
 }

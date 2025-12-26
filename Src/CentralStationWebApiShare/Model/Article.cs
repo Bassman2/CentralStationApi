@@ -45,4 +45,7 @@ public partial class Article
     [CsProperty("dectyp")]
     public string? DecoderType { get; private set; }
 
+    [CsProperty("decoder")]
+    public string? Decoder { get; private set; }
+
 }
