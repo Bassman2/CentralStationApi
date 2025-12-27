@@ -6,5 +6,5 @@ public static class TraceSwitches
 
     public static TraceSwitch CanReceiveSwitch = new TraceSwitch("CanReceiveSwitch", "CanReceiveSwitch", "Warning");
 
-    public static TraceSwitch SerializerSwitch = new TraceSwitch("SerializerSwitch", "SerializerSwitch", "Info");
+    public static TraceSwitch SerializerSwitch = new TraceSwitch("SerializerSwitch", "SerializerSwitch", "Warning");
 }

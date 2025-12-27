@@ -29,10 +29,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     protected override void OnStartup()
     {
-        //cs.RequestConfigDataLocomotives();
-        //cs.RequestConfigDataMagneticItems();
-        //cs.RequestConfigDataRailwayRoute();
-        cs.RequestConfigDataTrackDiagramRoute();
+        cs.RequestConfigDataLocomotives();
+        cs.RequestConfigDataMagneticItems();
+        cs.RequestConfigDataRailwayRoute();
+        cs.RequestConfigDataTrackDiagram();
+        cs.RequestConfigDataTrackDiagramPage(1);
+        cs.RequestConfigDataTrackDiagramPage(2);
     }
 
     private void UpdateStatus(CANMessage message)

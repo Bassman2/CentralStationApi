@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
+public sealed partial class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
     private const int PortSend = 15731;
     private const int PortReceive = 15730;
@@ -122,27 +122,33 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     }
 
     private readonly Dictionary<ushort, CSFileStream> fileDictionary = [];
+    private string filename = "empty";
 
     private void HandleStreams(CANMessage msg)
     {
+
+        if (msg.IsResponse && msg.Command == Command.RequestConfigData)
+        {
+            filename = msg.GetDataString().Trim('\0');
+        }
         if (/*msg.IsResponse && */ msg.Command == Command.ConfigDataStream)
         {
             if (msg.DataLength == 6)
             {
                 // overwrite existing
-                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, msg.GetDataUInt(5), msg.GetDataUShort(9));
+                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, filename, msg.GetDataUInt(5), msg.GetDataUShort(9));
             }
             else if (msg.DataLength == 7)
             {
                 // overwrite existing
-                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, msg.GetDataUInt(5), msg.GetDataUShort(9), msg.GetDataByte(11));
+                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, filename, msg.GetDataUInt(5), msg.GetDataUShort(9), msg.GetDataByte(11));
             }
             else if(msg.DataLength == 8 && fileDictionary.TryGetValue(msg.Hash, out var fileStream))
             {
                 if (fileStream.AddData(msg.GetData()))
                 {
                     //fileReceivedQueue.Add(fileStream);
-                    SetFile(fileStream.GetFileStream());
+                    SetFile(fileStream.GetFileStream(), fileStream.FileName);
                     fileDictionary.Remove(msg.Hash);
                 }
             }
@@ -154,9 +160,9 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         }
     }
 
-    private void SetFile(Stream stream)
+    private void SetFile(Stream stream, string fileName)
     {
-        SaveStream(stream);
+        SaveStream(stream, fileName);
 
         stream.Position = 0;
         StreamReader reader = new StreamReader(stream);
@@ -188,7 +194,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     private const string dataPath = @"C:\MärklinData";
 
-    private void SaveStream(Stream stream)
+    private void SaveStream(Stream stream, string fileName)
     {
         if (Directory.Exists(dataPath))
         {
@@ -196,279 +202,18 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
             StreamReader reader = new StreamReader(stream);
             string? firstLine = reader.ReadLine();
 
-            string fileName = firstLine?.Trim('[', ']') ?? "unknown";
+            string fileId = firstLine?.Trim('[', ']') ?? "unknown";
 
-            using var file = File.CreateText(Path.Combine(dataPath, $"{fileName}.txt"));
+            using var file = File.CreateText(Path.Combine(dataPath, $"{fileName}-{fileId}.txt"));
             file.WriteLine(firstLine);
             file.Write(reader.ReadToEnd());
         }
         stream.Position = 0;
     }
 
-    #endregion
-
-    #region System Commands
-
     private uint hash = 0x4711;
 
-    //private CANMessage systemStopReqMessage;
-    //private CANMessage systemStopResMessage;
-    //private AutoResetEvent systemStopRespEvent = new AutoResetEvent(false);
-
-    public void SystemStop(uint device = AllDevices)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.Stop);
-        SendMessage(message);
-    }
-
-    public async Task<CANMessage> SystemStopAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
-    {   
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.Stop);
-        return await SendMessageAsync(message, cancellationToken);
-    }
-
-    public void SystemGo(uint device = AllDevices)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.Go);
-        SendMessage(message);
-    }
-
-    public async Task<CANMessage> SystemGoAsync(uint device = AllDevices, CancellationToken cancellationToken = default)                            
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.Go);
-        return await SendMessageAsync(message, cancellationToken);
-    }
-
-    public void SystemHalt(uint device = AllDevices)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.Halt);
-        SendMessage(message);
-    }
-
-    public async Task<CANMessage> SystemHaltAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.Halt);
-        return await SendMessageAsync(message, cancellationToken);
-    }
-
-    public void SystemLocoHalt(uint device = AllDevices)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.LocoHalt);
-        SendMessage(message);
-    }
-
-    public async Task<CANMessage> SystemLocoHaltAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.LocoHalt);
-        return await SendMessageAsync(message, cancellationToken);
-    }
-
-    public void SystemLocoCycleStop(uint device = AllDevices)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.LocoCycleStop);
-        SendMessage(message);
-    }
-
-    public async Task<CANMessage> SystemLocoCycleStopAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.LocoCycleStop);
-        return await SendMessageAsync(message, cancellationToken);
-    }
-
-    public void SystemLocoDataProtocol(uint device = AllDevices, byte protocoll = 0xff)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.LocoDataProtocol);
-        SendMessage(message);
-    }
-
-    public async Task<CANMessage> SystemLocoDataProtocolAsync(uint device = AllDevices, byte protocoll = 0xff, CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
-        message.SetData(device, 5);
-        message.SetData(SystemCommand.LocoDataProtocol);
-        return await SendMessageAsync(message, cancellationToken);
-    }
-
-    //public async Task<bool> SystemSwitchingTimeAsync(uint device, ushort time, CancellationToken cancellationToken = default)
-    //{
-    //    var msg = new SystemMessage(SystemCommand.LocoDataProtocol, device, time);
-
-    //    await SendMessageAsync(msg, cancellationToken);
-
-    //    return true;
-    //}
-
-    //public async Task<bool> SystemFastReadAsync(uint deviceUID, ushort mfxSID, CancellationToken cancellationToken = default)
-    //{
-    //    var msg = new SystemMessage(SystemCommand.FastRead, deviceUID, mfxSID);
-
-    //    await SendMessageAsync(msg, cancellationToken);
-
-    //    return true;
-    //}
-
-    public async Task<CANMessage> SystemTrackProtocolAsync(uint deviceUID, byte param, CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 6;
-        message.SetData(deviceUID, 5);
-        message.SetData(SystemCommand.TrackProtocol);
-        message.SetData(param, 10);
-        return await SendMessageAsync(message, cancellationToken);
-    }
-
-    //public async Task<bool> SystemNewRegistrationCounterAsync(uint deviceUID, ushort counter, CancellationToken cancellationToken = default)
-    //{
-    //    var msg = new SystemMessage(SystemCommand.FastRead, deviceUID, counter);
-
-    //    await SendMessageAsync(msg, cancellationToken);
-
-    //    return true;
-    //}
-
-    public async Task<CANMessage> SystemOverloadAsync(uint deviceUID, byte channel, CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 6;
-        message.SetData(deviceUID, 5);
-        message.SetData(SystemCommand.Overload);
-        message.SetData(channel, 10);
-        return await SendMessageAsync(message, cancellationToken);
-    }
-
-    public async Task<CANMessage> SystemResetAsync(uint deviceUID, byte target, CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 6;
-        message.SetData(deviceUID, 5);
-        message.SetData(SystemCommand.Overload);
-        message.SetData(target, 10);
-        return await SendMessageAsync(message, cancellationToken);
-    }
-
     #endregion
-
-    public async Task<string> ConfigDataLocomotivesInfo(CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("lokinfo");
-        await SendMessageAsync(message, cancellationToken);
-
-        return "lokinfo";
-    }
-
-    private AutoResetEvent autoResetEventConfigDataStream = new AutoResetEvent(false);
-
-    public void RequestConfigDataLocomotives()
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("loks");
-        SendMessage(message);
-    }
-
-    public async Task<string> ConfigDataLocosAsync(CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("loks");
-        await SendMessageAsync(message, cancellationToken);
-
-        autoResetEventConfigDataStream.WaitOne();
-        return ""; 
-    }
-
-    public void RequestConfigDataMagneticItems()
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("mags");
-        SendMessage(message);
-    }
-
-    public async Task<string> ConfigDataMagneticItemsAsync(CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("mags");
-        await SendMessageAsync(message, cancellationToken);
-
-        autoResetEventConfigDataStream.WaitOne();
-        return "";
-    }
-
-    public void RequestConfigDataRailwayRoute()
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("fs");
-        SendMessage(message);
-    }
-
-    public async Task<string> ConfigDataRailwayRouteAsync(CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("fs");
-        await SendMessageAsync(message, cancellationToken);
-
-        autoResetEventConfigDataStream.WaitOne();
-        return "";
-    }
-
-    public void RequestConfigDataTrackDiagramRoute()
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("gbs");
-        SendMessage(message);
-    }
-
-    public async Task<string> ConfigDataTrackDiagramAsync(CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("gbs");
-        await SendMessageAsync(message, cancellationToken);
-
-        autoResetEventConfigDataStream.WaitOne();
-        return "";
-    }
 
     #region Static
 

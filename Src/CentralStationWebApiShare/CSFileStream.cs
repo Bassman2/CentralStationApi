@@ -2,9 +2,10 @@
 
 public class CSFileStream
 {
-    public CSFileStream(CSFileStreamMode mode, uint length, ushort cRC, byte reserved = 0)
+    public CSFileStream(CSFileStreamMode mode, string fileName,uint length, ushort cRC, byte reserved = 0)
     {
         Mode = mode;
+        FileName = fileName;
         Length = length;
         CRC = cRC;
         Reserved = reserved;
@@ -13,6 +14,8 @@ public class CSFileStream
     private MemoryStream mem = new(4 * 1024);
 
     public CSFileStreamMode Mode { get; }
+
+    public string FileName { get; }
 
     public uint Length { get; }
 
