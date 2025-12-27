@@ -70,6 +70,8 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     public TrackDiagram? TrackDiagram;
 
+    public TrackDiagramPage? TrackDiagramPages;
+
     #endregion
 
     #region Send Message
@@ -187,6 +189,11 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
         case "[gleisbild]":
             PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackDiagram)));
             TrackDiagram = CsSerializer.Deserialize<TrackDiagram>(stream, "[gleisbild]");
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackDiagram)));
+            break;
+        case "[gleisbildseite]":
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackDiagram)));
+            TrackDiagramPages = CsSerializer.Deserialize<TrackDiagramPage>(stream, "[gleisbildseite]");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackDiagram)));
             break;
         }
