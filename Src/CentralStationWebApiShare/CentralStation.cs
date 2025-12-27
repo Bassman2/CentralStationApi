@@ -156,9 +156,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     private void SetFile(Stream stream)
     {
-        stream.Position = 0;
-        string text = new StreamReader(stream).ReadToEnd();
-
+        SaveStream(stream);
 
         stream.Position = 0;
         StreamReader reader = new StreamReader(stream);
@@ -182,10 +180,29 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
             break;
         case "[gleisbild]":
             PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackDiagram)));
-            TrackDiagram = CsSerializer.Deserialize<TrackDiagram>(stream, "[gleisbild]]");
+            TrackDiagram = CsSerializer.Deserialize<TrackDiagram>(stream, "[gleisbild]");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackDiagram)));
             break;
         }
+    }
+
+    private const string dataPath = @"C:\MärklinData";
+
+    private void SaveStream(Stream stream)
+    {
+        if (Directory.Exists(dataPath))
+        {
+            stream.Position = 0;
+            StreamReader reader = new StreamReader(stream);
+            string? firstLine = reader.ReadLine();
+
+            string fileName = firstLine?.Trim('[', ']') ?? "unknown";
+
+            using var file = File.CreateText(Path.Combine(dataPath, $"{fileName}.txt"));
+            file.WriteLine(firstLine);
+            file.Write(reader.ReadToEnd());
+        }
+        stream.Position = 0;
     }
 
     #endregion

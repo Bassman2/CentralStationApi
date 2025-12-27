@@ -4,10 +4,11 @@ public static class CsSerializer
 {
     public static T Deserialize<T>(Stream stream, string id) where T : ICsSerialize, new()
     {
-        stream.Position = 0; 
+        stream.Position = 0;
 
+        Debug.IndentLevel = 0;
+        Debug.IndentSize = 2;
         Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Deserialize {typeof(T).Name} {id}");
-        Debug.IndentLevel = 2;
 
         var root = new T();
         ICsSerialize? leave = root;
@@ -30,12 +31,12 @@ public static class CsSerializer
         {
             int lineLevel = GetLevel(line);
             
-            Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"{lineNum++} ({lineLevel}/{curLevel}) '{line}' ---- [{TraceStack}]\"");
+            Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"{lineNum++} ({lineLevel}/{curLevel}) '{line}' ---- [{TraceStack(stack)}]\"");
 
             if (lineLevel < curLevel)
             {
                 Debug.Unindent();
-                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"End ({lineLevel}/{curLevel}) {leave.GetType().Name} ---- [{TraceStack}]\"");
+                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"End ({lineLevel}/{curLevel}) {leave.GetType().Name} ---- [{TraceStack(stack)}]\"");
                 leave = stack[lineLevel];
                 //curLevel = lineLevel;
             }
@@ -45,7 +46,7 @@ public static class CsSerializer
             {
                 stack[lineLevel] = leave;
                 leave = leave.DeserializeLeave(line.TrimLevel());
-                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Begin ({lineLevel}/{curLevel}) {leave.GetType().Name} ---- [{TraceStack}]");
+                Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Begin ({lineLevel}/{curLevel}) {leave.GetType().Name} ---- [{TraceStack(stack)}]");
                 Debug.Indent();
                 //curLevel++;
             }
@@ -88,13 +89,8 @@ public static class CsSerializer
     //    return value;
     //}
 
-    private static string TraceStack(ICsSerialize[] stack)
-    {
-        var x = stack.Select(i => i.GetType().Name).ToList();
-        var y = x.Aggregate("", (a, b) => $"{a}, {b}");
-        return y;
-    }
-
+    private static string TraceStack(ICsSerialize[] stack) => string.Join(", ", stack.Select(i => i?.GetType().Name ?? "null"));
+    
     public static uint ToUInt(string value)
     {
         return value.StartsWith("0x") ? Convert.ToUInt32(value, 16) : uint.Parse(value);
