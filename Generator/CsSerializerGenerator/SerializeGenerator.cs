@@ -172,7 +172,13 @@ namespace CsSerializerGenerator
                     break;
 
                 default:
-                    //sb.AppendLine($"// {prop.Name} - {prop.Type.Name} - {prop.Type.FullName} not defined");
+                    sb.AppendLine($"// {prop.Name} - {prop.Type.Name} - {prop.Type.FullName} not defined");
+                    if (prop.Type.IsEnum)
+                    {
+                        sb.AppendLine($"        case {arg.Value}:");
+                        sb.AppendLine($"            {prop.Name} = {prop.Type.Name}_Converter.Deserialize(value);");
+                        sb.AppendLine("            break;");
+                    }
                     break;
                 }                   
                     
@@ -226,7 +232,7 @@ namespace CsSerializerGenerator
                 var attr = field.GetAttribute("System.Runtime.Serialization.EnumMemberAttribute");
                 //sb.AppendLine($"// {attr?.Name ?? "0"}");
                 var arg = attr?.GetNamedArgument("Value");
-                string name = arg?.Value ?? field.Name;
+                string name = arg?.Value ?? $"\"{field.Name}\"";
                 sb.AppendLine($"        {name} => {en.Name}.{field.Name},");
             }
         }

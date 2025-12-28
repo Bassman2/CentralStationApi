@@ -20,9 +20,7 @@ global using Microsoft.Extensions.DependencyInjection;
 global using WpfToolbox.ViewModel;
 
 global using CentralStationWebApi;
-global using CentralStationWebApi.Serializer;
 global using CentralStationWebApi.Model;
-
 
 global using CentralStationDemo.ViewModel;
 

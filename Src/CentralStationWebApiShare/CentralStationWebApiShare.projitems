@@ -27,6 +27,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Internal\SystemMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessageReceivedEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Article.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\DecoderTyp.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Element.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ElementType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Function.cs" />

@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using CentralStationWebApi.Model;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace CentralStationDemo.ViewModel;
@@ -46,7 +47,7 @@ public partial class LocomotiveViewModel : ObservableObject
     private ImageSource? icon;
 
     [ObservableProperty]
-    private string? type;
+    private DecoderTyp type;
 
     [ObservableProperty]
     private uint mfxType;

@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace CentralStationWebApi.Model;
+﻿namespace CentralStationWebApi.Model;
 
 [EnumConverter]
 public enum ElementType
