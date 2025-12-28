@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\Size.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\TrackDiagramPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Version.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsDummy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsPropertyAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsSerializeAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serializer\CsSerializer.cs" />

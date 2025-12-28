@@ -53,7 +53,7 @@ namespace CsSerializerGenerator
                 $$"""
                         default:
                             Debug.WriteLine($"Unknown {{cl.Name}} section {name}");
-                            return null;
+                            return new CsDummy(name);
                         }
                     }
 

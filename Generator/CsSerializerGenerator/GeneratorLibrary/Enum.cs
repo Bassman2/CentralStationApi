@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace CsSerializerGenerator.GeneratorLibrary
 {
-	public class Class(INamedTypeSymbol symbol) : BaseAttributes
+    public class Enum(INamedTypeSymbol symbol) : BaseAttributes
     {
         public string Name => symbol.Name;
 
@@ -31,15 +31,12 @@ namespace CsSerializerGenerator.GeneratorLibrary
                 return dotIndex > 0 ? ns.Substring(0, dotIndex) : ns;
             }
         }
-        
-        public string FullName => symbol.ToDisplayString();
-
-        public IEnumerable<Property> Properties => symbol.GetMembers().OfType<IPropertySymbol>().Select(p => new Property(p));
 
         public IEnumerable<Field> Fields => symbol.GetMembers().OfType<IFieldSymbol>().Select(p => new Field(p));
-        
-        //public Property? GetProperty(string name) => Properties.FirstOrDefault(p => p.Name == name);
-        
+
+        public string FullName => symbol.ToDisplayString();
+
         public override IEnumerable<Attribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a));
+
     }
 }

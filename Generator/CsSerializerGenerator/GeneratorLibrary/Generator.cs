@@ -21,8 +21,8 @@ namespace CsSerializerGenerator.GeneratorLibrary
         {
 
             var provider = context.SyntaxProvider.CreateSyntaxProvider(
-                    predicate: static (node, _) => node is ClassDeclarationSyntax,
-                    transform: static (ctx, _) => (ClassDeclarationSyntax)ctx.Node
+                    predicate: static (node, _) => IsSyntaxTargetForGeneration(node),           //node is ClassDeclarationSyntax || node is EnumDeclarationSyntax,
+                    transform: static (ctx, _) => (BaseTypeDeclarationSyntax)ctx.Node           // (ClassDeclarationSyntax)ctx.Node
                     ).Where(m => m is not null).Collect();
 
             var compilation = context.CompilationProvider.Combine(provider);
@@ -30,11 +30,18 @@ namespace CsSerializerGenerator.GeneratorLibrary
             context.RegisterSourceOutput(compilation, Excecute);
         }
 
-        private void Excecute(SourceProductionContext context, (Compilation Left, ImmutableArray<ClassDeclarationSyntax> Right) tuple)
+        private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
+         => (node is ClassDeclarationSyntax c && c.AttributeLists.Count > 0) ||
+            (node is EnumDeclarationSyntax e && e.AttributeLists.Count > 0);
+
+
+        //private void Excecute(SourceProductionContext context, (Compilation Left, ImmutableArray<ClassDeclarationSyntax> Right) tuple)
+        private void Excecute(SourceProductionContext context, (Compilation Left, ImmutableArray<BaseTypeDeclarationSyntax> Right) tuple)
         {
             Context = context;
             Compilation = tuple.Left;
-            Classes = tuple.Right;
+            Classes = tuple.Right.Where(i => i is ClassDeclarationSyntax).Cast<ClassDeclarationSyntax>().ToArray();         // OfType<string>();
+            Enums = tuple.Right.Where(i => i is EnumDeclarationSyntax).Cast<EnumDeclarationSyntax>().ToArray();
             try
             {
                 Excecute();
@@ -50,7 +57,10 @@ namespace CsSerializerGenerator.GeneratorLibrary
 
         protected Compilation Compilation { get; private set; } = null!;
 
-        protected ImmutableArray<ClassDeclarationSyntax> Classes { get; private set; }
+        //protected ImmutableArray<ClassDeclarationSyntax> Classes { get; private set; }
+        protected ClassDeclarationSyntax[] Classes { get; private set; } = [];
+
+        protected EnumDeclarationSyntax[] Enums { get; private set; } = [];
 
         public virtual void Excecute()
         { }
@@ -62,6 +72,17 @@ namespace CsSerializerGenerator.GeneratorLibrary
                 if (Compilation.GetSemanticModel(cla.SyntaxTree).GetDeclaredSymbol(cla) is INamedTypeSymbol symbol)
                 {
                     yield return new Class(symbol);
+                }
+            }
+        }
+
+        public IEnumerable<Enum> GetAllEnums()
+        {
+            foreach (var enu in Enums)
+            {
+                if (Compilation.GetSemanticModel(enu.SyntaxTree).GetDeclaredSymbol(enu) is INamedTypeSymbol symbol)
+                {
+                    yield return new Enum(symbol);
                 }
             }
         }
@@ -135,6 +156,27 @@ namespace CsSerializerGenerator.GeneratorLibrary
                     }
                 }
 
+            }
+
+            sb.AppendLine("Enums");
+            foreach (var en in GetAllEnums())
+            {
+                sb.AppendLine();
+                sb.AppendLine($"  Enum: Name: {en.Name}, Namespace: {en.NameSpace}, FullName: {en.FullName}");
+                sb.AppendLine();
+
+                
+                if (en.Fields.Any())
+                {
+                    DebugAttributes(sb, en, 2);
+                    sb.AppendLine($"    Properties:");
+                    foreach (var field in en.Fields)
+                    {
+                        sb.AppendLine($"      {field.Type.Name} {field.Name}");
+
+                        DebugAttributes(sb, field, 4);
+                    }
+                }
             }
             sb.AppendLine($"*/");
             AddSource($"Debug.g.cs", sb.ToString());
