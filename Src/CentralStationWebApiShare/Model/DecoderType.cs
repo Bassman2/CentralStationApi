@@ -1,9 +1,12 @@
 ﻿namespace CentralStationWebApi.Model;
 
 [EnumConverter]
-public enum DecoderTyp
+public enum DecoderType
 {
     Unknown = 0,
+
+    [EnumMember(Value = "mm2")]
+    MM2,
 
     [EnumMember(Value = "mm2_prg")]
     MM2Prg,
@@ -21,7 +24,5 @@ public enum DecoderTyp
     ESX1,
 
     [EnumMember(Value = "mm_prg")]
-    MMPrg
-
-        
+    MMPrg        
 }

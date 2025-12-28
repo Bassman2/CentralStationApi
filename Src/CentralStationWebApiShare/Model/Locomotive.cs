@@ -22,7 +22,7 @@ public partial class Locomotive
     public string? Icon { get; private set; }
 
     [CsProperty("typ")]
-    public DecoderTyp Type { get; private set; }
+    public DecoderType Type { get; private set; }
 
     /// <summary>
     /// Locomotive symbol for MS1 (0=electric locomotive, 1=diesel locomotive, 2=steam locomotive, 3=no icon)

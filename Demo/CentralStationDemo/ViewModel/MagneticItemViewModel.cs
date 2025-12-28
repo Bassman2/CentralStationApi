@@ -20,7 +20,7 @@ public partial class MagneticItemViewModel : ObservableObject
     private string? name;
 
     [ObservableProperty]
-    private string? type;
+    private ArticleType type;
 
     [ObservableProperty]
     private uint position;
@@ -32,5 +32,5 @@ public partial class MagneticItemViewModel : ObservableObject
     private uint odd;
 
     [ObservableProperty]
-    private string? decoderType;
+    private DecoderType decoderType;
 }

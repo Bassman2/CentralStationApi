@@ -19,7 +19,7 @@ public partial class Article
     /// Type of article
     /// </summary>
     [CsProperty("typ")]
-    public string? Type { get; private set; }
+    public ArticleType Type { get; private set; }
 
     /// <summary>
     /// Current position
@@ -43,7 +43,7 @@ public partial class Article
     /// Decoder type, either DCC or mm2
     /// </summary>
     [CsProperty("dectyp")]
-    public string? DecoderType { get; private set; }
+    public DecoderType DecoderType { get; private set; }
 
     [CsProperty("decoder")]
     public string? Decoder { get; private set; }

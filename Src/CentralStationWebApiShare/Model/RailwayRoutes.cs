@@ -3,6 +3,9 @@
 [CsSerialize]
 public partial class RailwayRoutes
 {
+    [CsProperty("readonly")]
+    public bool Readonly { get; private set; }
+
     [CsProperty("version")]
     public Version? Version { get; private set; }
 

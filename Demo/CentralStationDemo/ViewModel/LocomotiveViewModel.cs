@@ -48,7 +48,7 @@ public partial class LocomotiveViewModel : ObservableObject
     private ImageSource? icon;
 
     [ObservableProperty]
-    private DecoderTyp type;
+    private DecoderType type;
 
     [ObservableProperty]
     private uint mfxType;
