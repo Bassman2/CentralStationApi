@@ -15,6 +15,7 @@ public partial class LocomotiveViewModel : ObservableObject
         IconName = loco.Icon;
         Type = loco.Type;
         MfxType = loco.MfxType;
+        Symbol = loco.Symbol;
 
         // http://cs3/app/assets/lok/NS%20186%20012-8.png
 
@@ -51,6 +52,9 @@ public partial class LocomotiveViewModel : ObservableObject
 
     [ObservableProperty]
     private uint mfxType;
-    
+
+    [ObservableProperty]
+    private Symbol symbol;
+
 }
 

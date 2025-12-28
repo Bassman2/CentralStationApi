@@ -28,7 +28,7 @@ public partial class Locomotive
     /// Locomotive symbol for MS1 (0=electric locomotive, 1=diesel locomotive, 2=steam locomotive, 3=no icon)
     /// </summary>
     [CsProperty("symbol")]
-    public uint Symbol { get; private set; }
+    public Symbol Symbol { get; private set; }
 
     [CsProperty("sid")]
     public uint Sid { get; private set; }

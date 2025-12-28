@@ -22,7 +22,7 @@ namespace CsSerializerGenerator.GeneratorLibrary
 
         public bool IsValueType => symbol.IsValueType;
 
-        public bool IsEnum => symbol.TypeKind == TypeKind.Enum;
+        public bool IsEnum => symbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Enum;
 
         ITypeSymbol? GetInnerType(ITypeSymbol type, int index = 0)
         {

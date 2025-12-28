@@ -172,7 +172,7 @@ namespace CsSerializerGenerator
                     break;
 
                 default:
-                    sb.AppendLine($"// {prop.Name} - {prop.Type.Name} - {prop.Type.FullName} not defined");
+                    sb.AppendLine($"// {prop.Name} - {prop.Type.Name} - {prop.Type.FullName} - {prop.Type.TypeKind} not defined");
                     if (prop.Type.IsEnum)
                     {
                         sb.AppendLine($"        case {arg.Value}:");
@@ -201,9 +201,13 @@ namespace CsSerializerGenerator
 
                 internal static class {{en.Name}}_Converter 
                 {
-                    public static {{en.Name}} Deserialize(string name)
+                    public static {{en.Name}} Deserialize(string value)
                     {
-                        return name switch
+                        if (int.TryParse(value, out int val))
+                        {
+                            return ({{en.Name}})val;
+                        }
+                        return value switch
                         {
 
                 """);
@@ -223,6 +227,7 @@ namespace CsSerializerGenerator
 
         private void AddEnumField(StringBuilder sb, Enum en)
         {
+            
             foreach (var field in en.Fields)
             {
                 //foreach (var a in field.Attributes)
