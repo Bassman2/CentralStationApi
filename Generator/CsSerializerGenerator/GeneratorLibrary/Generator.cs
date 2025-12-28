@@ -111,6 +111,8 @@ namespace CsSerializerGenerator.GeneratorLibrary
 
         public IEnumerable<Class> GetAllClassesWithAttribute(string attributeFullName) => GetAllClasses().Where(c => c.HasAttribute(attributeFullName));
 
+        public IEnumerable<Enum> GetAllEnumsWithAttribute(string attributeFullName) => GetAllEnums().Where(c => c.HasAttribute(attributeFullName));
+
         public void AddSource(string hintName, string source) => Context.AddSource(hintName, source);
 
         public override IEnumerable<Attribute> Attributes => Compilation.Assembly.GetAttributes().Select(a => new Attribute(a));

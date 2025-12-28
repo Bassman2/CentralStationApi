@@ -16,5 +16,8 @@ namespace CsSerializerGenerator.GeneratorLibrary
         public IEnumerable<ConstructorArgument> ConstructorArguments => data.ConstructorArguments.Select(a => new ConstructorArgument(a));
        
         public IEnumerable<NamedArgument> NamedArguments => data.NamedArguments.Select(a => new NamedArgument(a.Key, a.Value));
+
+        public NamedArgument? GetNamedArgument(string name) => data.NamedArguments.Where(a => a.Key == name).Select(a => new NamedArgument(a.Key, a.Value)).FirstOrDefault();
+
     }
 }
