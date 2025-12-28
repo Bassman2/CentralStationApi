@@ -16,6 +16,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <local:SystemSyncView Grid.Row="0"/>
@@ -24,9 +25,10 @@
         <local:LocomotivesView Grid.Row="3"/>
         <local:ArticlesView Grid.Row="4"/>
         <local:RailwayRoutesView Grid.Row="5"/>
+        <local:DevicesView Grid.Row="6"/>
 
         <DataGrid 
-            Grid.Row="6" 
+            Grid.Row="7" 
             ItemsSource="{Binding Messages}" 
             AutoGenerateColumns="False" 
             IsReadOnly="True"

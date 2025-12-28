@@ -1,4 +1,6 @@
-﻿namespace CentralStationWebApi;
+﻿using System.IO;
+
+namespace CentralStationWebApi;
 
 public sealed partial class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
@@ -110,7 +112,8 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
                 var msg = new CANMessage(result);
                 Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceInfo, $"Received: {msg}");
                 messageReceivedQueue.Add(msg);
-                HandleStreams(msg); 
+                HandleStreams(msg);
+                HandleParticipants(msg);
             }
         }
         catch (ObjectDisposedException)
@@ -219,6 +222,22 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
     }
 
     private uint hash = 0x4711;
+
+    public IEnumerable<Device> Devices = [];
+
+    private readonly Dictionary<uint, Device> devices = [];
+
+    private void HandleParticipants(CANMessage msg)
+    {
+        if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
+        {
+            uint device = msg.Device;
+            devices[device] = new Device(device, msg.GetDataByte(9), msg.GetDataByte(10), msg.GetDataUShort(11));
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Devices)));
+            Devices = devices.Values;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Devices)));
+        }
+    }
 
     #endregion
 

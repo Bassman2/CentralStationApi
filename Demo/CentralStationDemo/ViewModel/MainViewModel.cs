@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 
 namespace CentralStationDemo.ViewModel;
 
@@ -29,12 +30,15 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     protected override void OnStartup()
     {
+        cs.RequestParticipants();
+
         cs.RequestConfigDataLocomotives();
         cs.RequestConfigDataMagneticItems();
         cs.RequestConfigDataRailwayRoute();
         cs.RequestConfigDataTrackDiagram();
         cs.RequestConfigDataTrackDiagramPage(1);
         cs.RequestConfigDataTrackDiagramPage(2);
+
     }
 
     private void UpdateStatus(CANMessage message)
@@ -65,6 +69,9 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         case "TrackDiagram":
             TrackDiagram = cs.TrackDiagram;
             break;
+        case "Devices":
+            Devices = cs.Devices.Select(i => new DeviceViewModel(i)).ToList();
+            break;
 
         }
     }
@@ -89,10 +96,18 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private List<RailwayRouteViewModel>? railwayRoutes;
 
     [ObservableProperty]
-    private ObservableCollection<MessageViewModel> messages = [];
+    private TrackDiagram? trackDiagram;
 
     [ObservableProperty]
-    private TrackDiagram? trackDiagram;
+    private List<DeviceViewModel>? devices;
+
+
+    [ObservableProperty]
+    private ObservableCollection<MessageViewModel> messages = [];
+
+   
+
+
 
     #region System Sync Commands
 

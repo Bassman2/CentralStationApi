@@ -3,9 +3,9 @@
 public class CANMessage : MessageBuffer
 {
     
-    public CANMessage(Priority priority, Command command, uint hash)
+    public CANMessage(Priority priority, Command command, uint hash, byte dataLength = 0)
     {
-        SetHeader(priority, command, hash);
+        SetHeader(priority, command, hash, dataLength);
     }
 
     public CANMessage(UdpReceiveResult udpReceiveResult)

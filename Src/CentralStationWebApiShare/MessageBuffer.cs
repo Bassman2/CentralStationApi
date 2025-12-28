@@ -8,7 +8,7 @@ public class MessageBuffer
 
     #region Header
 
-    public void SetHeader(Priority priority, Command command, uint hash)
+    public void SetHeader(Priority priority, Command command, uint hash, byte dataLength)
     {
         uint header = 0;
         SetBits(ref header, 25, 4, (uint)priority);
@@ -21,6 +21,7 @@ public class MessageBuffer
         //Array.Copy(msgId, 0, buffer, 0, 4);
 
         SetData(header, 0);
+        buffer[4] = (byte)dataLength;
     }
 
     public Priority Priority => (Priority)GetBits(GetDataUInt(0), 25, 4);

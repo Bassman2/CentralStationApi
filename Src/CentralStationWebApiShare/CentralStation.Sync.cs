@@ -60,7 +60,17 @@ partial class CentralStation
 
     #endregion
 
-    #region Config Data
+    #region 6 Other Commands / Sonstige Befehle
+
+    public void RequestParticipants()
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SoftwareVersion, hash);
+        SendMessage(message);
+    }
+
+    #endregion
+
+    #region GUI Information Transfer / GUI Informationsübertragung
 
     public async Task<string> ConfigDataLocomotivesInfo(CancellationToken cancellationToken = default)
     {

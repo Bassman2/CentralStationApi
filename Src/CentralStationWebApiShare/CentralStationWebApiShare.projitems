@@ -15,6 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CentralStation.Sync.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConfigDataMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CSFileStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Device.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\CSFileStreamMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Priority.cs" />
