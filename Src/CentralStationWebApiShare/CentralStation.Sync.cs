@@ -1,8 +1,10 @@
-﻿namespace CentralStationWebApi;
+﻿using CentralStationWebApi.Model;
+
+namespace CentralStationWebApi;
 
 partial class CentralStation
 {
-    #region System Commands
+    #region 2 System Commands
 
     public void SystemStop(uint device = AllDevices)
     {
@@ -60,6 +62,18 @@ partial class CentralStation
 
     #endregion
 
+    #region 3 Administration
+
+    #endregion
+
+    #region 4 Article Commands
+
+    #endregion
+
+    #region 5 Feedback
+
+    #endregion
+
     #region 6 Other Commands / Sonstige Befehle
 
     public void RequestParticipants()
@@ -70,7 +84,7 @@ partial class CentralStation
 
     #endregion
 
-    #region GUI Information Transfer / GUI Informationsübertragung
+    #region 7 GUI Information Transfer
 
     public void RequestConfigDataLocomotives()
     {
@@ -106,9 +120,22 @@ partial class CentralStation
     public void RequestConfigDataTrackDiagramPage(int page)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(page, 1, nameof(page));
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash, 8);
         message.SetData($"gbs-{page}");
+        SendMessage(message);
+    }
+
+    #endregion
+
+    #region 9 Automation
+
+    public void AutomaticTransmission(ushort deviceExpert, ushort automaticFunction, byte position, byte parameter)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.AutomaticTransmission, hash, 6);
+        message.SetData((ushort)deviceExpert, 5);
+        message.SetData((ushort)automaticFunction, 7);
+        message.SetData((byte)position, 9);
+        message.SetData((byte)parameter, 10);
         SendMessage(message);
     }
 
