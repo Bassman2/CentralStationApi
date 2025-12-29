@@ -133,6 +133,8 @@ public class CANMessage : MessageBuffer
             $"Prio.: {Priority} Command: {Command} IsResp: {IsResponse} Hash: {Hash:X4}";
     }
 
+    
+
     //private void SetHeader(Priority priority, Command command, uint hash)
     //{
     //    //uint messageId =

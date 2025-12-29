@@ -1,4 +1,6 @@
-﻿namespace CentralStationWebApi;
+﻿using System;
+
+namespace CentralStationWebApi;
 
 public class MessageBuffer
 {
@@ -105,6 +107,15 @@ public class MessageBuffer
         byte[] mem = new byte[length];
         Array.Copy(buffer, index, mem, 0, length);
         return mem;
+    }
+
+    private const uint responseFlag = 0x00010000;
+    public bool IsResponseMsgFrom(CANMessage res)
+    {
+        return ((this.GetDataUInt(0) | responseFlag) == res.GetDataUInt(0)) &&
+            (this.Command != Command.SystemCommand || this.GetDataByte(9) == res.GetDataByte(9));   // on SystemCommand compare sub command
+
+
     }
 
     #endregion

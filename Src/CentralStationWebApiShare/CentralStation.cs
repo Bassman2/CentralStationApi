@@ -22,8 +22,6 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     //private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
-    private TimeSpan receiveTimeout = TimeSpan.FromSeconds(30);
-
     public CentralStation(string host, SystemStatus systemStatus = SystemStatus.Default) 
     {
         this.host = host;
@@ -78,14 +76,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     #region Send Message
 
-    private readonly List<MessageRequest> messageQueue = [];
-
-    private async Task<CANMessage> SendMessageAsync(CANMessage message, CancellationToken cancellationToken = default)
-    {
-        messageReceivedQueue.Add(message);
-        int x = await sender.SendAsync(message.Buffer, 13);
-        return message;
-    }
+    
 
     private void SendMessage(CANMessage message)
     {
@@ -114,6 +105,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
                 messageReceivedQueue.Add(msg);
                 HandleStreams(msg);
                 HandleParticipants(msg);
+                HandleAsync(msg);
             }
         }
         catch (ObjectDisposedException)

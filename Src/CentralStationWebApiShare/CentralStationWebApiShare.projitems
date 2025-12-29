@@ -28,6 +28,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)MessageBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\SystemMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessageReceivedEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MessageRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MessageResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Article.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ArticleType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\DecoderType.cs" />

@@ -72,16 +72,6 @@ partial class CentralStation
 
     #region GUI Information Transfer / GUI Informationsübertragung
 
-    public async Task<string> ConfigDataLocomotivesInfo(CancellationToken cancellationToken = default)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
-        message.DataLength = 8;
-        message.SetData("lokinfo");
-        await SendMessageAsync(message, cancellationToken);
-
-        return "lokinfo";
-    }
-
     public void RequestConfigDataLocomotives()
     {
         var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);

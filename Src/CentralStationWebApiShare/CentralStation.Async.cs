@@ -2,31 +2,69 @@
 
 partial class CentralStation
 {
-    #region System Commands
+    private readonly List<CANMessage> messageQueue = [];
 
+    private readonly AutoResetEvent messageReceivedEvent = new(false);
 
-    public async Task<CANMessage> SystemStopAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
+    public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(30);
+
+    private void HandleAsync(CANMessage msg)
     {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
+        var resMsg = messageQueue.FirstOrDefault(m => m.IsResponseMsgFrom(msg));
+        if (resMsg is not null)
+        {
+            messageReceivedEvent.Set();
+        }
+    }
+
+    private async Task<MessageResponse> SendMessageAsync(CANMessage reqMsg, CancellationToken cancellationToken = default)
+    {
+        // create wait thread
+        return await Task.Run(() =>
+        {
+            // add to message queue
+            messageReceivedQueue.Add(reqMsg);
+
+            // send message
+            sender.Send(reqMsg.Buffer, 13);
+
+        
+            while (messageReceivedEvent.WaitOne(ReceiveTimeout))
+            {
+                var resMsg = messageQueue.FirstOrDefault(m => m.IsResponseMsgFrom(reqMsg));
+                if (resMsg is not null)
+                {
+                    messageQueue.Remove(reqMsg);
+                    return new MessageResponse(reqMsg, resMsg); // response arrived
+                }
+            }
+            return new MessageResponse(reqMsg);  // failure
+        });
+    }
+
+    #region 2 System Commands
+
+
+    public async Task<bool> SystemStopAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash, 5);
         message.SetData(device, 5);
         message.SetData(SystemCommand.Stop);
-        return await SendMessageAsync(message, cancellationToken);
+        var res = await SendMessageAsync(message, cancellationToken);
+        return res.Success;
     }
 
 
-
-    public async Task<CANMessage> SystemGoAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
+    public async Task<MessageResponse> SystemGoAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
     {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
-        message.DataLength = 5;
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash, 5);
         message.SetData(device, 5);
         message.SetData(SystemCommand.Go);
         return await SendMessageAsync(message, cancellationToken);
     }
 
 
-    public async Task<CANMessage> SystemHaltAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
+    public async Task<MessageResponse> SystemHaltAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -37,7 +75,7 @@ partial class CentralStation
 
 
 
-    public async Task<CANMessage> SystemLocoHaltAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
+    public async Task<MessageResponse> SystemLocoHaltAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -48,7 +86,7 @@ partial class CentralStation
 
 
 
-    public async Task<CANMessage> SystemLocoCycleStopAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
+    public async Task<MessageResponse> SystemLocoCycleStopAsync(uint device = AllDevices, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -59,7 +97,7 @@ partial class CentralStation
 
 
 
-    public async Task<CANMessage> SystemLocoDataProtocolAsync(uint device = AllDevices, byte protocoll = 0xff, CancellationToken cancellationToken = default)
+    public async Task<MessageResponse> SystemLocoDataProtocolAsync(uint device = AllDevices, byte protocoll = 0xff, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 5;
@@ -86,7 +124,7 @@ partial class CentralStation
     //    return true;
     //}
 
-    public async Task<CANMessage> SystemTrackProtocolAsync(uint deviceUID, byte param, CancellationToken cancellationToken = default)
+    public async Task<MessageResponse> SystemTrackProtocolAsync(uint deviceUID, byte param, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 6;
@@ -105,7 +143,7 @@ partial class CentralStation
     //    return true;
     //}
 
-    public async Task<CANMessage> SystemOverloadAsync(uint deviceUID, byte channel, CancellationToken cancellationToken = default)
+    public async Task<MessageResponse> SystemOverloadAsync(uint deviceUID, byte channel, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 6;
@@ -115,7 +153,7 @@ partial class CentralStation
         return await SendMessageAsync(message, cancellationToken);
     }
 
-    public async Task<CANMessage> SystemResetAsync(uint deviceUID, byte target, CancellationToken cancellationToken = default)
+    public async Task<MessageResponse> SystemResetAsync(uint deviceUID, byte target, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash);
         message.DataLength = 6;
@@ -173,6 +211,18 @@ partial class CentralStation
 
         autoResetEventConfigDataStream.WaitOne();
         return "";
+    }
+
+    #endregion
+
+    #region GUI Information Transfer / GUI Informationsübertragung
+
+    public async Task<MessageResponse> ConfigDataLocomotivesInfo(CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash);
+        message.DataLength = 8;
+        message.SetData("lokinfo");
+        return await SendMessageAsync(message, cancellationToken);
     }
 
     #endregion
