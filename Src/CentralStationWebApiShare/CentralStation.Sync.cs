@@ -1,4 +1,6 @@
-﻿namespace CentralStationWebApi;
+﻿using System.Threading.Channels;
+
+namespace CentralStationWebApi;
 
 partial class CentralStation
 {
@@ -48,7 +50,89 @@ partial class CentralStation
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
-            AddSubCommand(SubCommand.LocoDataProtocol);
+            AddSubCommand(SubCommand.LocoDataProtocol).
+            AddByte(protocoll);
+        SendMessage(message);
+    }
+
+    public void SystemSwitchingTimel(uint device, ushort time)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.SwitchingTime).
+            AddUInt16(time);
+        SendMessage(message);
+    }
+
+    public void SystemFastRead(uint device, ushort mfxSid)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.FastRead).
+            AddUInt16(mfxSid);
+        SendMessage(message);
+    }
+
+    public void SystemTrackProtocol(uint device, byte protocoll)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.TrackProtocol).
+            AddByte(protocoll); 
+        SendMessage(message);
+    }
+
+    public void SystemNewRegistrationCounter(uint device, ushort newRegistrationCounter)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.NewRegistrationCounter).
+            AddUInt16(newRegistrationCounter);
+        SendMessage(message);
+    }
+
+    public void SystemOverload(uint device, byte channel)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.Overload).
+            AddByte(channel);
+        SendMessage(message);
+    }
+
+    public void SystemStatus(uint device, byte channel, ushort? value = null)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.Status).
+            AddByte(channel).
+            AddUInt16(value);   // optional
+        SendMessage(message);
+    }
+
+    public void SystemIdentifier(uint device, byte identifier)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.Identifier).
+            AddUInt16(identifier);   // optional
+        SendMessage(message);
+    }
+
+    public void SystemMfxSeek(uint device)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.MfxSeek);
+        SendMessage(message);
+    }
+
+    public void SystemReset(uint device, byte target)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.Reset).
+            AddByte(target);
         SendMessage(message);
     }
 

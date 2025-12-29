@@ -41,27 +41,33 @@ public class CANMessage
         set => buffer[DLC] = value;
     }
 
-    public CANMessage AddByte(byte value)
+    public CANMessage AddByte(byte? value)
     {
-        buffer[DATA + DataLength] = value;
+        if (value is null) return this;
+
+        buffer[DATA + DataLength] = (byte)value;
         DataLength += 1;
         return this;
     }
 
-    public CANMessage AddUInt16(ushort value)
+    public CANMessage AddUInt16(ushort? value)
     {
+        if (value is null) return this;
+
         byte[] data = new byte[sizeof(ushort)];
-        Array.Copy(BitConverter.GetBytes(value), 0, data, 0, sizeof(ushort));
+        Array.Copy(BitConverter.GetBytes((ushort)value), 0, data, 0, sizeof(ushort));
         Array.Reverse(data);
         Array.Copy(data, 0, buffer, DATA + DataLength, sizeof(ushort));
         DataLength += sizeof(ushort);
         return this;
     }
 
-    public CANMessage AddUInt32(uint value)
+    public CANMessage AddUInt32(uint? value)
     {
+        if (value is null) return this;
+
         byte[] data = new byte[sizeof(uint)];
-        Array.Copy(BitConverter.GetBytes(value), 0, data, 0, sizeof(uint));
+        Array.Copy(BitConverter.GetBytes((uint)value), 0, data, 0, sizeof(uint));
         Array.Reverse(data);
         Array.Copy(data, 0, buffer, DATA + DataLength, sizeof(uint));
         DataLength += sizeof(uint);
