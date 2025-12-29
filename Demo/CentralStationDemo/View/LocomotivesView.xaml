@@ -24,14 +24,6 @@
             IsSynchronizedWithCurrentItem="True"
             ClipboardCopyMode="IncludeHeader">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Uid" Binding="{Binding Uid}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Mfx Uid" Binding="{Binding MfxUid}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Address" Binding="{Binding Address}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Icon Name" Binding="{Binding IconName}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="MfxType" Binding="{Binding MfxType}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="100" IsReadOnly="True"/>
                 <DataGridTemplateColumn Header="Icon" Width="SizeToCells" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -39,6 +31,15 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="140" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Uid" Binding="{Binding Uid}" Width="60" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Mfx Uid" Binding="{Binding MfxUid, StringFormat=X8}" Width="60" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Address" Binding="{Binding Address}" Width="60" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Icon Name" Binding="{Binding IconName}" Width="140" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="60" IsReadOnly="True"/>
+                <DataGridTextColumn Header="MfxType" Binding="{Binding MfxType}" Width="60" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="60" IsReadOnly="True"/>
+               
             </DataGrid.Columns>
         </DataGrid>
     </GroupBox>
