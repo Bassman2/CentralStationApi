@@ -1,6 +1,4 @@
-﻿using System.Threading.Channels;
-
-namespace CentralStationWebApi;
+﻿namespace CentralStationWebApi;
 
 partial class CentralStation
 {

@@ -22,7 +22,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     //private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
-    public CentralStation(string host, SystemStatus systemStatus = SystemStatus.Default) 
+    public CentralStation(string host, SystemStatus systemStatus = CentralStationWebApi.SystemStatus.Default) 
     {
         this.host = host;
 
@@ -37,10 +37,10 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
         switch (systemStatus)
         {
-            case SystemStatus.Stop:
+            case CentralStationWebApi.SystemStatus.Stop:
                 SystemStop();
                 break;
-            case SystemStatus.Go:
+            case CentralStationWebApi.SystemStatus.Go:
                 SystemGo();
                 break;
             default:

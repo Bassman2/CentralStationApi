@@ -1,6 +1,4 @@
-﻿using System.Threading.Channels;
-
-namespace CentralStationWebApi;
+﻿namespace CentralStationWebApi;
 
 partial class CentralStation
 {
@@ -121,36 +119,46 @@ partial class CentralStation
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
-            AddSubCommand(SubCommand.LocoDataProtocol);        
+            AddSubCommand(SubCommand.LocoDataProtocol).
+            AddByte(protocoll);         
         return await SendSingleMessageAsync(message, cancellationToken);
     }
 
-    //public async Task<bool> SystemFastReadAsync(uint deviceUID, ushort mfxSID, CancellationToken cancellationToken = default)
-    //{
-    //    var msg = new SystemMessage(SubCommand.FastRead, deviceUID, mfxSID);
+    public async Task<MessageResponse> SystemSwitchingTimelAsync(uint device, ushort time, CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.SwitchingTime).
+            AddUInt16(time);
+        return await SendSingleMessageAsync(message, cancellationToken);
+    }
 
-    //    await SendSingleMessageAsync(msg, cancellationToken);
+    public async Task<MessageResponse> SystemFastReadAsync(uint device, ushort mfxSid, CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.FastRead).
+            AddUInt16(mfxSid);
+        return await SendSingleMessageAsync(message, cancellationToken);
+    }
 
-    //    return true;
-    //}
-
-    public async Task<MessageResponse> SystemTrackProtocolAsync(uint deviceUID, byte param, CancellationToken cancellationToken = default)
+    public async Task<MessageResponse> SystemTrackProtocolAsync(uint deviceUID, byte protocoll, CancellationToken cancellationToken = default)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(deviceUID).
             AddSubCommand(SubCommand.TrackProtocol).
-            AddByte(param);
+            AddByte(protocoll);
         return await SendSingleMessageAsync(message, cancellationToken);
     }
 
-    //public async Task<bool> SystemNewRegistrationCounterAsync(uint deviceUID, ushort counter, CancellationToken cancellationToken = default)
-    //{
-    //    var msg = new SystemMessage(SubCommand.FastRead, deviceUID, counter);
-
-    //    await SendSingleMessageAsync(msg, cancellationToken);
-
-    //    return true;
-    //}
+    public async Task<MessageResponse> SystemNewRegistrationCounterAsync(uint device, ushort newRegistrationCounter, CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.NewRegistrationCounter).
+            AddUInt16(newRegistrationCounter);
+        return await SendSingleMessageAsync(message, cancellationToken);
+    }
 
     public async Task<MessageResponse> SystemOverloadAsync(uint deviceUID, byte channel, CancellationToken cancellationToken = default)
     {
@@ -158,7 +166,33 @@ partial class CentralStation
             AddUInt32(deviceUID).
             AddSubCommand(SubCommand.Overload).
             AddByte(channel);
+        return await SendSingleMessageAsync(message, cancellationToken);
+    }
 
+    public async Task<MessageResponse> SystemStatusAsync(uint device, byte channel, ushort? value = null, CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.Status).
+            AddByte(channel).
+            AddUInt16(value);   // optional
+        return await SendSingleMessageAsync(message, cancellationToken);
+    }
+
+    public async Task<MessageResponse> SystemIdentifierAsync(uint device, byte identifier, CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.Identifier).
+            AddUInt16(identifier);   // optional
+        return await SendSingleMessageAsync(message, cancellationToken);
+    }
+
+    public async Task<MessageResponse> SystemMfxSeekAsync(uint device, CancellationToken cancellationToken = default)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+            AddUInt32(device).
+            AddSubCommand(SubCommand.MfxSeek);
         return await SendSingleMessageAsync(message, cancellationToken);
     }
 
