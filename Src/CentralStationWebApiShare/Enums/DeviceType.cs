@@ -30,11 +30,11 @@ public enum DeviceType : ushort
     /// </summary>
     MS2 = 0x0030,
 
-    /// <summary>
-    /// Mobil Station 2
-    /// 60653 SW-Version 5.6  (from original device)
-    /// </summary>
-    MS2_1 = 0x0033,
+    ///// <summary>
+    ///// Mobil Station 2
+    ///// 60653 SW-Version 5.6  (from original device)
+    ///// </summary>
+    //MS2_1 = 0x0033,
 
     /// <summary>
     /// GFP3 from CS3

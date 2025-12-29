@@ -231,11 +231,14 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
     {
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
-            uint device = msg.Device;
-            devices[device] = new Device(device, msg.GetDataByte(9), msg.GetDataByte(10), msg.GetDataUShort(11));
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Devices)));
-            Devices = devices.Values;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Devices)));
+            var device = new Device(msg);
+            if (!devices.TryGetValue(msg.Device, out var oldDevice) || !device.Equals(oldDevice))
+            {
+                devices[msg.Device] = new Device(msg);
+                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Devices)));
+                Devices = devices.Values;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Devices)));
+            }
         }
     }
 

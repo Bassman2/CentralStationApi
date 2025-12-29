@@ -7,13 +7,7 @@ public partial class DeviceViewModel : ObservableObject
     
         DeviceId = device.DeviceId;
         SwVersion = $"{device.MajorVersion}.{device.MinorVersion}";
-        DeviceType = device.DeviceType switch
-        {
-            0x0033 => "MS2",
-            0x0050 => "GFP3",
-            0xffff => "GUI (Master)",
-            _ => device.DeviceType.ToString("X4")
-        };  
+        DeviceType = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
     }
 
     [ObservableProperty]
