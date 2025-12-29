@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Device.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\CSFileStreamMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\DeviceType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Priority.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\SystemCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\SystemStatus.cs" />
