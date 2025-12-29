@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-public enum SystemCommand : byte
+public enum SubCommand : byte
 {
     Stop = 0x00,
     Go = 0x01,

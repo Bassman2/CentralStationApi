@@ -43,11 +43,11 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     private void UpdateStatus(CANMessage message)
     { 
-        if (message.Command == Command.SystemCommand && message.SystemCommand == SystemCommand.Stop && message.Device == CentralStation.AllDevices)
+        if (message.Command == Command.SystemCommand && message.SubCommand == SubCommand.Stop && message.Device == CentralStation.AllDevices)
         {
             SystemStatus = SystemStatus.Stop;
         }
-        if (message.Command == Command.SystemCommand && message.SystemCommand == SystemCommand.Go && message.Device == CentralStation.AllDevices)
+        if (message.Command == Command.SystemCommand && message.SubCommand == SubCommand.Go && message.Device == CentralStation.AllDevices)
         {
             SystemStatus = SystemStatus.Go;
         }

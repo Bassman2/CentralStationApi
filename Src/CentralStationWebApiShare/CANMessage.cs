@@ -1,76 +1,184 @@
 ﻿namespace CentralStationWebApi;
 
-public class CANMessage : MessageBuffer
+public class CANMessage 
 {
-    
-    public CANMessage(Priority priority, Command command, uint hash, byte dataLength = 0)
+    private const int DLC = 4;      // data length index
+    private const int DATA = 5;     // data start index
+    private const int SUBC = 9;     // sub command index
+
+    protected readonly byte[] buffer = new byte[13];
+
+    public byte[] Buffer => buffer;
+
+    public DateTime Timestamp { get; } = DateTime.Now;
+    public string Sender { get; } = "";
+
+
+    #region Send
+
+    public CANMessage(Priority priority, Command command, uint hash)
     {
-        SetHeader(priority, command, hash, dataLength);
+        //SetHeader(priority, command, hash, dataLength);
+
+        uint header = 0;
+        SetBits(ref header, 25, 4, (uint)priority);
+        SetBits(ref header, 17, 8, (uint)command);
+        SetBits(ref header, 16, 1, 0u);
+        SetBits(ref header, 0, 16, hash);
+
+        byte[] data = new byte[sizeof(uint)];
+        Array.Copy(BitConverter.GetBytes(header), 0, data, 0, sizeof(uint));
+        Array.Reverse(data);
+        Array.Copy(data, 0, buffer, 0, sizeof(uint));
+
+        //SetData(header, 0);
+        DataLength = 0;
     }
+
+    public byte DataLength
+    {
+        get => buffer[DLC];
+        set => buffer[DLC] = value;
+    }
+
+    public CANMessage AddByte(byte value)
+    {
+        buffer[DATA + DataLength] = value;
+        DataLength += 1;
+        return this;
+    }
+
+    public CANMessage AddUInt16(ushort value)
+    {
+        byte[] data = new byte[sizeof(ushort)];
+        Array.Copy(BitConverter.GetBytes(value), 0, data, 0, sizeof(ushort));
+        Array.Reverse(data);
+        Array.Copy(data, 0, buffer, DATA + DataLength, sizeof(ushort));
+        DataLength += sizeof(ushort);
+        return this;
+    }
+
+    public CANMessage AddUInt32(uint value)
+    {
+        byte[] data = new byte[sizeof(uint)];
+        Array.Copy(BitConverter.GetBytes(value), 0, data, 0, sizeof(uint));
+        Array.Reverse(data);
+        Array.Copy(data, 0, buffer, DATA + DataLength, sizeof(uint));
+        DataLength += sizeof(uint);
+        return this;
+    }
+
+    public CANMessage AddString(string value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNotEqual(DataLength, 0, "Must be first and only AddXxx method");
+
+        byte[] mem = Encoding.ASCII.GetBytes(value);
+        Array.Clear(buffer, DATA, 8);
+        Array.Copy(mem, 0, buffer, DATA, Math.Min(8, mem.Length));
+        DataLength += 8;
+        return this;
+    }
+
+    public CANMessage AddSubCommand(SubCommand subCommand)
+    {
+        ArgumentOutOfRangeException.ThrowIfNotEqual(DataLength, 4, "Must be after Device");
+
+        return AddByte((byte)subCommand);
+    }
+
+    #endregion
+
+    #region Receive
 
     public CANMessage(UdpReceiveResult udpReceiveResult)
     {
         Sender = udpReceiveResult.RemoteEndPoint.Address.ToString();
         Array.Copy(udpReceiveResult.Buffer, Buffer, 13);
     }
-      
 
-    public DateTime Timestamp { get; } = DateTime.Now;
+    public Priority Priority => (Priority)GetBits(GetDataUInt(0), 25, 4);
 
-    public string Sender { get; } = "";
+    public Command Command => (Command)GetBits(GetDataUInt(0), 17, 8);
 
-    //public Priority Priority => (Priority)GetBits(GetHeader(), 25, 4);
+    public bool IsResponse => GetBits(GetDataUInt(0), 16, 1) == 1;
 
-    //public Command Command => (Command)GetBits(GetHeader(), 17, 8);
+    public ushort Hash => (ushort)GetBits(GetDataUInt(0), 0, 16);
 
-    //public bool IsResponse => GetBits(GetDataUInt(0), 16, 1) == 1;
+    public string Binary => $"{buffer[0]:X2}{buffer[1]:X2}{buffer[2]:X2}{buffer[3]:X2} {buffer[4]:X} " + string.Join(" ", buffer[5..(5 + Math.Min(buffer[4], (byte)8))].Select(b => b.ToString("X2")));
 
-    //public ushort Hash => (ushort)GetBits(GetHeader(), 0, 16);
+    public byte GetDataByte(int index) => buffer[index];
 
-    //public string Binary => $"{buffer[0]:X2}{buffer[1]:X2}{buffer[2]:X2}{buffer[3]:X2} {buffer[4]:X} " + string.Join(" ", buffer[5..(5 + Math.Min(buffer[4], (byte)8))].Select(b => b.ToString("X2")));
-
-    //public string Filename => Encoding.ASCII.GetString(buffer, 5, buffer[4]);
-    //public int DataLength => buffer[4];
-
-    //public byte[] Data
-    //{
-    //    get
-    //    {
-    //        byte[] data = new byte[DataLength];
-    //        Array.Copy(buffer, 5, data, 0, DataLength);
-    //        return data;
-    //    }
-    //}
-
-    public SystemCommand SystemCommand
+    public ushort GetDataUShort(int index)
     {
-        get => (SystemCommand)GetDataByte(9);
-        set => SetData((byte)value, 9);
+        byte[] mem = new byte[2];
+        Array.Copy(buffer, index, mem, 0, 2);
+        Array.Reverse(mem);
+        return BitConverter.ToUInt16(mem, 0);
+    }
+
+    public uint GetDataUInt(int index)
+    {
+        byte[] mem = new byte[4];
+        Array.Copy(buffer, index, mem, 0, 4);
+        Array.Reverse(mem);
+        return BitConverter.ToUInt32(mem, 0);
+    }
+
+    public string GetDataString(int index = 5, int length = 8)
+    {
+        return Encoding.ASCII.GetString(buffer, index, length);
+    }
+
+    public byte[] GetData(int index = 5, int length = 8)
+    {
+        byte[] mem = new byte[length];
+        Array.Copy(buffer, index, mem, 0, length);
+        return mem;
+    }
+
+    private const uint responseFlag = 0x00010000;
+    public bool IsResponseMsgFrom(CANMessage res)
+    {
+        return ((this.GetDataUInt(0) | responseFlag) == res.GetDataUInt(0)) &&
+            (this.Command != Command.SystemCommand || this.GetDataByte(9) == res.GetDataByte(9));   // on SubCommand compare sub command
+
+
+    }
+
+    #endregion
+
+
+    public SubCommand SubCommand
+    {
+        get => (SubCommand)buffer[SUBC];
+        set => buffer[SUBC] = (byte)value;
     }
 
     public uint Device => GetDataUInt(5);
+
+    #region Description
 
     public string Description => 
         Command switch
         {
             Command.SystemCommand =>
-                SystemCommand switch
+                SubCommand switch
                 {
-                    SystemCommand.Stop => $"System Stop - Device: {Device}",
-                    SystemCommand.Go => $"System Go - Device: {Device}",
-                    SystemCommand.Halt => $"System Halt - Device: {Device}",
-                    SystemCommand.LocoHalt => $"System Loco Halt - Device: {Device}",
-                    SystemCommand.LocoCycleStop => $"Loco Cycle Stop - Device: {Device}",
-                    SystemCommand.LocoDataProtocol => $"Loco Buffer Protocol - Device: {Device}",
-                    SystemCommand.SwitchingTime => $"Switching Time - Device: {Device}",
-                    SystemCommand.FastRead => $"Fast Read - Device: {Device}",
-                    SystemCommand.TrackProtocol => $"Track Protocol - Device: {Device}",
-                    SystemCommand.NewRegistrationCounter => $"New Registration Counter - Device: {Device}",
-                    SystemCommand.Overload => $"Overload - Device: {Device}",
-                    SystemCommand.Status => $"Status - Device: {Device}",
-                    SystemCommand.Identifier => $"Identifier - Device: {Device}",
-                    SystemCommand.MfxSeek => $"Mfx Seek - Device: {Device}",
-                    SystemCommand.Reset => $"System Reset - Device: {Device}",
+                    SubCommand.Stop => $"System Stop - Device: {Device}",
+                    SubCommand.Go => $"System Go - Device: {Device}",
+                    SubCommand.Halt => $"System Halt - Device: {Device}",
+                    SubCommand.LocoHalt => $"System Loco Halt - Device: {Device}",
+                    SubCommand.LocoCycleStop => $"Loco Cycle Stop - Device: {Device}",
+                    SubCommand.LocoDataProtocol => $"Loco Buffer Protocol - Device: {Device}",
+                    SubCommand.SwitchingTime => $"Switching Time - Device: {Device}",
+                    SubCommand.FastRead => $"Fast Read - Device: {Device}",
+                    SubCommand.TrackProtocol => $"Track Protocol - Device: {Device}",
+                    SubCommand.NewRegistrationCounter => $"New Registration Counter - Device: {Device}",
+                    SubCommand.Overload => $"Overload - Device: {Device}",
+                    SubCommand.Status => $"Status - Device: {Device}",
+                    SubCommand.Identifier => $"Identifier - Device: {Device}",
+                    SubCommand.MfxSeek => $"Mfx Seek - Device: {Device}",
+                    SubCommand.Reset => $"System Reset - Device: {Device}",
                     _ => $"Unknown System Command 0x{GetDataByte(9):X2}" 
                 },
 
@@ -133,121 +241,21 @@ public class CANMessage : MessageBuffer
             $"Prio.: {Priority} Command: {Command} IsResp: {IsResponse} Hash: {Hash:X4}";
     }
 
-    
+    #endregion
 
-    //private void SetHeader(Priority priority, Command command, uint hash)
-    //{
-    //    //uint messageId =
-    //    //    ((((uint)priority) & 0x000f) << 25) +       // Prio
-    //    //    ((((uint)command) & 0x00ff) << 17) +        // Command
-    //    //    ((((uint)0) & 0x0001) << 16) +              // Resp.
-    //    //    ((((uint)hash) & 0xffff));            // Command
+    #region Bits
 
-    //    uint messageId = 0;
-    //    SetBits(ref messageId, 25, 4, (uint)priority);
-    //    SetBits(ref messageId, 17, 8, (uint)command);
-    //    SetBits(ref messageId, 16, 1, 0u);
-    //    SetBits(ref messageId, 0, 16, hash);
-        
-    //    var msgId = BitConverter.GetBytes(messageId);
-    //    Array.Reverse(msgId);
-    //    Array.Copy(msgId, 0, buffer, 0, 4);
-    //}
+    protected static void SetBits(ref uint value, int position, int length, uint bits)
+    {
+        uint mask = ((1u << length) - 1u) << position;
+        value = (value & ~mask) | ((bits << position) & mask);
+    }
 
-    //private uint GetHeader()
-    //{
-    //    var msgId = new byte[4];
-    //    Array.Copy(buffer, 0, msgId, 0, 4);
-    //    Array.Reverse(msgId);
-    //    return BitConverter.ToUInt32(msgId, 0);
-    //}
+    protected static uint GetBits(uint value, int position, int length)
+    {
+        uint mask = (1u << length) - 1u;
+        return (value >> position) & mask;
+    }
 
-    //private void SetData(byte[] bytes, int length)
-    //{
-    //    // set DLC
-    //    buffer[4] = (byte)length;       
-    //    // set data bytes 0 - 7
-    //    Array.Copy(bytes, 0, buffer, 5, length);
-    //}
-
-
-
-    //public uint UInt0
-    //{
-    //    get
-    //    {
-    //        byte[] mem = new byte[4];
-    //        Array.Copy(buffer, 5, mem, 0, 4);
-    //        Array.Reverse(mem);
-    //        return BitConverter.ToUInt32(mem, 0);
-    //    }
-    //}
-
-        
-    //private uint UInt01
-    //{
-    //    get
-    //    {
-    //        byte[] mem = new byte[4];
-    //        Array.Copy(buffer, 9, mem, 0, 4);
-    //        Array.Reverse(mem);
-    //        return BitConverter.ToUInt32(mem, 0);
-    //    }
-    //}
-
-    //private ushort UShort0
-    //{
-    //    get
-    //    {
-    //        byte[] mem = new byte[2];
-    //        Array.Copy(buffer, 5, mem, 0, 2);
-    //        Array.Reverse(mem);
-    //        return BitConverter.ToUInt16(mem, 0);
-    //    }
-    //}
-
-    //private ushort UShort1
-    //{ 
-    //    get
-    //    {
-    //        byte[] mem = new byte[2];
-    //        Array.Copy(buffer, 7, mem, 0, 2);
-    //        Array.Reverse(mem);
-    //        return BitConverter.ToUInt16(mem, 0);
-    //    }
-    //}
-
-    //private ushort UShort2
-    //{
-    //    get
-    //    {
-    //        byte[] mem = new byte[2];
-    //        Array.Copy(buffer, 9, mem, 0, 2);
-    //        Array.Reverse(mem);
-    //        return BitConverter.ToUInt16(mem, 0);
-    //    }
-    //}
-
-    //private ushort UShort3
-    //{
-    //    get
-    //    {
-    //        byte[] mem = new byte[2];
-    //        Array.Copy(buffer, 11, mem, 0, 2);
-    //        Array.Reverse(mem);
-    //        return BitConverter.ToUInt16(mem, 0);
-    //    }
-    //}
-
-    //private static void SetBits(ref uint value, int position, int length, uint bits)
-    //{
-    //    uint mask = ((1u << length) - 1u) << position;
-    //    value = (value & ~mask) | ((bits << position) & mask);
-    //}   
-
-    //private static uint GetBits(uint value, int position, int length)
-    //{
-    //    uint mask = (1u << length) - 1u;
-    //    return (value >> position) & mask;
-    //}
+    #endregion
 }
