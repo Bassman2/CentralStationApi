@@ -37,7 +37,7 @@ public partial class Locomotive
     /// Final reading of the speedometer.
     /// </summary>
     [CsProperty("tachomax")]
-    public uint SpeedometerMax { get; private set; }
+    public uint MaxSpeed { get; private set; }
 
     /// <summary>
     /// Maximum speed of the locomotive

@@ -1,4 +1,6 @@
 ﻿using CentralStationWebApi.Model;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -16,6 +18,19 @@ public partial class LocomotiveViewModel : ObservableObject
         Type = loco.Type;
         MfxType = loco.MfxType;
         Symbol = loco.Symbol;
+
+        Sid = loco.Sid;
+        MaxSpeed = loco.MaxSpeed;
+        VMax = loco.VMax;
+        VMin = loco.VMin;
+        Av = loco.Av;
+        Bv = loco.Bv;
+        Volume = loco.Volume;
+        Spa = loco.Spa;
+        Spm = loco.Spm;
+        Velocity = loco.Velocity;
+        Direction = loco.Direction;
+
 
         // http://cs3/app/assets/lok/NS%20186%20012-8.png
 
@@ -57,6 +72,41 @@ public partial class LocomotiveViewModel : ObservableObject
 
     [ObservableProperty]
     private Symbol symbol;
+
+    [ObservableProperty]
+    private uint sid;
+
+    [ObservableProperty]
+    private uint maxSpeed;
+
+    [ObservableProperty]
+    private uint vMax;
+
+    [ObservableProperty]
+    private uint vMin;
+
+    [ObservableProperty]
+    private uint av;
+
+    [ObservableProperty]
+    private uint bv;
+
+    [ObservableProperty]
+    private uint volume;
+
+    [ObservableProperty]
+    private uint spa;
+
+    [ObservableProperty]
+    private uint spm;
+
+    [ObservableProperty]
+    private uint velocity;
+
+
+    [ObservableProperty]
+    private uint direction;
+
 
     #endregion
 

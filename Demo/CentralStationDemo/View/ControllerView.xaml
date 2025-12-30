@@ -36,6 +36,18 @@
                                 <RowDefinition Height="20"/>
                                 <RowDefinition Height="20"/>
                                 <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
                             </Grid.RowDefinitions>
                             <Image Grid.Row="0" Source="{Binding Icon}" Width="100" Height="40" Stretch="Uniform" ToolTip="{Binding IconName}"/>
                             <TextBlock Grid.Row="1" Text="{Binding Name}" HorizontalAlignment="Center"/>
@@ -45,6 +57,18 @@
                             <TextBlock Grid.Row="5" Text="{Binding Address, StringFormat=Address: {0:X4}}" HorizontalAlignment="Center"/>
                             <TextBlock Grid.Row="6" Text="{Binding Type, StringFormat=Type: {0}}" HorizontalAlignment="Center"/>
                             <TextBlock Grid.Row="7" Text="{Binding MfxType, StringFormat=MFX Type: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="8" Text="{Binding Sid, StringFormat=Sid: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="9" Text="{Binding MaxSpeed, StringFormat=MaxSpeed: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="10" Text="{Binding VMax, StringFormat=VMax: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="11" Text="{Binding VMin, StringFormat=VMin: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="12" Text="{Binding Av, StringFormat=Av: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="13" Text="{Binding Bv, StringFormat=Bv: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="14" Text="{Binding Volume, StringFormat=Volume: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="15" Text="{Binding Spa, StringFormat=Spa: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="16" Text="{Binding Spm, StringFormat=Spm: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="17" Text="{Binding Velocity, StringFormat=Velocity: {0}}" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Row="18" Text="{Binding Direction, StringFormat=Direction: {0}}" HorizontalAlignment="Center"/>
+                            
                         </Grid>
                         <!-- control -->
                         <Grid Grid.Row="1">

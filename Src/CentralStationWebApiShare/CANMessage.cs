@@ -192,7 +192,7 @@ public class CANMessage
             Command.Discovery => "Discovery",
             Command.Bind => "Bind",
             Command.Verify => "Verify",
-            Command.LocoSpeed =>
+            Command.LocoVelocity =>
                 DataLength switch
                 {
                     4 => $"Loco Speed - Loco: {Device}",
