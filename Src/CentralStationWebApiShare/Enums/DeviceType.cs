@@ -30,11 +30,23 @@ public enum DeviceType : ushort
     /// </summary>
     MS2 = 0x0030,
 
-    ///// <summary>
-    ///// Mobil Station 2
-    ///// 60653 SW-Version 5.6  (from original device)
-    ///// </summary>
-    //MS2_1 = 0x0033,
+    /// <summary>
+    /// Mobil Station 2
+    /// 60653 SW-Version
+    /// </summary>
+    MS2_1 = 0x0031,
+
+    /// <summary>
+    /// Mobil Station 2
+    /// 60653 SW-Version 
+    /// </summary>
+    MS2_2 = 0x0032,
+
+    /// <summary>
+    /// Mobil Station 2
+    /// 60653 SW-Version 5.6  (from original device)
+    /// </summary>
+    MS2_3 = 0x0033,
 
     /// <summary>
     /// GFP3 from CS3
@@ -44,15 +56,26 @@ public enum DeviceType : ushort
     GFP3 = 0x0050,
 
     /// <summary>
+    /// Central Station 2
+    /// </summary>
+    CS2 = 0xeeee,
+
+    /// <summary>
     /// Wireless Devices
     /// </summary>
-    WirelessDevice = 0xffe0,
+    Wireless = 0xffe0,
+
+    /// <summary>
+    /// Wired Device
+    /// </summary>
+    Wired = 0xfff0,
 
     /// <summary>
     /// Central Station Master GUI
     /// ???
-    /// 60226 Central Station 3         (from original device)
-    /// 60216 Central Station 3 plus
+    /// xxxxx GUI Central Station 2
+    /// 60226 GUI Central Station 3         (from original device)
+    /// 60216 GUI Central Station 3 plus
     /// </summary>
     GUI = 0xffff        
 }

@@ -29,6 +29,8 @@ public partial class LocomotiveViewModel : ObservableObject
         }
     }
 
+    #region info
+
     [ObservableProperty]
     private string? name;
 
@@ -55,6 +57,21 @@ public partial class LocomotiveViewModel : ObservableObject
 
     [ObservableProperty]
     private Symbol symbol;
+
+    #endregion
+
+    #region control
+
+    [ObservableProperty]
+    private uint speed;
+
+    [RelayCommand]
+    private void OnEmergencyHalt()
+    {
+
+    }
+
+    #endregion
 
 }
 

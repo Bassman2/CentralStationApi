@@ -58,8 +58,9 @@ public class CSFileStream
             return outputStream;
 
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Debug.WriteLine(ex);
             throw;
         }
     }
