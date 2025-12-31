@@ -64,6 +64,10 @@ public partial class LocomotiveViewModel : ObservableObject
                 break;
             case DirectionChange.Toggle:
                 break;
+            case DirectionChange.Unknown4:
+                break;
+            case DirectionChange.Unknown5:
+                break;
             default:
                 throw new NotImplementedException();
             }
@@ -136,7 +140,7 @@ public partial class LocomotiveViewModel : ObservableObject
 
 
     [ObservableProperty]
-    private uint direction;
+    private Direction direction;
 
 
     #endregion

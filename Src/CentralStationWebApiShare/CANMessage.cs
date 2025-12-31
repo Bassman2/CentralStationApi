@@ -1,4 +1,6 @@
-﻿namespace CentralStationWebApi;
+﻿using System.Net;
+
+namespace CentralStationWebApi;
 
 public class CANMessage 
 {
@@ -170,21 +172,21 @@ public class CANMessage
             Command.SystemCommand =>
                 SubCommand switch
                 {
-                    SubCommand.Stop => $"System Stop - Device: {Device}",
-                    SubCommand.Go => $"System Go - Device: {Device}",
-                    SubCommand.Halt => $"System Halt - Device: {Device}",
-                    SubCommand.LocoHalt => $"System Loco Halt - Device: {Device}",
-                    SubCommand.LocoCycleStop => $"Loco Cycle Stop - Device: {Device}",
-                    SubCommand.LocoDataProtocol => $"Loco Buffer Protocol - Device: {Device}",
-                    SubCommand.SwitchingTime => $"Switching Time - Device: {Device}",
-                    SubCommand.FastRead => $"Fast Read - Device: {Device}",
-                    SubCommand.TrackProtocol => $"Track Protocol - Device: {Device}",
-                    SubCommand.NewRegistrationCounter => $"New Registration Counter - Device: {Device}",
-                    SubCommand.Overload => $"Overload - Device: {Device}",
-                    SubCommand.Status => $"Status - Device: {Device}",
-                    SubCommand.Identifier => $"Identifier - Device: {Device}",
-                    SubCommand.MfxSeek => $"Mfx Seek - Device: {Device}",
-                    SubCommand.Reset => $"System Reset - Device: {Device}",
+                    SubCommand.Stop => $"System Stop - Device: {Device:X4}",
+                    SubCommand.Go => $"System Go - Device: {Device:X4}",
+                    SubCommand.Halt => $"System Halt - Device: {Device:X4}",
+                    SubCommand.LocoHalt => $"System Loco Halt - Device: {Device:X4}",
+                    SubCommand.LocoCycleStop => $"Loco Cycle Stop - Device: {Device:X4}",
+                    SubCommand.LocoDataProtocol => $"Loco Buffer Protocol - Device: {Device:X4}",
+                    SubCommand.SwitchingTime => $"Switching Time - Device: {Device:X4}",
+                    SubCommand.FastRead => $"Fast Read - Device: {Device:X4}",
+                    SubCommand.TrackProtocol => $"Track Protocol - Device: {Device:X4}",
+                    SubCommand.NewRegistrationCounter => $"New Registration Counter - Device: {Device:X4}",
+                    SubCommand.Overload => $"Overload - Device: {Device:X4}",
+                    SubCommand.Status => $"Status - Device: {Device:X4}",
+                    SubCommand.Identifier => $"Identifier - Device: {Device:X4}",
+                    SubCommand.MfxSeek => $"Mfx Seek - Device: {Device:X4}",
+                    SubCommand.Reset => $"System Reset - Device: {Device:X4}",
                     _ => $"Unknown System Command 0x{GetDataByte(9):X2}" 
                 },
 
@@ -195,15 +197,15 @@ public class CANMessage
             Command.LocoVelocity =>
                 DataLength switch
                 {
-                    4 => $"Loco Speed - Loco: {Device}",
-                    6 => $"Loco Speed - Loco: {Device} Speed: {GetDataUShort(7)}",
+                    4 => $"Loco Speed - Loco: {Device:X4}",
+                    6 => $"Loco Speed - Loco: {Device:X4} Speed: {GetDataUShort(7)}",
                     _ => "Loco Speed unknown data size"
                 },
             Command.LocoDirection => 
                 DataLength switch
                 {
-                    4 => $"Loco Direction - Loco: {Device}",
-                    5 => $"Loco Direction - Loco: {Device} Direction: " +
+                    4 => $"Loco Direction - Loco: {Device:X4}",
+                    5 => $"Loco Direction - Loco: {Device:X4} Direction: " +
                         GetDataByte(10) switch
                         {
                             0x00 => "Stay",
@@ -247,9 +249,20 @@ public class CANMessage
             $"Prio.: {Priority} Command: {Command} IsResp: {IsResponse} Hash: {Hash:X4}";
     }
 
+    public string ToTrace()
+    {
+        string timestamp = Timestamp.ToString("HH:mm:ss.ffff");
+        string sender = Dns.GetHostEntry(Sender)?.HostName.Split('.')[0] ?? Sender;
+        string data = $"{GetDataByte(0):X2}{GetDataByte(1):X2}{GetDataByte(2):X2}{GetDataByte(3):X2} {GetDataByte(4):X} {GetDataByte(5):X2} {GetDataByte(6):X2} {GetDataByte(7):X2} {GetDataByte(8):X2} {GetDataByte(9):X2} {GetDataByte(10):X2} {GetDataByte(11):X2} {GetDataByte(12):X2}";
+        string sendReq = IsResponse ? "<--" : "-->";
+        string header = $"{Priority} {Command.ToString().PadRight(20)} {sendReq} {Hash:X4}";
+        string description = Description;
+        return $"{timestamp} {sender.PadRight(12)} {data} {header} {description}";
+    }
+
     #endregion
 
-    #region Bits
+        #region Bits
 
     protected static void SetBits(ref uint value, int position, int length, uint bits)
     {

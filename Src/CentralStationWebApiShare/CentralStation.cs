@@ -78,10 +78,11 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     
 
-    private void SendMessage(CANMessage message)
+    private void SendMessage(CANMessage msg)
     {
-        messageReceivedQueue.Add(message);
-        sender.Send(message.Buffer, 13);
+        messageReceivedQueue.Add(msg);
+        sender.Send(msg.Buffer, 13);
+        Tracer.TraceMessage(msg);
     }
 
     #endregion
@@ -106,6 +107,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
                 HandleStreams(msg);
                 HandleParticipants(msg);
                 HandleAsync(msg);
+                Tracer.TraceMessage(msg);
             }
         }
         catch (ObjectDisposedException)
@@ -159,7 +161,8 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     private void SetFile(Stream stream, string fileName)
     {
-        SaveStream(stream, fileName);
+        
+        Tracer.TraceStream(stream, fileName);
 
         stream.Position = 0;
         StreamReader reader = new StreamReader(stream);
@@ -194,24 +197,24 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
         }
     }
 
-    private const string dataPath = @"C:\MärklinData";
+    //private const string dataPath = @"C:\MärklinData";
 
-    private void SaveStream(Stream stream, string fileName)
-    {
-        if (Directory.Exists(dataPath))
-        {
-            stream.Position = 0;
-            StreamReader reader = new StreamReader(stream);
-            string? firstLine = reader.ReadLine();
+    //private void TraceStream(Stream stream, string fileName)
+    //{
+    //    if (Directory.Exists(dataPath))
+    //    {
+    //        stream.Position = 0;
+    //        StreamReader reader = new StreamReader(stream);
+    //        string? firstLine = reader.ReadLine();
 
-            string fileId = firstLine?.Trim('[', ']') ?? "unknown";
+    //        string fileId = firstLine?.Trim('[', ']') ?? "unknown";
 
-            using var file = File.CreateText(Path.Combine(dataPath, $"{fileName}-{fileId}.txt"));
-            file.WriteLine(firstLine);
-            file.Write(reader.ReadToEnd());
-        }
-        stream.Position = 0;
-    }
+    //        using var file = File.CreateText(Path.Combine(dataPath, $"{fileName}-{fileId}.txt"));
+    //        file.WriteLine(firstLine);
+    //        file.Write(reader.ReadToEnd());
+    //    }
+    //    stream.Position = 0;
+    //}
 
     private uint hash = 0x4711;
 

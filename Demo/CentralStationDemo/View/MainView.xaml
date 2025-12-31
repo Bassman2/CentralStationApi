@@ -26,7 +26,7 @@
         <local:LocomotivesView Grid.Row="3" Visibility="Collapsed"/>
         <local:ArticlesView Grid.Row="4" Visibility="Collapsed"/>
         <local:RailwayRoutesView Grid.Row="5" Visibility="Collapsed"/>
-        <local:DevicesView Grid.Row="6" Visibility="Collapsed"/>
+        <local:DevicesView Grid.Row="6" Visibility="Visible"/>
         <local:ControllerView Grid.Row="7"/>
 
         <DataGrid 

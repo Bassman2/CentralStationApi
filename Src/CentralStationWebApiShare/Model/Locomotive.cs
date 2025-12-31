@@ -91,7 +91,7 @@ public partial class Locomotive
     public uint Velocity { get; private set; }
 
     [CsProperty("richtung")]
-    public uint Direction { get; private set; }
+    public Direction Direction { get; private set; }
 
     //
     [CsProperty("mfxtyp")]
