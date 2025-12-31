@@ -156,7 +156,7 @@ partial class CentralStation
         SendMessage(message);
     }
 
-    public void SetLocomotiveDirection(uint locoId, Direction direction)
+    public void SetLocomotiveDirection(uint locoId, DirectionChange direction)
     {
         var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte((byte)direction);
         SendMessage(message);

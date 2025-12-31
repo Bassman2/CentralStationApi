@@ -19,7 +19,7 @@ public partial class App : Application
             new ServiceCollection()
                 //.AddSingleton<IBusinessLogic, BusinessLogic>()
                 //.AddSingleton<DialogService, DialogService>()
-                .AddScoped<MainViewModel>()
+                .AddSingleton<MainViewModel>()
                 //.AddScoped<UsersViewModel>()
                 //.AddScoped<GroupsViewModel>()
                 //.AddScoped<MembersViewModel>()

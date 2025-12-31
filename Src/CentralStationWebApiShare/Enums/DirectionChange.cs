@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-public enum Direction : byte
+public enum DirectionChange : byte
 {
     Remain = 0,
     Forward = 1, 

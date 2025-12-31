@@ -1,6 +1,5 @@
-﻿using CentralStationWebApi.Model;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Drawing.Diagrams;
+﻿//using DocumentFormat.OpenXml.Bibliography;
+//using DocumentFormat.OpenXml.Drawing.Diagrams;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -8,6 +7,8 @@ namespace CentralStationDemo.ViewModel;
 
 public partial class LocomotiveViewModel : ObservableObject
 {
+    private static MainViewModel mainViewModel = Ioc.Default.GetRequiredService<MainViewModel>();
+
     public LocomotiveViewModel(string host, Locomotive loco)
     {
         Name = loco.Name;
@@ -41,6 +42,36 @@ public partial class LocomotiveViewModel : ObservableObject
                 var uri = new Uri($"http://{host}/app/assets/lok/{IconName}.png");
                 return new BitmapImage(uri);
             });
+        }
+    }
+
+    public void UpdateLocomotive(CANMessage msg)
+    {
+        switch (msg.Command)
+        {
+        case Command.LocoVelocity:
+            Velocity = msg.GetDataUShort(4);
+            break;
+        case Command.LocoDirection:
+            DirectionChange directionChange = (DirectionChange)msg.GetDataByte(4);
+            switch (directionChange)
+            {
+            case DirectionChange.Remain:
+                break;
+            case DirectionChange.Forward:
+                break;
+            case DirectionChange.Backward:
+                break;
+            case DirectionChange.Toggle:
+                break;
+            default:
+                throw new NotImplementedException();
+            }
+            break;
+        case Command.LocoFunction:
+            break;
+        default:
+            throw new NotImplementedException();
         }
     }
 

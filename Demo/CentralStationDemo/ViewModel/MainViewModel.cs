@@ -14,6 +14,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
                 Messages.Insert(0, new MessageViewModel(e.Message));
 
                 UpdateStatus(e.Message);
+                UpdateLocomotive(e.Message);
             });
         };
         cs.PropertyChanged += (s, e) => OnCsPropertyChanged(e.PropertyName);
@@ -48,6 +49,18 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             SystemStatus = SystemStatus.Go;
         }
+    }
+
+    private void UpdateLocomotive(CANMessage message)
+    {
+        if (message.Command == Command.LocoVelocity ||
+            message.Command == Command.LocoDirection ||
+            message.Command == Command.LocoFunction)
+        {
+            var locomotiveViewModel = Locomotives?.FirstOrDefault(l => l.Uid == message.Device);
+            locomotiveViewModel?.UpdateLocomotive(message);
+        }
+
     }
 
     private void OnCsPropertyChanged(string? propertyName)
