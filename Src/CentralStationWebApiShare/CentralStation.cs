@@ -135,12 +135,12 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
             if (msg.DataLength == 6)
             {
                 // overwrite existing
-                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, filename, msg.GetDataUInt(5), msg.GetDataUShort(9));
+                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, filename, msg.GetDataUInt(0), msg.GetDataUShort(0));
             }
             else if (msg.DataLength == 7)
             {
                 // overwrite existing
-                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, filename, msg.GetDataUInt(5), msg.GetDataUShort(9), msg.GetDataByte(11));
+                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, filename, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
             }
             else if(msg.DataLength == 8 && fileDictionary.TryGetValue(msg.Hash, out var fileStream))
             {

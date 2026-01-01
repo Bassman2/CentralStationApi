@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
 namespace CentralStationWebApi;
 
@@ -104,43 +105,52 @@ public class CANMessage
         Array.Copy(udpReceiveResult.Buffer, Buffer, 13);
     }
 
-    public Priority Priority => (Priority)GetBits(GetDataUInt(0), 25, 4);
+    public Priority Priority => (Priority)GetBits(GetHeader(), 25, 4);
 
-    public Command Command => (Command)GetBits(GetDataUInt(0), 17, 8);
+    public Command Command => (Command)GetBits(GetHeader(), 17, 8);
 
-    public bool IsResponse => GetBits(GetDataUInt(0), 16, 1) == 1;
+    public bool IsResponse => GetBits(GetHeader(), 16, 1) == 1;
 
-    public ushort Hash => (ushort)GetBits(GetDataUInt(0), 0, 16);
+    public ushort Hash => (ushort)GetBits(GetHeader(), 0, 16);
 
     public string Binary => $"{buffer[0]:X2}{buffer[1]:X2}{buffer[2]:X2}{buffer[3]:X2} {buffer[4]:X} " + string.Join(" ", buffer[5..(5 + Math.Min(buffer[4], (byte)8))].Select(b => b.ToString("X2")));
 
-    public byte GetDataByte(int index) => buffer[index];
+    
+    public uint GetHeader()
+    {
+        byte[] mem = new byte[sizeof(uint)];
+        Array.Copy(buffer, 0, mem, 0, 4);
+        Array.Reverse(mem);
+        return BitConverter.ToUInt32(mem, 0);
+    }
+
+    public byte GetDataByte(int index) => buffer[index + DATA];
 
     public ushort GetDataUShort(int index)
     {
-        byte[] mem = new byte[2];
-        Array.Copy(buffer, index, mem, 0, 2);
+        byte[] mem = new byte[sizeof(short)];
+        Array.Copy(buffer, index + DATA, mem, 0, sizeof(short));
         Array.Reverse(mem);
         return BitConverter.ToUInt16(mem, 0);
     }
 
     public uint GetDataUInt(int index)
     {
-        byte[] mem = new byte[4];
-        Array.Copy(buffer, index, mem, 0, 4);
+        byte[] mem = new byte[sizeof(uint)];
+        Array.Copy(buffer, index + DATA, mem, 0, sizeof(uint));
         Array.Reverse(mem);
         return BitConverter.ToUInt32(mem, 0);
     }
 
-    public string GetDataString(int index = 5, int length = 8)
+    public string GetDataString(int index = 0, int length = 8)
     {
-        return Encoding.ASCII.GetString(buffer, index, length);
+        return Encoding.ASCII.GetString(buffer, index + DATA, length).Trim((char)0);
     }
 
-    public byte[] GetData(int index = 5, int length = 8)
+    public byte[] GetData(int index = 0, int length = 8)
     {
         byte[] mem = new byte[length];
-        Array.Copy(buffer, index, mem, 0, length);
+        Array.Copy(buffer, index + DATA, mem, 0, length);
         return mem;
     }
 
@@ -162,7 +172,7 @@ public class CANMessage
         set => buffer[SUBC] = (byte)value;
     }
 
-    public uint Device => GetDataUInt(5);
+    public uint Device => GetDataUInt(0);
 
     #region Description
 
@@ -187,7 +197,7 @@ public class CANMessage
                     SubCommand.Identifier => $"Identifier - Device: {Device:X4}",
                     SubCommand.MfxSeek => $"Mfx Seek - Device: {Device:X4}",
                     SubCommand.Reset => $"System Reset - Device: {Device:X4}",
-                    _ => $"Unknown System Command 0x{GetDataByte(9):X2}" 
+                    _ => $"Unknown System Command {buffer[SUBC]:X2}" 
                 },
 
 
@@ -198,7 +208,7 @@ public class CANMessage
                 DataLength switch
                 {
                     4 => $"Loco Speed - Loco: {Device:X4}",
-                    6 => $"Loco Speed - Loco: {Device:X4} Speed: {GetDataUShort(7)}",
+                    6 => $"Loco Speed - Loco: {Device:X4} Speed: {GetDataUShort(4)}",
                     _ => "Loco Speed unknown data size"
                 },
             Command.LocoDirection => 
@@ -212,7 +222,7 @@ public class CANMessage
                             0x01 => "Forward",
                             0x02 => "Backward",
                             0x03 => "Switch",
-                            _ => $"Unknown Direction 0x{GetDataByte(10):X2}"
+                            _ => $"Unknown Direction {GetDataByte(4)}"
                         },
                     _ => "Loco Direction unknown data size"
                 },
@@ -223,7 +233,7 @@ public class CANMessage
             Command.S88Polling => "S88 Polling",
             Command.S88Event => "S88 Event",
             Command.SX1Event => "SX1 Event",
-            Command.SoftwareVersion => IsResponse ? $"Software Version - Sender: {Device} Version: {GetDataUShort(7)} Device: 0x{GetDataByte(11):X2} 0x{GetDataByte(12):X2}" : "Software Version",
+            Command.SoftwareVersion => $"Software Version - Sender: {Device:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceId: {GetDataUShort(6):X2}",
             Command.UpdateOffer => "Update Offer",
             Command.ReadConfigData => "Read Config Buffer",
             Command.BootloaderCANBound => "Bootloader CAN Bound",
@@ -245,7 +255,7 @@ public class CANMessage
 
     public override string ToString()
     {
-        return $"{GetDataByte(0):X2}{GetDataByte(1):X2}{GetDataByte(2):X2}{GetDataByte(3):X2} {GetDataByte(4):X} {GetDataByte(5):X2} {GetDataByte(6):X2} {GetDataByte(7):X2} {GetDataByte(8):X2} {GetDataByte(9):X2} {GetDataByte(10):X2} {GetDataByte(11):X2} {GetDataByte(12):X2} - " +
+        return $"{GetHeader():X8} {DataLength:X2} {GetDataByte(0):X2} {GetDataByte(1):X2} {GetDataByte(2):X2} {GetDataByte(3):X2} {GetDataByte(4):X2} {GetDataByte(5):X2} {GetDataByte(6):X2} {GetDataByte(7):X2} - " +
             $"Prio.: {Priority} Command: {Command} IsResp: {IsResponse} Hash: {Hash:X4}";
     }
 
@@ -253,7 +263,7 @@ public class CANMessage
     {
         string timestamp = Timestamp.ToString("HH:mm:ss.ffff");
         string sender = Dns.GetHostEntry(Sender)?.HostName.Split('.')[0] ?? Sender;
-        string data = $"{GetDataByte(0):X2}{GetDataByte(1):X2}{GetDataByte(2):X2}{GetDataByte(3):X2} {GetDataByte(4):X} {GetDataByte(5):X2} {GetDataByte(6):X2} {GetDataByte(7):X2} {GetDataByte(8):X2} {GetDataByte(9):X2} {GetDataByte(10):X2} {GetDataByte(11):X2} {GetDataByte(12):X2}";
+        string data = $"{GetHeader():X8} {DataLength:X} {GetDataByte(0):X2} {GetDataByte(1):X2} {GetDataByte(2):X2} {GetDataByte(3):X2} {GetDataByte(4):X2} {GetDataByte(5):X2} {GetDataByte(6):X2} {GetDataByte(7):X2}";
         string sendReq = IsResponse ? "<--" : "-->";
         string header = $"{Priority} {Command.ToString().PadRight(20)} {sendReq} {Hash:X4}";
         string description = Description;
