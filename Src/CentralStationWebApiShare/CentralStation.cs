@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace CentralStationWebApi;
+﻿namespace CentralStationWebApi;
 
 public sealed partial class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
@@ -238,29 +236,47 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
         }
     }
 
-    //private Dictionary<uint, StatusData> statusData = [];
-    private List<StatusData> StatusData = [];
-    private StatusData? curStatusData;
+    //private Dictionary<uint, StatusDataDevice> statusData = [];
+    public List<StatusDataDevice> StatusData = [];
+    private StatusDataDevice? curStatusData;
     private ushort nextStatusDataPackage = 1;
 
     private void HandleStatusData(CANMessage msg)
     {
         if (msg.Command == Command.StatusData && msg.IsResponse)
         {
-            if (msg.DataLength == 8)
+            switch (msg.DataLength)
             {
-                ushort package = (ushort)(msg.Hash & 0xff);
+            case 5:
+                break;
+            case 6:
+                if (curStatusData is null) throw new Exception("HandleStatusData msg req");
+                curStatusData.DeviceId = msg.Device;
+                curStatusData.Index = msg.GetDataByte(4);
+                curStatusData.NumOfPackages = msg.GetDataByte(5);
+                if (curStatusData.NumOfPackages != nextStatusDataPackage - 1)
+                {
+                    throw new InvalidDataException("HandleStatusData incorrect package number");
+                }
+                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
+                StatusData.Add(curStatusData);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
 
-                if (package == nextStatusDataPackage)
+                curStatusData = null;
+                nextStatusDataPackage = 1; // ready; reset for next message
+                break;
+            case 8:
+                ushort packageIndex = (byte)(msg.Hash & 0xff);
+                if (packageIndex == nextStatusDataPackage)
                 {
                     nextStatusDataPackage++;
 
-                    switch (package)
+                    switch (packageIndex)
                     {
                     case 1:
-                        curStatusData = new StatusData();
+                        curStatusData = new StatusDataDevice();
                         curStatusData.NumOfMeasuredValues = msg.GetDataByte(0);
-                        curStatusData.NumOfConfigurationChannels = msg.GetDataByte(0);
+                        curStatusData.NumOfConfigurationChannels = msg.GetDataByte(1);
                         curStatusData.SerialNumber = msg.GetDataUInt(4);
                         break;
 
@@ -284,19 +300,21 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
                         curStatusData.DeviceName += msg.GetDataString();
                         curStatusData.DeviceName = curStatusData.DeviceName.Trim((char)0);
 
-                        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
-                        StatusData.Add(curStatusData); 
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
-                        
-                        curStatusData = null;
-                        nextStatusDataPackage = 1; // ready; reset for next message
+                        //PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusDataDevice)));
+                        //StatusDataDevice.Add(curStatusData);
+                        //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusDataDevice)));
+
+                        //curStatusData = null;
+                        //nextStatusDataPackage = 1; // ready; reset for next message
                         break;
 
                     default:
                         throw new InvalidOperationException(nameof(HandleStatusData));
                     }
                 }
-
+                break;
+            default:
+                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
             }
         }
     }

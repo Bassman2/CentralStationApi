@@ -1,8 +1,12 @@
 ﻿namespace CentralStationWebApi;
 
-public class StatusData
+public class StatusDataDevice
 {
     public uint DeviceId { get; internal set; }
+
+    public byte Index { get; internal set; }
+
+    public byte NumOfPackages { get; internal set; }
 
     public byte NumOfMeasuredValues { get; internal set; }
 
@@ -13,4 +17,6 @@ public class StatusData
     public string? ArticleNumber { get; internal set; }
 
     public string DeviceName { get; internal set; } = String.Empty;
+
+    public StatusDataValue[]? Values { get; internal set; }
 }

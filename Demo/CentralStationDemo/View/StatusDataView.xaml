@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CentralStationDemo.View.DevicesView"
+﻿<UserControl x:Class="CentralStationDemo.View.StatusDataView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,7 +10,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <GroupBox Header="Devices">
         <DataGrid 
-            ItemsSource="{Binding Devices}" 
+            ItemsSource="{Binding StatusData}" 
             AutoGenerateColumns="False" 
             IsReadOnly="True"
             HeadersVisibility="Column"
@@ -23,9 +23,14 @@
             IsSynchronizedWithCurrentItem="True"
             ClipboardCopyMode="IncludeHeader">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Device ID" Binding="{Binding DeviceId, StringFormat=X4}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="SW-Version" Binding="{Binding SwVersion}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Device Type" Binding="{Binding DeviceType}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Device Id" Binding="{Binding DeviceId, StringFormat=X8}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Index" Binding="{Binding Index}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="# Packages" Binding="{Binding NumOfPackages}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="# Values" Binding="{Binding NumOfMeasuredValues}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="# Channels" Binding="{Binding NumOfConfigurationChannels}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Serial Number" Binding="{Binding SerialNumber}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Article Number" Binding="{Binding ArticleNumber}" Width="100" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Device Name" Binding="{Binding DeviceName}" Width="300" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
     </GroupBox>

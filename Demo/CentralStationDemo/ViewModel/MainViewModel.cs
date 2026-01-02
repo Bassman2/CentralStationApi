@@ -1,4 +1,6 @@
-﻿using CentralStationWebApi;
+﻿using CentralStationDemo.View;
+using CentralStationWebApi;
+using System.Linq;
 
 namespace CentralStationDemo.ViewModel;
 
@@ -28,6 +30,13 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.Dispose();
     }
 
+    private AutoResetEvent statusDataEvent = new AutoResetEvent(false);
+
+    private const uint CS3 = 0x63736E38;
+    private const uint MS2 = 0x4D54E34D;
+
+    private readonly uint[] allDevices = { CS3, MS2 };
+
     protected override void OnStartup()
     {
         //cs.RequestParticipants();
@@ -40,11 +49,26 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         //cs.RequestConfigDataTrackDiagramPage(2);
 
         // Timestamp	Sender	Binary	Priority	Command	IsResponse	Hash	Description
-//        00:42:40.1337   CS3.fritz.box   00315F1F 8 63 73 6E 38 0C 71 00 50  Proirity1 SoftwareVersion True    5F1F    Software Version -Sender: 63736E38 Version: 12.113 DeviceId: GFP3 50
-//00:42:40.1315   CS3.fritz.box   00317319 8 4D 54 E3 4D 05 06 00 33  Proirity1 SoftwareVersion True    7319    Software Version -Sender: 4D54E34D Version: 5.6 DeviceId: MS2_3 33
+        //        00:42:40.1337   CS3.fritz.box   00315F1F 8 63 73 6E 38 0C 71 00 50  Proirity1 SoftwareVersion True    5F1F    Software Version -Sender: 63736E38 Version: 12.113 DeviceId: GFP3 50
+        //00:42:40.1315   CS3.fritz.box   00317319 8 4D 54 E3 4D 05 06 00 33  Proirity1 SoftwareVersion True    7319    Software Version -Sender: 4D54E34D Version: 5.6 DeviceId: MS2_3 33
 
-        cs.RequestStatusData(0x63736E38, 0);
-        cs.RequestStatusData(0x4D54E34D, 0);
+        Task.Run(() =>
+        {
+            foreach (var device in allDevices)
+            {
+                do
+                {
+                    cs.RequestStatusData(device, 0);
+                    statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
+                } while (StatusData is null || StatusData.Count == 0 || !StatusData.Any(d => d.DeviceId == device));
+
+                for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues; index++)
+                {
+                    cs.RequestStatusData(device, index);
+                    statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
+                }
+            }
+        });
 
     }
 
@@ -91,6 +115,10 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         case "Devices":
             Devices = cs.Devices.Select(i => new DeviceViewModel(i)).ToList();
             break;
+        case "StatusDataDevice":
+            StatusData = cs.StatusData.Select(i => new StatusDataViewModel(i)).ToList();
+            statusDataEvent.Set();
+            break;
 
         }
     }
@@ -119,6 +147,9 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     [ObservableProperty]
     private List<DeviceViewModel>? devices;
+
+    [ObservableProperty]
+    private List<StatusDataViewModel>? statusData;
 
 
     [ObservableProperty]

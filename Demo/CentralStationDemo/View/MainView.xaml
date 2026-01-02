@@ -64,7 +64,10 @@
             <TabItem Header="Devices">
                 <local:DevicesView/>
             </TabItem>
-            
+            <TabItem Header="Status Data">
+                <local:StatusDataView/>
+            </TabItem>
+
         </TabControl>
         
     </DockPanel>
