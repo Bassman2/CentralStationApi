@@ -12,6 +12,7 @@ public enum Command : byte
     ReadConfig = 7,
     WriteConfig = 8,
     SwitchAccessories = 0x0B,
+    ACC_CONFIG = 0x0C,      // not is specification
     S88Polling = 0x10,
     S88Event = 0x11,
     SX1Event = 0x12,
@@ -24,5 +25,6 @@ public enum Command : byte
     RequestConfigData = 0x20,
     ConfigDataStream = 0x21,
     DataStream6021Adapter = 0x22,
-    AutomaticTransmission = 0x30 
+    AutomaticTransmission = 0x30,
+    DebugMessage = 0x42     // not is specification
 }

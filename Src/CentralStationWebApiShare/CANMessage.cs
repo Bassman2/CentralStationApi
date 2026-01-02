@@ -172,7 +172,11 @@ public class CANMessage
         set => buffer[SUBC] = (byte)value;
     }
 
+    public DirectionChange DirectionChange => (DirectionChange)GetDataByte(4);
+
     public uint Device => GetDataUInt(0);
+
+    public string DeviceName => GetDataUInt(0).ToString("X4");
 
     #region Description
 
@@ -182,21 +186,21 @@ public class CANMessage
             Command.SystemCommand =>
                 SubCommand switch
                 {
-                    SubCommand.Stop => $"System Stop - Device: {Device:X4}",
-                    SubCommand.Go => $"System Go - Device: {Device:X4}",
-                    SubCommand.Halt => $"System Halt - Device: {Device:X4}",
-                    SubCommand.LocoHalt => $"System Loco Halt - Device: {Device:X4}",
-                    SubCommand.LocoCycleStop => $"Loco Cycle Stop - Device: {Device:X4}",
-                    SubCommand.LocoDataProtocol => $"Loco Buffer Protocol - Device: {Device:X4}",
-                    SubCommand.SwitchingTime => $"Switching Time - Device: {Device:X4}",
-                    SubCommand.FastRead => $"Fast Read - Device: {Device:X4}",
-                    SubCommand.TrackProtocol => $"Track Protocol - Device: {Device:X4}",
-                    SubCommand.NewRegistrationCounter => $"New Registration Counter - Device: {Device:X4}",
-                    SubCommand.Overload => $"Overload - Device: {Device:X4}",
-                    SubCommand.Status => $"Status - Device: {Device:X4}",
-                    SubCommand.Identifier => $"Identifier - Device: {Device:X4}",
-                    SubCommand.MfxSeek => $"Mfx Seek - Device: {Device:X4}",
-                    SubCommand.Reset => $"System Reset - Device: {Device:X4}",
+                    SubCommand.Stop => $"System Stop - Device: {DeviceName}",
+                    SubCommand.Go => $"System Go - Device: {DeviceName}",
+                    SubCommand.Halt => $"System Halt - Device: {DeviceName}",
+                    SubCommand.LocoHalt => $"System Loco Halt - Device: {DeviceName}",
+                    SubCommand.LocoCycleStop => $"Loco Cycle Stop - Device: {DeviceName}",
+                    SubCommand.LocoDataProtocol => $"Loco Buffer Protocol - Device: {DeviceName}",
+                    SubCommand.SwitchingTime => $"Switching Time - Device: {DeviceName}",
+                    SubCommand.FastRead => $"Fast Read - Device: {DeviceName}",
+                    SubCommand.TrackProtocol => $"Track Protocol - Device: {DeviceName}",
+                    SubCommand.NewRegistrationCounter => $"New Registration Counter - Device: {DeviceName}",
+                    SubCommand.Overload => $"Overload - Device: {DeviceName}",
+                    SubCommand.Status => $"Status - Device: {DeviceName}",
+                    SubCommand.Identifier => $"Identifier - Device: {DeviceName}",
+                    SubCommand.MfxSeek => $"Mfx Seek - Device: {DeviceName}",
+                    SubCommand.Reset => $"System Reset - Device: {DeviceName}",
                     _ => $"Unknown System Command {buffer[SUBC]:X2}" 
                 },
 
@@ -207,23 +211,15 @@ public class CANMessage
             Command.LocoVelocity =>
                 DataLength switch
                 {
-                    4 => $"Loco Speed - Loco: {Device:X4}",
-                    6 => $"Loco Speed - Loco: {Device:X4} Speed: {GetDataUShort(4)}",
+                    4 => $"Loco Speed - Loco: {DeviceName}",
+                    6 => $"Loco Speed - Loco: {DeviceName} Speed: {GetDataUShort(4)}",
                     _ => "Loco Speed unknown data size"
                 },
             Command.LocoDirection => 
                 DataLength switch
                 {
-                    4 => $"Loco Direction - Loco: {Device:X4}",
-                    5 => $"Loco Direction - Loco: {Device:X4} Direction: " +
-                        GetDataByte(10) switch
-                        {
-                            0x00 => "Stay",
-                            0x01 => "Forward",
-                            0x02 => "Backward",
-                            0x03 => "Switch",
-                            _ => $"Unknown Direction {GetDataByte(4)}"
-                        },
+                    4 => $"Loco Direction - Loco: {DeviceName}",
+                    5 => $"Loco Direction - Loco: {DeviceName} Direction: {DirectionChange}",
                     _ => "Loco Direction unknown data size"
                 },
             Command.LocoFunction => "Loco Function",
@@ -233,12 +229,21 @@ public class CANMessage
             Command.S88Polling => "S88 Polling",
             Command.S88Event => "S88 Event",
             Command.SX1Event => "SX1 Event",
-            Command.SoftwareVersion => $"Software Version - Sender: {Device:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceId: {GetDataUShort(6):X2}",
+            Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - Sender: {Device:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceId: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2}",
             Command.UpdateOffer => "Update Offer",
             Command.ReadConfigData => "Read Config Buffer",
             Command.BootloaderCANBound => "Bootloader CAN Bound",
             Command.BootloaderRailBound => "Bootloader Rail Bound",
-            Command.StatusData => "Status Buffer",
+            Command.StatusData =>
+                DataLength switch
+                {
+                    5 => $"Device: {DeviceName} Index: {GetDataByte(4)}",
+                    6 => $"Device: {DeviceName} Index: {GetDataByte(4)} Num: {GetDataByte(5)}",
+                    8 => $"{GetDataString()}",
+                    _ => "Unknown Length"
+
+
+                },
             Command.RequestConfigData => $"Config Buffer - Filename: {GetDataString()}",
             Command.ConfigDataStream =>
                 DataLength switch

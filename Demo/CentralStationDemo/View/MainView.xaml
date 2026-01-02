@@ -7,30 +7,12 @@
         xmlns:vm="clr-namespace:CentralStationDemo.ViewModel" 
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
-        Height="800" Width="1200">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <local:SystemSyncView Grid.Row="0" Visibility="Collapsed"/>
-        <local:SystemAsyncView Grid.Row="1" Visibility="Collapsed"/>
-        <local:StatusView Grid.Row="2" Visibility="Collapsed"/>
-        <local:LocomotivesView Grid.Row="3" Visibility="Collapsed"/>
-        <local:ArticlesView Grid.Row="4" Visibility="Collapsed"/>
-        <local:RailwayRoutesView Grid.Row="5" Visibility="Collapsed"/>
-        <local:DevicesView Grid.Row="6" Visibility="Visible"/>
-        <local:ControllerView Grid.Row="7"/>
+        Height="1200" Width="1800">
+    <DockPanel>
 
         <DataGrid 
-            Grid.Row="8" 
+            DockPanel.Dock="Bottom"
+            Height="300"
             ItemsSource="{Binding Messages}" 
             AutoGenerateColumns="False" 
             IsReadOnly="True"
@@ -44,8 +26,7 @@
             IsSynchronizedWithCurrentItem="True"
             ClipboardCopyMode="IncludeHeader"
             FontFamily="Courier"
-            
-            Margin="3,3,3,3" Grid.ColumnSpan="2">
+            Margin="2">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="110"/>
                 <DataGridTextColumn Header="Sender" Binding="{Binding Sender}" Width="110"/>
@@ -57,5 +38,34 @@
                 <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
-    </Grid>
+        
+        <TabControl>
+            <TabItem Header="Controller">
+                <local:ControllerView Grid.Row="7"/>
+            </TabItem>
+            <TabItem Header="System Sync">
+                <local:SystemSyncView Grid.Row="0"/>
+            </TabItem>
+            <TabItem Header="System Async">
+            <local:SystemAsyncView Grid.Row="1"/>
+            </TabItem>
+            <TabItem Header="Status">
+                <local:StatusView Grid.Row="2"/>
+            </TabItem>
+            <TabItem Header="Locomotives">
+                <local:LocomotivesView Grid.Row="3"/>
+            </TabItem>
+            <TabItem Header="Articles">
+                <local:ArticlesView/>
+            </TabItem>
+            <TabItem Header="Railway">
+                <local:RailwayRoutesView/>
+            </TabItem>
+            <TabItem Header="Devices">
+                <local:DevicesView/>
+            </TabItem>
+            
+        </TabControl>
+        
+    </DockPanel>
 </AppWindowView>

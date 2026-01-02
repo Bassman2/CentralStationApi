@@ -198,6 +198,14 @@ partial class CentralStation
         SendMessage(message);
     }
 
+    public void RequestStatusData(uint device, byte index)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.StatusData, hash).
+            AddUInt32(device).
+            AddByte(index);
+        SendMessage(message);
+    }
+
     #endregion
 
     #region 7 GUI Information Transfer

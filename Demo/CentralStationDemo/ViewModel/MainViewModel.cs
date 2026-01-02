@@ -1,4 +1,6 @@
-﻿namespace CentralStationDemo.ViewModel;
+﻿using CentralStationWebApi;
+
+namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
@@ -28,14 +30,21 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     protected override void OnStartup()
     {
-        cs.RequestParticipants();
+        //cs.RequestParticipants();
 
-        cs.RequestConfigDataLocomotives();
-        cs.RequestConfigDataMagneticItems();
-        cs.RequestConfigDataRailwayRoute();
-        cs.RequestConfigDataTrackDiagram();
-        cs.RequestConfigDataTrackDiagramPage(1);
-        cs.RequestConfigDataTrackDiagramPage(2);
+        //cs.RequestConfigDataLocomotives();
+        //cs.RequestConfigDataMagneticItems();
+        //cs.RequestConfigDataRailwayRoute();
+        //cs.RequestConfigDataTrackDiagram();
+        //cs.RequestConfigDataTrackDiagramPage(1);
+        //cs.RequestConfigDataTrackDiagramPage(2);
+
+        // Timestamp	Sender	Binary	Priority	Command	IsResponse	Hash	Description
+//        00:42:40.1337   CS3.fritz.box   00315F1F 8 63 73 6E 38 0C 71 00 50  Proirity1 SoftwareVersion True    5F1F    Software Version -Sender: 63736E38 Version: 12.113 DeviceId: GFP3 50
+//00:42:40.1315   CS3.fritz.box   00317319 8 4D 54 E3 4D 05 06 00 33  Proirity1 SoftwareVersion True    7319    Software Version -Sender: 4D54E34D Version: 5.6 DeviceId: MS2_3 33
+
+        cs.RequestStatusData(0x63736E38, 0);
+        cs.RequestStatusData(0x4D54E34D, 0);
 
     }
 

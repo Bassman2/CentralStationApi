@@ -15,6 +15,7 @@ public enum SubCommand : byte
     Overload = 0x0A,
     Status = 0x0B,
     Identifier = 0x0C,
+    Unknown20 = 0x20,        // not is specification
     MfxSeek = 0x30,
     Reset = 0x80,
 }
