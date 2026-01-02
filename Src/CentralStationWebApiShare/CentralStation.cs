@@ -106,6 +106,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
                 messageReceivedQueue.Add(msg);
                 HandleStreams(msg);
                 HandleParticipants(msg);
+                HandleStatusData(msg);
                 HandleAsync(msg);
                 Tracer.TraceMessage(msg);
             }
@@ -233,6 +234,69 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
                 PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Devices)));
                 Devices = devices.Values;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Devices)));
+            }
+        }
+    }
+
+    //private Dictionary<uint, StatusData> statusData = [];
+    private List<StatusData> StatusData = [];
+    private StatusData? curStatusData;
+    private ushort nextStatusDataPackage = 1;
+
+    private void HandleStatusData(CANMessage msg)
+    {
+        if (msg.Command == Command.StatusData && msg.IsResponse)
+        {
+            if (msg.DataLength == 8)
+            {
+                ushort package = (ushort)(msg.Hash & 0xff);
+
+                if (package == nextStatusDataPackage)
+                {
+                    nextStatusDataPackage++;
+
+                    switch (package)
+                    {
+                    case 1:
+                        curStatusData = new StatusData();
+                        curStatusData.NumOfMeasuredValues = msg.GetDataByte(0);
+                        curStatusData.NumOfConfigurationChannels = msg.GetDataByte(0);
+                        curStatusData.SerialNumber = msg.GetDataUInt(4);
+                        break;
+
+                    case 2:
+                        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
+                        curStatusData.ArticleNumber = msg.GetDataString();
+                        break;
+
+                    case 3:
+                        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
+                        curStatusData.DeviceName += msg.GetDataString();
+                        break;
+
+                    case 4:
+                        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
+                        curStatusData.DeviceName += msg.GetDataString();
+                        break;
+
+                    case 5:
+                        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
+                        curStatusData.DeviceName += msg.GetDataString();
+                        curStatusData.DeviceName = curStatusData.DeviceName.Trim((char)0);
+
+                        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
+                        StatusData.Add(curStatusData); 
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
+                        
+                        curStatusData = null;
+                        nextStatusDataPackage = 1; // ready; reset for next message
+                        break;
+
+                    default:
+                        throw new InvalidOperationException(nameof(HandleStatusData));
+                    }
+                }
+
             }
         }
     }

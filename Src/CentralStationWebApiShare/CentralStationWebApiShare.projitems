@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Enums\DeviceType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Direction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\Tracer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StatusData.cs" />
     <Compile Include="..\CentralStationWebApiShare\Enums\DirectionChange.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Priority.cs" />
     <Compile Include="..\CentralStationWebApiShare\Enums\SubCommand.cs" />
