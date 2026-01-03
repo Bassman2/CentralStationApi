@@ -241,6 +241,8 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
     private StatusDataDevice? curStatusData;
     private ushort nextStatusDataPackage = 1;
 
+    private DataCollector statusDataCollector = new();
+
     private void HandleStatusData(CANMessage msg)
     {
         if (msg.Command == Command.StatusData && msg.IsResponse)
@@ -250,68 +252,78 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
             case 5:
                 break;
             case 6:
-                if (curStatusData is null) throw new Exception("HandleStatusData msg req");
-                curStatusData.DeviceId = msg.Device;
-                curStatusData.Index = msg.GetDataByte(4);
-                curStatusData.NumOfPackages = msg.GetDataByte(5);
-                if (curStatusData.NumOfPackages != nextStatusDataPackage - 1)
-                {
-                    throw new InvalidDataException("HandleStatusData incorrect package number");
-                }
+                //if (curStatusData is null) throw new Exception("HandleStatusData msg req");
+                //curStatusData.DeviceId = msg.Device;
+                //curStatusData.Index = msg.GetDataByte(4);
+                //curStatusData.NumOfPackages = msg.GetDataByte(5);
+                //if (curStatusData.NumOfPackages != nextStatusDataPackage - 1)
+                //{
+                //    throw new InvalidDataException("HandleStatusData incorrect package number");
+                //}
+
+                StatusDataDevice statusDataDevice = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
+
                 PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
-                StatusData.Add(curStatusData);
+                StatusData.Add(statusDataDevice);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
 
-                curStatusData = null;
-                nextStatusDataPackage = 1; // ready; reset for next message
+                //curStatusData = null;
+                //nextStatusDataPackage = 1; // ready; reset for next message
+                //statusDataCollector.Device = msg.Device;
                 break;
             case 8:
                 ushort packageIndex = (byte)(msg.Hash & 0xff);
-                if (packageIndex == nextStatusDataPackage)
+                if (packageIndex == 1)
                 {
-                    nextStatusDataPackage++;
-
-                    switch (packageIndex)
-                    {
-                    case 1:
-                        curStatusData = new StatusDataDevice();
-                        curStatusData.NumOfMeasuredValues = msg.GetDataByte(0);
-                        curStatusData.NumOfConfigurationChannels = msg.GetDataByte(1);
-                        curStatusData.SerialNumber = msg.GetDataUInt(4);
-                        break;
-
-                    case 2:
-                        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
-                        curStatusData.ArticleNumber = msg.GetDataString();
-                        break;
-
-                    case 3:
-                        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
-                        curStatusData.DeviceName += msg.GetDataString();
-                        break;
-
-                    case 4:
-                        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
-                        curStatusData.DeviceName += msg.GetDataString();
-                        break;
-
-                    case 5:
-                        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
-                        curStatusData.DeviceName += msg.GetDataString();
-                        curStatusData.DeviceName = curStatusData.DeviceName.Trim((char)0);
-
-                        //PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusDataDevice)));
-                        //StatusDataDevice.Add(curStatusData);
-                        //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusDataDevice)));
-
-                        //curStatusData = null;
-                        //nextStatusDataPackage = 1; // ready; reset for next message
-                        break;
-
-                    default:
-                        throw new InvalidOperationException(nameof(HandleStatusData));
-                    }
+                    statusDataCollector = new();
                 }
+                statusDataCollector.AddData(msg.GetData());
+
+                //if (packageIndex == nextStatusDataPackage)
+                //{
+                //    nextStatusDataPackage++;
+
+                //    switch (packageIndex)
+                //    {
+                //    case 1:
+                //        curStatusData = new StatusDataDevice();
+                //        curStatusData.NumOfMeasuredValues = msg.GetDataByte(0);
+                //        curStatusData.NumOfConfigurationChannels = msg.GetDataByte(1);
+                //        curStatusData.SerialNumber = msg.GetDataUInt(4);
+                //        break;
+
+                //    case 2:
+                //        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
+                //        curStatusData.ArticleNumber = msg.GetDataString();
+                //        break;
+
+                //    case 3:
+                //        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
+                //        curStatusData.DeviceName += msg.GetDataString();
+                //        break;
+
+                //    case 4:
+                //        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
+                //        curStatusData.DeviceName += msg.GetDataString();
+                //        break;
+
+                //    case 5:
+                //        if (curStatusData is null) throw new Exception("HandleStatusData msg 2");
+                //        curStatusData.DeviceName += msg.GetDataString();
+                //        curStatusData.DeviceName = curStatusData.DeviceName.Trim((char)0);
+
+                //        //PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusDataDevice)));
+                //        //StatusDataDevice.Add(curStatusData);
+                //        //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusDataDevice)));
+
+                //        //curStatusData = null;
+                //        //nextStatusDataPackage = 1; // ready; reset for next message
+                //        break;
+
+                //    default:
+                //        throw new InvalidOperationException(nameof(HandleStatusData));
+                //    }
+                //}
                 break;
             default:
                 throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");

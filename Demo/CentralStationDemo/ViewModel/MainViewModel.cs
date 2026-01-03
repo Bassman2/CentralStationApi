@@ -62,7 +62,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
                     statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
                 } while (StatusData is null || StatusData.Count == 0 || !StatusData.Any(d => d.DeviceId == device));
 
-                for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues; index++)
+                for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
                 {
                     cs.RequestStatusData(device, index);
                     statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
@@ -115,7 +115,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         case "Devices":
             Devices = cs.Devices.Select(i => new DeviceViewModel(i)).ToList();
             break;
-        case "StatusDataDevice":
+        case "StatusData":
             StatusData = cs.StatusData.Select(i => new StatusDataViewModel(i)).ToList();
             statusDataEvent.Set();
             break;
