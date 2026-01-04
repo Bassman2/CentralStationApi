@@ -164,7 +164,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
         Tracer.TraceStream(stream, fileName);
 
         stream.Position = 0;
-        StreamReader reader = new StreamReader(stream);
+        var reader = new StreamReader(stream);
         string? line = reader.ReadLine();
         switch (line)
         {
@@ -215,7 +215,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
     //    stream.Position = 0;
     //}
 
-    private uint hash = 0x4711;
+    private readonly uint hash = 0x4711;
 
     public IEnumerable<Device> Devices = [];
 
@@ -238,8 +238,8 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     //private Dictionary<uint, StatusDataDevice> statusData = [];
     public List<StatusDataDevice> StatusData = [];
-    private StatusDataDevice? curStatusData;
-    private ushort nextStatusDataPackage = 1;
+    //private StatusDataDevice? curStatusData;
+    //private ushort nextStatusDataPackage = 1;
 
     private DataCollector statusDataCollector = new();
 

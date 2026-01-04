@@ -1,5 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
+[DebuggerDisplay("StatusDataDevice {DeviceId} {ArticleNumber} {DeviceName}")]
 public class StatusDataDevice
 {
     internal StatusDataDevice(uint device, byte index, byte numOfPackages, DataCollector col)

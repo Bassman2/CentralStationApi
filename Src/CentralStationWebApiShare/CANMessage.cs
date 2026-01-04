@@ -271,9 +271,9 @@ public class CANMessage
         string sender = Dns.GetHostEntry(Sender)?.HostName.Split('.')[0] ?? Sender;
         string data = $"{GetHeader():X8} {DataLength:X} {GetDataByte(0):X2} {GetDataByte(1):X2} {GetDataByte(2):X2} {GetDataByte(3):X2} {GetDataByte(4):X2} {GetDataByte(5):X2} {GetDataByte(6):X2} {GetDataByte(7):X2}";
         string sendReq = IsResponse ? "<--" : "-->";
-        string header = $"{Priority} {Command.ToString().PadRight(20)} {sendReq} {Hash:X4}";
+        string header = $"{Priority} {Command,-20} {sendReq} {Hash:X4}";
         string description = Description;
-        return $"{timestamp} {sender.PadRight(12)} {data} {header} {description}";
+        return $"{timestamp} {sender,-12} {data} {header} {description}";
     }
 
     #endregion

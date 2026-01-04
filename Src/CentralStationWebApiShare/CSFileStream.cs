@@ -11,7 +11,7 @@ public class CSFileStream
         Reserved = reserved;
     }
 
-    private MemoryStream mem = new(4 * 1024);
+    private readonly MemoryStream mem = new(4 * 1024);
 
     public CSFileStreamMode Mode { get; }
 
@@ -73,14 +73,14 @@ public class CSFileStream
         //return reader.ReadToEnd();
     }
 
-    private void WriteLog(string fileName, MemoryStream stream)
-    {
-        using (var file = File.Create(fileName))
-        {
-            file.Write(stream.ToArray());
-        }
-        stream.Seek(0, SeekOrigin.Begin);
-    }
+    //private void WriteLog(string fileName, MemoryStream stream)
+    //{
+    //    using (var file = File.Create(fileName))
+    //    {
+    //        file.Write(stream.ToArray());
+    //    }
+    //    stream.Seek(0, SeekOrigin.Begin);
+    //}
 }
 
 

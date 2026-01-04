@@ -9,7 +9,7 @@ public partial class ControlUnitViewModel : ObservableObject
         DeviceType = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
     }
 
-    public void SetDeviceDetails(StatusDataDevice statusData)
+    public void UpdateStatusData(StatusDataDevice statusData)
     {
         //DeviceId = statusData.DeviceId;
         Index = statusData.Index;

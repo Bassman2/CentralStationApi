@@ -64,10 +64,6 @@
             <TabItem Header="Control Units">
                 <local:ControlUnitsView/>
             </TabItem>
-            <TabItem Header="Status Data">
-                <local:StatusDataView/>
-            </TabItem>
-
         </TabControl>
         
     </DockPanel>

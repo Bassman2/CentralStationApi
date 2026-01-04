@@ -1,13 +1,14 @@
 ﻿using CentralStationDemo.View;
 using CentralStationWebApi;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
     private const string host = "CS3";
-    private CentralStation cs; 
+    private readonly CentralStation cs; 
     public MainViewModel()
     {
         cs = new CentralStation(host);
@@ -30,12 +31,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.Dispose();
     }
 
-    private AutoResetEvent statusDataEvent = new AutoResetEvent(false);
+    private readonly AutoResetEvent statusDataEvent = new(false);
 
     private const uint CS3 = 0x63736E38;
     private const uint MS2 = 0x4D54E34D;
 
-    private readonly uint[] allDevices = { CS3, MS2 };
+    private readonly uint[] allDevices = [CS3, MS2];
 
     protected override void OnStartup()
     {
@@ -52,23 +53,23 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         //        00:42:40.1337   CS3.fritz.box   00315F1F 8 63 73 6E 38 0C 71 00 50  Proirity1 SoftwareVersion True    5F1F    Software Version -Sender: 63736E38 Version: 12.113 DeviceId: GFP3 50
         //00:42:40.1315   CS3.fritz.box   00317319 8 4D 54 E3 4D 05 06 00 33  Proirity1 SoftwareVersion True    7319    Software Version -Sender: 4D54E34D Version: 5.6 DeviceId: MS2_3 33
 
-        Task.Run(() =>
-        {
-            foreach (var device in allDevices)
-            {
-                do
-                {
-                    cs.RequestStatusData(device, 0);
-                    statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
-                } while (StatusData is null || StatusData.Count == 0 || !StatusData.Any(d => d.DeviceId == device));
+        //Task.Run(() =>
+        //{
+        //    foreach (var device in allDevices)
+        //    {
+        //        do
+        //        {
+        //            cs.RequestStatusData(device, 0);
+        //            statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
+        //        } while (StatusData is null || StatusData.Count == 0 || !StatusData.Any(d => d.DeviceId == device));
 
-                for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
-                {
-                    cs.RequestStatusData(device, index);
-                    statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
-                }
-            }
-        });
+        //        for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
+        //        {
+        //            cs.RequestStatusData(device, index);
+        //            statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
+        //        }
+        //    }
+        //});
 
     }
 
@@ -113,15 +114,60 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             TrackDiagram = cs.TrackDiagram;
             break;
         case "Devices":
-            Devices = cs.Devices.Select(i => new ControlUnitViewModel(i)).ToList();
+            ControlUnits = cs.Devices.Select(i => new ControlUnitViewModel(i)).ToList();
+            UpdateControlUnits();
             break;
         case "StatusData":
-            StatusData = cs.StatusData.Select(i => new StatusDataViewModel(i)).ToList();
-            statusDataEvent.Set();
+            UpdateControlUnitDetails(cs.StatusData);
             break;
 
         }
     }
+
+    private readonly Lock lockItem = new();
+    //private uint reqDeviceId = 0;
+    private ControlUnitViewModel? GetControlUnit(uint deviceId) => ControlUnits?.FirstOrDefault(d => d.DeviceId == deviceId);
+       
+
+    private void UpdateControlUnits()
+    {
+        var devices = cs.Devices.ToArray();
+
+        Task.Run(() =>
+        {
+            lock (lockItem)
+            {
+                foreach (var device in devices)
+                {
+                    var cu = GetControlUnit(device.DeviceId);
+                    while (cu!.HasDetails == false)  
+                    {
+                        //reqDeviceId = device.DeviceId;
+                        cs.RequestStatusData(device.DeviceId, 0);
+                        statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
+                        //var cu = Devices!.First(d => d.DeviceId == device.DeviceId)!;
+                    } 
+
+                    //for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
+                    //{
+                    //    cs.RequestStatusData(device, index);
+                    //    statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
+                    //}
+                }
+            }
+        });
+    }
+
+    private void UpdateControlUnitDetails(IEnumerable<StatusDataDevice> statusDataDevices)
+    {
+        foreach (var device in statusDataDevices)
+        {
+            //var cu = Devices?.FirstOrDefault(d => d.DeviceId == device.DeviceId);
+            GetControlUnit(device.DeviceId)?.UpdateStatusData(device);
+        }
+        statusDataEvent.Set();
+    }
+
 
     [ObservableProperty]
     private SystemStatus systemStatus = SystemStatus.Default;
@@ -146,10 +192,10 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private TrackDiagram? trackDiagram;
 
     [ObservableProperty]
-    private List<ControlUnitViewModel>? devices;
+    private List<ControlUnitViewModel>? controlUnits;
 
-    [ObservableProperty]
-    private List<StatusDataViewModel>? statusData;
+    //[ObservableProperty]
+    //private List<StatusDataViewModel>? statusData;
 
 
     [ObservableProperty]
