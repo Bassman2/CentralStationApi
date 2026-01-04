@@ -1,9 +1,4 @@
-﻿using CentralStationDemo.View;
-using CentralStationWebApi;
-using System.Linq;
-using System.Runtime.CompilerServices;
-
-namespace CentralStationDemo.ViewModel;
+﻿namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
@@ -40,7 +35,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     protected override void OnStartup()
     {
-        //cs.RequestParticipants();
+        cs.RequestParticipants();
 
         //cs.RequestConfigDataLocomotives();
         //cs.RequestConfigDataMagneticItems();
@@ -114,7 +109,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             TrackDiagram = cs.TrackDiagram;
             break;
         case "Devices":
-            ControlUnits = cs.Devices.Select(i => new ControlUnitViewModel(i)).ToList();
+            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"OnCsPropertyChanged Devices # {cs.Devices.Count()}");
+            ControlUnits = [.. cs.Devices.Select(i => new ControlUnitViewModel(i))];
             UpdateControlUnits();
             break;
         case "StatusData":
@@ -131,21 +127,35 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     private void UpdateControlUnits()
     {
-        var devices = cs.Devices.ToArray();
-
+        // store for parallel changes
+        ControlUnitViewModel[] controlUnits = [.. ControlUnits.Where(c => !c.HasDetails).Reverse()];
+        
         Task.Run(() =>
         {
             lock (lockItem)
             {
-                foreach (var device in devices)
+                foreach (var controlUnit in controlUnits)
                 {
-                    var cu = GetControlUnit(device.DeviceId);
-                    while (cu!.HasDetails == false)  
+                    if (controlUnit.HasDetails == false)  
                     {
-                        //reqDeviceId = device.DeviceId;
-                        cs.RequestStatusData(device.DeviceId, 0);
-                        statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
-                        //var cu = Devices!.First(d => d.DeviceId == device.DeviceId)!;
+                        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index 0");
+
+                        cs.RequestStatusData(controlUnit.DeviceId, 0);
+                        if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
+                        {
+                            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout {controlUnit.DeviceId:X8}");
+                        }
+
+                        for (byte index = 1; index <= controlUnit.NumOfMeasuredValues; index++)
+                        {
+                            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index {index}");
+
+                            cs.RequestStatusData(controlUnit.DeviceId, index);
+                            if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
+                            {
+                                Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout Index {index} Device {controlUnit.DeviceId:X8}");
+                            }
+                        }
                     } 
 
                     //for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
@@ -165,6 +175,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             //var cu = Devices?.FirstOrDefault(d => d.DeviceId == device.DeviceId);
             GetControlUnit(device.DeviceId)?.UpdateStatusData(device);
         }
+
+        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnitDetails Set Event");
         statusDataEvent.Set();
     }
 
@@ -192,7 +204,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private TrackDiagram? trackDiagram;
 
     [ObservableProperty]
-    private List<ControlUnitViewModel>? controlUnits;
+    private List<ControlUnitViewModel> controlUnits = [];
 
     //[ObservableProperty]
     //private List<StatusDataViewModel>? statusData;

@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <GroupBox Header="Devices">
-        <ListView ItemsSource="{Binding Devices}">
+        <ListView ItemsSource="{Binding ControlUnits}">
             <!--<ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>

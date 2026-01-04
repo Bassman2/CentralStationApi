@@ -23,6 +23,8 @@ public class StatusDataDevice
 
         // package 3, ...
         DeviceName = col.ReadString();
+
+        Values = new StatusDataValue[NumOfMeasuredValues];
     }
     
     public uint DeviceId { get; internal set; }
@@ -31,15 +33,22 @@ public class StatusDataDevice
 
     public byte NumOfPackages { get; internal set; }
 
+    // Package 1
+
     public byte NumOfMeasuredValues { get; internal set; }
 
     public byte NumOfConfigurationChannels { get; internal set; }
 
     public uint SerialNumber { get; internal set; }
 
+    // Package 2
+
     public string? ArticleNumber { get; internal set; }
 
+    // Package 3 - 5
     public string DeviceName { get; internal set; } = String.Empty;
 
-    public StatusDataValue[]? Values { get; internal set; }
+    // values
+
+    public StatusDataValue[] Values { get; internal set; }
 }

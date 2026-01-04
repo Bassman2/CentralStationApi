@@ -1,7 +1,42 @@
 ﻿namespace CentralStationWebApi;
 
+[DebuggerDisplay("StatusDataDevice {DeviceId} {ArticleNumber} {DeviceName}")]
 public class StatusDataValue
 {
+    internal StatusDataValue(uint device, byte index, byte numOfPackages, DataCollector col)
+    {
+        DeviceId = device;
+        Index = index;
+        NumOfPackages = numOfPackages;
+
+        // package 1
+        Channel = col.ReadByte();
+        Potency = col.ReadByte();
+        Color1 = col.ReadByte();
+        Color2 = col.ReadByte();
+        Color3 = col.ReadByte();
+        Color4 = col.ReadByte();
+        ZeroPoint =  col.ReadUInt16();
+        // package 2
+        End1 = col.ReadUInt16();
+        End2 = col.ReadUInt16();
+        End3 = col.ReadUInt16();
+        End4 = col.ReadUInt16();
+        // package 3, 4, 5
+        MeasurementDesignation = col.ReadString();
+        Start = col.ReadString();
+        End = col.ReadString();
+        Unit = col.ReadString();
+    }
+
+    public uint DeviceId { get; internal set; }
+
+    public byte Index { get; internal set; }
+
+    public byte NumOfPackages { get; internal set; }
+
+
+
     // Package 1
 
     public byte Channel { get; internal set; }
@@ -28,7 +63,7 @@ public class StatusDataValue
 
     public ushort End4 { get; internal set; }
 
-    // Package 3 ,4 , 5
+    // Package 3 - 5
 
     public string MeasurementDesignation { get; internal set; } = string.Empty;
 

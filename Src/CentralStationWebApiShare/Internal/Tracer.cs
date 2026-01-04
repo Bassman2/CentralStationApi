@@ -4,14 +4,14 @@ internal static class Tracer
 {
     private const string folder = @"C:\\MärklinTraces";
 
-    private static bool trace = Directory.Exists(folder);
+    private static readonly bool trace = Directory.Exists(folder);
 
     public static void TraceStream(Stream stream, string fileName)
     {
         if (trace)
         {
             stream.Position = 0;
-            StreamReader reader = new StreamReader(stream);
+            StreamReader reader = new(stream);
             string? firstLine = reader.ReadLine();
 
             string fileId = firstLine?.Trim('[', ']') ?? "unknown";
