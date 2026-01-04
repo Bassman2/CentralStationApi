@@ -113,7 +113,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             TrackDiagram = cs.TrackDiagram;
             break;
         case "Devices":
-            Devices = cs.Devices.Select(i => new DeviceViewModel(i)).ToList();
+            Devices = cs.Devices.Select(i => new ControlUnitViewModel(i)).ToList();
             break;
         case "StatusData":
             StatusData = cs.StatusData.Select(i => new StatusDataViewModel(i)).ToList();
@@ -146,7 +146,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private TrackDiagram? trackDiagram;
 
     [ObservableProperty]
-    private List<DeviceViewModel>? devices;
+    private List<ControlUnitViewModel>? devices;
 
     [ObservableProperty]
     private List<StatusDataViewModel>? statusData;

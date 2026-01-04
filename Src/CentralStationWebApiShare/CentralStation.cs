@@ -100,13 +100,13 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
             {
                 var result = await listener.ReceiveAsync();
                 var msg = new CANMessage(result);
+                Tracer.TraceMessage(msg);
                 Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceInfo, $"Received: {msg}");
                 messageReceivedQueue.Add(msg);
                 HandleStreams(msg);
                 HandleParticipants(msg);
                 HandleStatusData(msg);
                 HandleAsync(msg);
-                Tracer.TraceMessage(msg);
             }
         }
         catch (ObjectDisposedException)

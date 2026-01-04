@@ -199,6 +199,7 @@ public class CANMessage
                     SubCommand.Overload => $"Overload - Device: {DeviceName}",
                     SubCommand.Status => $"Status - Device: {DeviceName}",
                     SubCommand.Identifier => $"Identifier - Device: {DeviceName}",
+                    SubCommand.Unknown20 => $"Unknown20 - Device: {DeviceName}",
                     SubCommand.MfxSeek => $"Mfx Seek - Device: {DeviceName}",
                     SubCommand.Reset => $"System Reset - Device: {DeviceName}",
                     _ => $"Unknown System Command {buffer[SUBC]:X2}" 
