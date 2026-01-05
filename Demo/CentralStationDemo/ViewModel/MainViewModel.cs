@@ -11,7 +11,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             App.Current.Dispatcher.Invoke(() =>
             {
-                Messages.Insert(0, new MessageViewModel(e.Message));
+                Messages.Insert(0, e.Message);
 
                 UpdateStatus(e.Message);
                 UpdateLocomotive(e.Message);
@@ -211,10 +211,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
 
     [ObservableProperty]
-    private ObservableCollection<MessageViewModel> messages = [];
-
-   
-
+    private ObservableCollection<CANMessage> messages = [];
 
 
     #region System Sync Commands

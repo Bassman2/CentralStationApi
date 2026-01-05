@@ -18,7 +18,7 @@
                 <MenuItem Header="Articles" Command="{Binding RequestArticlesCommand}"/>
                 <MenuItem Header="Routes" Command="{Binding RequestRoutesCommand}"/>
                 <MenuItem Header="Tracks" Command="{Binding RequestTracksCommand}"/>
-                <MenuItem Header="Control Units" Command="{Binding RequestControlUnitsCommand}"/>
+                <MenuItem Header="Controllers" Command="{Binding RequestControlUnitsCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Command="{Binding AboutCommand}"/>
@@ -76,12 +76,12 @@
                 FontFamily="Courier"
                 Margin="2"> 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="110"/>
+                    <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat=HH:mm:ss.ffff}" Width="110"/>
                     <DataGridTextColumn Header="Sender" Binding="{Binding Sender}" Width="110"/>
                     <DataGridTextColumn Header="Binary" Binding="{Binding Binary}" Width="260"/>
                     <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="80"/>
                     <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="140"/>
-                    <DataGridTextColumn Header="IsResponse" Binding="{Binding IsResponse}" Width="70"/>
+                    <DataGridTextColumn Header="Direction" Binding="{Binding IsResponse, Converter={StaticResource ResponseToArrowConverter}}" FontWeight="ExtraBold" FontFamily="Arial" Width="70"/>
                     <DataGridTextColumn Header="Hash" Binding="{Binding Hash}" Width="50"/>
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
                 </DataGrid.Columns>
