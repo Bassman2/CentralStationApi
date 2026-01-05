@@ -1,4 +1,6 @@
-﻿namespace CentralStationWebApi.Internal;
+﻿using System.Net;
+
+namespace CentralStationWebApi.Internal;
 
 internal class TcpHandler : IProtocolHandler, IDisposable
 {
@@ -6,7 +8,9 @@ internal class TcpHandler : IProtocolHandler, IDisposable
     private const int TCPPort = 15731;
 
     private readonly TcpClient client;
-    private NetworkStream? stream; 
+    private NetworkStream? stream;
+
+    private string sender = "unknown";
 
     public TcpHandler()
     {
@@ -17,6 +21,8 @@ internal class TcpHandler : IProtocolHandler, IDisposable
     {
         client.Connect(host, TCPPort);
         stream = client.GetStream();
+
+        sender = Dns.GetHostEntry(host).HostName.Split('.')[0];
     }
 
     public void Dispose()
@@ -45,7 +51,7 @@ internal class TcpHandler : IProtocolHandler, IDisposable
     {
         byte[] buffer = new byte[CANMsgLength];
         await stream!.ReadExactlyAsync(buffer, 0, CANMsgLength);
-        return new CANMessage(buffer);
+        return new CANMessage(sender, buffer);
     }
 }
 

@@ -12,14 +12,19 @@ public class CANMessage
 
     public byte[] Buffer => buffer;
 
-    public DateTime Timestamp { get; } = DateTime.Now;
-    public string Sender { get; } = "";
+    
+    private static readonly string local = System.Net.Dns.GetHostName();
+
+    public  string Sender { get; }
+
+    public DateTime Timestamp { get; }
 
     #region Send
 
     public CANMessage(Priority priority, Command command, uint hash)
     {
-        //SetHeader(priority, command, hash, dataLength);
+        Sender = local;
+        Timestamp = DateTime.Now;
 
         uint header = 0;
         SetBits(ref header, 25, 4, (uint)priority);
@@ -96,15 +101,11 @@ public class CANMessage
     #endregion
 
     #region Receive
-
-    public CANMessage(UdpReceiveResult udpReceiveResult)
+    
+    public CANMessage(string sender, byte[] data)
     {
-        Sender = udpReceiveResult.RemoteEndPoint.Address.ToString();
-        Array.Copy(udpReceiveResult.Buffer, Buffer, 13);
-    }
-
-    public CANMessage(byte[] data)
-    {
+        Sender = sender;
+        Timestamp = DateTime.Now;
         Array.Copy(data, Buffer, 13);
     }
 

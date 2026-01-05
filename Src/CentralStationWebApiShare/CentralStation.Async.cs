@@ -38,7 +38,7 @@ partial class CentralStation
             //}
             //else
             //{
-            //    sender!.Send(reqMsg.Buffer, 13);
+            //    senderClient!.Send(reqMsg.Buffer, 13);
             //}
         
             while (messageReceivedEvent.WaitOne(ReceiveTimeout))

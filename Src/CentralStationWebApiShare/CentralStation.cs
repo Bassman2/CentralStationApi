@@ -6,8 +6,8 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
     //private const int UDPPortReceive = 15730;
     //private const int TCPPort = 15731;
 
-    //private readonly UdpClient? sender;
-    //private readonly UdpClient? listener;
+    //private readonly UdpClient? senderClient;
+    //private readonly UdpClient? listenerClient;
     //private readonly TcpClient? tcpClient;
     private readonly IProtocolHandler client;
 
@@ -25,7 +25,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     //private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
-    public CentralStation(string host, Protocol protocol = Protocol.TCP, SystemStatus systemStatus = CentralStationWebApi.SystemStatus.Default)
+    public CentralStation(string host, Protocol protocol = Protocol.UDP, SystemStatus systemStatus = CentralStationWebApi.SystemStatus.Default)
     {
         this.host = host;
 
@@ -46,11 +46,11 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
         
         this.receiver = Task.Run(async () => await ReceiveAsync());
         
-        //this.listener = new UdpClient(UDPPortReceive);
+        //this.listenerClient = new UdpClient(UDPPortReceive);
         //    this.receiver = Task.Run(async () => await ReceiveAsync());
 
-        //    this.sender = new UdpClient();
-        //    this.sender.Connect(host, UDPPortSend);
+        //    this.senderClient = new UdpClient();
+        //    this.senderClient.Connect(host, UDPPortSend);
         //}
 
         switch (systemStatus)
@@ -122,7 +122,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
                 //}
                 //else
                 //{
-                //    var result = await listener!.ReceiveAsync();
+                //    var result = await listenerClient!.ReceiveAsync();
                 //    msg = new CANMessage(result);
                 //}
                 Tracer.TraceMessage(msg);

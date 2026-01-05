@@ -5,8 +5,9 @@ public class MessageViewModel
     public MessageViewModel(CANMessage msg)
     {
         Timestamp = msg.Timestamp.ToString("HH:mm:ss.ffff");
-        IPHostEntry entry = Dns.GetHostEntry(msg.Sender);
-        Sender = entry != null ? entry.HostName : msg.Sender;
+        //IPHostEntry entry = Dns.GetHostEntry(msg.Sender);
+        //Sender = entry != null ? entry.HostName : msg.Sender;
+        Sender = msg.Sender;
         Binary = msg.Binary; 
         Priority = msg.Priority.ToString();
         Command = msg.Command.ToString();
