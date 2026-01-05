@@ -19,8 +19,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Enums\CSFileStreamMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\DeviceType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Direction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\Protocol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\DataCollector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\IProtocolHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\TcpHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\Tracer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\UdpHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StatusDataDevice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StatusDataValue.cs" />
     <Compile Include="..\CentralStationWebApiShare\Enums\DirectionChange.cs" />

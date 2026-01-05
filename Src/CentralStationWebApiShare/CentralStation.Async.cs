@@ -1,4 +1,6 @@
-﻿namespace CentralStationWebApi;
+﻿using System.Reflection;
+
+namespace CentralStationWebApi;
 
 partial class CentralStation
 {
@@ -28,9 +30,16 @@ partial class CentralStation
             // add to message queue
             messageReceivedQueue.Add(reqMsg);
 
-            // send message
-            sender.Send(reqMsg.Buffer, 13);
+            client.Send(reqMsg);
+            //// send message
+            //if (protocol == Protocol.TCP)
+            //{
 
+            //}
+            //else
+            //{
+            //    sender!.Send(reqMsg.Buffer, 13);
+            //}
         
             while (messageReceivedEvent.WaitOne(ReceiveTimeout))
             {
@@ -53,9 +62,7 @@ partial class CentralStation
             // add to message queue
             messageReceivedQueue.Add(reqMsg);
 
-            // send message
-            sender.Send(reqMsg.Buffer, 13);
-
+            client.Send(reqMsg);
 
             while (messageReceivedEvent.WaitOne(ReceiveTimeout))
             {
@@ -240,7 +247,7 @@ partial class CentralStation
 
     #region 7 GUI Information Transfer
 
-    private AutoResetEvent autoResetEventConfigDataStream = new AutoResetEvent(false);
+    private AutoResetEvent autoResetEventConfigDataStream = new(false);
 
     public async Task<string> ConfigDataLocosAsync(CancellationToken cancellationToken = default)
     {

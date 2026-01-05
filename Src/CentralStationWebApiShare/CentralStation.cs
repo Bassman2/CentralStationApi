@@ -2,13 +2,18 @@
 
 public sealed partial class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
-    private const int PortSend = 15731;
-    private const int PortReceive = 15730;
+    //private const int UDPPortSend = 15731;
+    //private const int UDPPortReceive = 15730;
+    //private const int TCPPort = 15731;
 
-    private readonly UdpClient sender;
-    private readonly UdpClient listener;
+    //private readonly UdpClient? sender;
+    //private readonly UdpClient? listener;
+    //private readonly TcpClient? tcpClient;
+    private readonly IProtocolHandler client;
+
     private readonly Task receiver;
     private readonly string host;
+    private readonly Protocol protocol;
         
     public const uint AllDevices = 0x0000;  
 
@@ -20,18 +25,33 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     //private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
-    public CentralStation(string host, SystemStatus systemStatus = CentralStationWebApi.SystemStatus.Default) 
+    public CentralStation(string host, Protocol protocol = Protocol.TCP, SystemStatus systemStatus = CentralStationWebApi.SystemStatus.Default)
     {
         this.host = host;
+
+        client = protocol switch
+        {
+            Protocol.TCP => new TcpHandler(),
+            Protocol.UDP => new UdpHandler(),
+            _ => throw new NotSupportedException($"Protocol {protocol} not supported"),
+        };
+
+        client.Connect(host);
+
+        this.protocol = protocol;
 
         messageReceivedQueue = new MessageQueue<CANMessage>((m) => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(m)));
         //fileReceivedQueue = new MessageQueue<CSFileStream>((f) => FileReceived?.Invoke(this, new FileReceivedEventArgs(f)));
 
-        this.listener = new UdpClient(PortReceive);
+        
         this.receiver = Task.Run(async () => await ReceiveAsync());
+        
+        //this.listener = new UdpClient(UDPPortReceive);
+        //    this.receiver = Task.Run(async () => await ReceiveAsync());
 
-        this.sender = new UdpClient();
-        this.sender.Connect(host, PortSend);
+        //    this.sender = new UdpClient();
+        //    this.sender.Connect(host, UDPPortSend);
+        //}
 
         switch (systemStatus)
         {
@@ -48,11 +68,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     public void Dispose()
     {
-        sender.Close();
-        sender.Dispose();
-        // stop listening
-        listener?.Close();
-        listener?.Dispose();
+        client.Dispose();
 
         messageReceivedQueue.Dispose();
         //fileReceivedQueue.Dispose();
@@ -79,7 +95,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
     private void SendMessage(CANMessage msg)
     {
         messageReceivedQueue.Add(msg);
-        sender.Send(msg.Buffer, 13);
+        client.Send(msg);
         Tracer.TraceMessage(msg);
     }
 
@@ -98,8 +114,17 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
         {
             while (true)
             {
-                var result = await listener.ReceiveAsync();
-                var msg = new CANMessage(result);
+                var msg = await client.ReceiveAsync();
+                //CANMessage msg;
+                //if (protocol == Protocol.TCP)
+                //{
+                //    msg = new CANMessage();
+                //}
+                //else
+                //{
+                //    var result = await listener!.ReceiveAsync();
+                //    msg = new CANMessage(result);
+                //}
                 Tracer.TraceMessage(msg);
                 Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceInfo, $"Received: {msg}");
                 messageReceivedQueue.Add(msg);

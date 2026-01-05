@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 
 namespace CentralStationWebApi;
 
@@ -15,7 +14,6 @@ public class CANMessage
 
     public DateTime Timestamp { get; } = DateTime.Now;
     public string Sender { get; } = "";
-
 
     #region Send
 
@@ -103,6 +101,11 @@ public class CANMessage
     {
         Sender = udpReceiveResult.RemoteEndPoint.Address.ToString();
         Array.Copy(udpReceiveResult.Buffer, Buffer, 13);
+    }
+
+    public CANMessage(byte[] data)
+    {
+        Array.Copy(data, Buffer, 13);
     }
 
     public Priority Priority => (Priority)GetBits(GetHeader(), 25, 4);

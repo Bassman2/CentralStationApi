@@ -17,6 +17,7 @@ public enum DeviceType : ushort
     /// 60113 for Märklin H0, Trix H0 and Minitrix
     /// </summary>
     DCB = 0x0010,
+    DCB1 = 0x0011,
 
     /// <summary>
     /// Connect 6021
@@ -49,6 +50,18 @@ public enum DeviceType : ushort
     MS2_3 = 0x0033,
 
     /// <summary>
+    /// Mobil Station 2
+    /// 60653 SW-Version 
+    /// </summary>
+    MS2_4 = 0x0034,
+
+    /// <summary>
+    /// S88 Link
+    /// SRSEII (non Märklin produkt)
+    /// </summary>
+    S88Link = 0x0040,
+
+    /// <summary>
     /// GFP3 from CS3
     /// 60226 Central Station 3       (from original device) 
     /// 60216 Central Station 3 plus
@@ -57,6 +70,7 @@ public enum DeviceType : ushort
 
     /// <summary>
     /// Central Station 2
+    /// Software App
     /// </summary>
     CS2 = 0xeeee,
 
@@ -66,6 +80,7 @@ public enum DeviceType : ushort
     Wireless = 0xffe0,
 
     /// <summary>
+    /// CS2 Slave
     /// Wired Device
     /// </summary>
     Wired = 0xfff0,
