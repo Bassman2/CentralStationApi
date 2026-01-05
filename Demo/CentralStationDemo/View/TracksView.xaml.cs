@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace CentralStationDemo.View
 {
     /// <summary>
-    /// Interaction logic for RailwayRoutesView.xaml
+    /// Interaction logic for TracksView.xaml
     /// </summary>
-    public partial class RailwayRoutesView : UserControl
+    public partial class TracksView : UserControl
     {
-        public RailwayRoutesView()
+        public TracksView()
         {
             InitializeComponent();
         }

@@ -9,62 +9,84 @@
         mc:Ignorable="d"
         Height="1200" Width="1800">
     <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Exit" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Request">
+                <MenuItem Header="Locomotioves" Command="{Binding RequestLocomotiovesCommand}"/>
+                <MenuItem Header="Articles" Command="{Binding RequestArticlesCommand}"/>
+                <MenuItem Header="Routes" Command="{Binding RequestRoutesCommand}"/>
+                <MenuItem Header="Tracks" Command="{Binding RequestTracksCommand}"/>
+                <MenuItem Header="Control Units" Command="{Binding RequestControlUnitsCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Command="{Binding AboutCommand}"/>
+            </MenuItem>
+        </Menu>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Text="{Binding SystemStatus}" />
+            </StatusBarItem>
+        </StatusBar>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                <TabControl Grid.Row="0">
+                    <TabItem Header="Locomotives">
+                        <local:LocomotivesView/>
+                    </TabItem>
+                    <TabItem Header="Articles">
+                        <local:ArticlesView/>
+                    </TabItem>
+                    <TabItem Header="Routes">
+                        <local:RoutesView/>
+                    </TabItem>
+                    <TabItem Header="Tracks">
+                        <local:TracksView/>
+                    </TabItem>
+                    <TabItem Header="Controllers">
+                        <local:ControllersView/>
+                    </TabItem>
+                </TabControl>
+                <Button Grid.Row="1" Content="STOP" Command="{Binding SystemStopAsyncCommand}" Margin="3" FontWeight="ExtraBold" FontSize="24" />
+            </Grid>
+            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Background="Blue" />
+            <DataGrid Grid.Row="2"
+                ItemsSource="{Binding Messages}" 
+                AutoGenerateColumns="False" 
+                IsReadOnly="True"
+                HeadersVisibility="Column"
+                GridLinesVisibility="None"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                CanUserResizeColumns="True"
+                CanUserReorderColumns="True"
+                CanUserSortColumns="True"
+                IsSynchronizedWithCurrentItem="True"
+                ClipboardCopyMode="IncludeHeader"
+                FontFamily="Courier"
+                Margin="2"> 
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="110"/>
+                    <DataGridTextColumn Header="Sender" Binding="{Binding Sender}" Width="110"/>
+                    <DataGridTextColumn Header="Binary" Binding="{Binding Binary}" Width="260"/>
+                    <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="80"/>
+                    <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="140"/>
+                    <DataGridTextColumn Header="IsResponse" Binding="{Binding IsResponse}" Width="70"/>
+                    <DataGridTextColumn Header="Hash" Binding="{Binding Hash}" Width="50"/>
+                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
 
-        <DataGrid 
-            DockPanel.Dock="Bottom"
-            Height="300"
-            ItemsSource="{Binding Messages}" 
-            AutoGenerateColumns="False" 
-            IsReadOnly="True"
-            HeadersVisibility="Column"
-            GridLinesVisibility="None"
-            CanUserAddRows="False"
-            CanUserDeleteRows="False"
-            CanUserResizeColumns="True"
-            CanUserReorderColumns="True"
-            CanUserSortColumns="True"
-            IsSynchronizedWithCurrentItem="True"
-            ClipboardCopyMode="IncludeHeader"
-            FontFamily="Courier"
-            Margin="2">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp}" Width="110"/>
-                <DataGridTextColumn Header="Sender" Binding="{Binding Sender}" Width="110"/>
-                <DataGridTextColumn Header="Binary" Binding="{Binding Binary}" Width="260"/>
-                <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="80"/>
-                <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="140"/>
-                <DataGridTextColumn Header="IsResponse" Binding="{Binding IsResponse}" Width="70"/>
-                <DataGridTextColumn Header="Hash" Binding="{Binding Hash}" Width="50"/>
-                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
-            </DataGrid.Columns>
-        </DataGrid>
-        
-        <TabControl>
-            <TabItem Header="Controller">
-                <local:ControllerView Grid.Row="7"/>
-            </TabItem>
-            <TabItem Header="System Sync">
-                <local:SystemSyncView Grid.Row="0"/>
-            </TabItem>
-            <TabItem Header="System Async">
-            <local:SystemAsyncView Grid.Row="1"/>
-            </TabItem>
-            <TabItem Header="Status">
-                <local:StatusView Grid.Row="2"/>
-            </TabItem>
-            <TabItem Header="Locomotives">
-                <local:LocomotivesView Grid.Row="3"/>
-            </TabItem>
-            <TabItem Header="Articles">
-                <local:ArticlesView/>
-            </TabItem>
-            <TabItem Header="Railway">
-                <local:RailwayRoutesView/>
-            </TabItem>
-            <TabItem Header="Control Units">
-                <local:ControlUnitsView/>
-            </TabItem>
-        </TabControl>
-        
     </DockPanel>
 </AppWindowView>

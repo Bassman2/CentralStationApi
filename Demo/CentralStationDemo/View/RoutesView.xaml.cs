@@ -13,16 +13,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace CentralStationDemo.View
+namespace CentralStationDemo.View;
+
+/// <summary>
+/// Interaction logic for RoutesView.xaml
+/// </summary>
+public partial class RoutesView : UserControl
 {
-    /// <summary>
-    /// Interaction logic for ControllerView.xaml
-    /// </summary>
-    public partial class ControllerView : UserControl
+    public RoutesView()
     {
-        public ControllerView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

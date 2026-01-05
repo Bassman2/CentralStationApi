@@ -35,7 +35,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     protected override void OnStartup()
     {
-        cs.RequestParticipants();
+       
 
         //cs.RequestConfigDataLocomotives();
         //cs.RequestConfigDataMagneticItems();
@@ -272,6 +272,42 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     #endregion
 
+    #region Requests
+
+    [RelayCommand]
+    private void OnRequestLocomotioves()
+    {
+        cs.RequestConfigDataLocomotives();
+    }
+
+    [RelayCommand]
+    private void OnRequestArticles()
+    {
+        cs.RequestConfigDataMagneticItems();
+    }
+
+    [RelayCommand]
+    private void OnRequestRoutes()
+    {
+        cs.RequestConfigDataRailwayRoute();
+    }
+
+    [RelayCommand]
+    private void OnRequestTracks()
+    {
+        cs.RequestConfigDataTrackDiagram();
+        //cs.RequestConfigDataTrackDiagramPage(1);
+        //cs.RequestConfigDataTrackDiagramPage(2);
+    }
+
+    [RelayCommand]
+    private void OnRequestControlUnits()
+    {
+        cs.RequestParticipants();
+    }
+
+    #endregion
+
     //[RelayCommand]
     //private async Task OnLocoInfo()
     //{
@@ -284,5 +320,5 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     //    string file = await cs.RequestConfigDataLocomotives();
     //}
 
-    
+
 }

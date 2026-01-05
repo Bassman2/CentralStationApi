@@ -13,16 +13,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace CentralStationDemo.View
+namespace CentralStationDemo.View;
+
+/// <summary>
+/// Interaction logic for LocomotivesView.xaml
+/// </summary>
+public partial class LocomotivesView : UserControl
 {
-    /// <summary>
-    /// Interaction logic for LocomotivesView.xaml
-    /// </summary>
-    public partial class LocomotivesView : UserControl
+    public LocomotivesView()
     {
-        public LocomotivesView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }
