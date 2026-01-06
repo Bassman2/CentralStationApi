@@ -7,7 +7,7 @@ namespace CentralStationConsole
         static async Task Main(/*string[] args*/)
         {
 
-            using var cs = new CentralStation("CS2");
+            using var cs = new CentralStationBasic("CS2");
 
             
             await cs.SystemStopAsync();

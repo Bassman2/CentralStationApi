@@ -1,8 +1,6 @@
-﻿using System.Reflection;
+﻿namespace CentralStationWebApi;
 
-namespace CentralStationWebApi;
-
-partial class CentralStation
+partial class CentralStationBasic
 {
     public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(30);
 

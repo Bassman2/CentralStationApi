@@ -9,10 +9,10 @@
     <Import_RootNamespace>CentralStationWebApi</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)CentralStation.Async.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CentralStation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.Async.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CANMessage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CentralStation.Sync.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.Sync.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CSFileStream.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Device.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Command.cs" />

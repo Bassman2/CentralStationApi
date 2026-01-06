@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-partial class CentralStation
+partial class CentralStationBasic
 {
     #region 2 System Commands
 

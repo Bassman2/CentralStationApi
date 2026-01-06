@@ -8,6 +8,16 @@
     <RootNamespace>CentralStationWebApi</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <IsTrimmable>True</IsTrimmable>
+    <IsAotCompatible>True</IsAotCompatible>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <IsTrimmable>True</IsTrimmable>
+    <IsAotCompatible>True</IsAotCompatible>
+  </PropertyGroup>
+
   <Import Project="..\CentralStationWebApiShare\CentralStationWebApiShare.projitems" Label="Shared" />
 
   <ItemGroup>

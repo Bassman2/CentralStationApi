@@ -7,7 +7,7 @@ public class DeviceToDescriptionConverter : IValueConverter
     {
         if (value is uint device)
         {
-            return CentralStation.DeviceDescription(device);
+            return CentralStationBasic.DeviceDescription(device);
         }
         throw new InvalidOperationException("The target must be a uint");
     }

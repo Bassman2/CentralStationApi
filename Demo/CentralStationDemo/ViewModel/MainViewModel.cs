@@ -3,10 +3,11 @@
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
     private const string host = "CS3";
-    private readonly CentralStation cs; 
+    private readonly CentralStationBasic cs; 
+
     public MainViewModel()
     {
-        cs = new CentralStation(host);
+        cs = new CentralStationBasic(host);
         cs.MessageReceived += (s, e) =>
         {
             App.Current.Dispatcher.Invoke(() =>
@@ -20,61 +21,18 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.PropertyChanged += (s, e) => OnCsPropertyChanged(e.PropertyName);
     }
 
-    public void Dispose()
-    {
-        //cs.Close();
-        cs.Dispose();
-    }
-
+    public void Dispose() => cs.Dispose();
     
-
-    //private const uint CS3 = 0x63736E38;
-    //private const uint MS2 = 0x4D54E34D;
-
-    //private readonly uint[] allDevices = [CS3, MS2];
-
-    protected override void OnStartup()
-    {
-       
-
-        //cs.RequestConfigDataLocomotives();
-        //cs.RequestConfigDataMagneticItems();
-        //cs.RequestConfigDataRailwayRoute();
-        //cs.RequestConfigDataTrackDiagram();
-        //cs.RequestConfigDataTrackDiagramPage(1);
-        //cs.RequestConfigDataTrackDiagramPage(2);
-
-        // Timestamp	Sender	Binary	Priority	Command	IsResponse	Hash	Description
-        //        00:42:40.1337   CS3.fritz.box   00315F1F 8 63 73 6E 38 0C 71 00 50  Proirity1 SoftwareVersion True    5F1F    Software Version -Sender: 63736E38 Version: 12.113 DeviceId: GFP3 50
-        //00:42:40.1315   CS3.fritz.box   00317319 8 4D 54 E3 4D 05 06 00 33  Proirity1 SoftwareVersion True    7319    Software Version -Sender: 4D54E34D Version: 5.6 DeviceId: MS2_3 33
-
-        //Task.Run(() =>
-        //{
-        //    foreach (var device in allDevices)
-        //    {
-        //        do
-        //        {
-        //            cs.RequestStatusData(device, 0);
-        //            statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
-        //        } while (StatusData is null || StatusData.Count == 0 || !StatusData.Any(d => d.DeviceId == device));
-
-        //        for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
-        //        {
-        //            cs.RequestStatusData(device, index);
-        //            statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
-        //        }
-        //    }
-        //});
-
-    }
+    //protected override void OnStartup()
+    //{ }
 
     private void UpdateStatus(CANMessage message)
     { 
-        if (message.Command == Command.SystemCommand && message.SubCommand == SubCommand.Stop && message.Device == CentralStation.AllDevices)
+        if (message.Command == Command.SystemCommand && message.SubCommand == SubCommand.Stop && message.Device == CentralStationBasic.AllDevices)
         {
             SystemStatus = SystemStatus.Stop;
         }
-        if (message.Command == Command.SystemCommand && message.SubCommand == SubCommand.Go && message.Device == CentralStation.AllDevices)
+        if (message.Command == Command.SystemCommand && message.SubCommand == SubCommand.Go && message.Device == CentralStationBasic.AllDevices)
         {
             SystemStatus = SystemStatus.Go;
         }

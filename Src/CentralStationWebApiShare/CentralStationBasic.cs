@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-public sealed partial class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
+public sealed partial class CentralStationBasic : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
     //private const int UDPPortSend = 15731;
     //private const int UDPPortReceive = 15730;
@@ -25,7 +25,7 @@ public sealed partial class CentralStation : INotifyPropertyChanged, INotifyProp
 
     //private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
-    public CentralStation(string host, Protocol protocol = Protocol.UDP, SystemStatus systemStatus = CentralStationWebApi.SystemStatus.Default)
+    public CentralStationBasic(string host, Protocol protocol = Protocol.UDP, SystemStatus systemStatus = CentralStationWebApi.SystemStatus.Default)
     {
         this.host = host;
 
