@@ -9,6 +9,7 @@
     <Import_RootNamespace>CentralStationWebApi</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CentralStation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.Async.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CANMessage.cs" />

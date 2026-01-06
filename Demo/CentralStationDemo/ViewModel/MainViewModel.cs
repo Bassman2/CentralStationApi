@@ -3,18 +3,17 @@
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
     private const string host = "CS3";
-    private readonly CentralStationBasic cs; 
+    private readonly CentralStation cs; 
 
     public MainViewModel()
     {
-        cs = new CentralStationBasic(host);
+        cs = new CentralStation(host);
         cs.MessageReceived += (s, e) =>
         {
             App.Current.Dispatcher.Invoke(() =>
             {
                 Messages.Insert(0, e.Message);
 
-                UpdateStatus(e.Message);
                 UpdateLocomotive(e.Message);
             });
         };
@@ -26,17 +25,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     //protected override void OnStartup()
     //{ }
 
-    private void UpdateStatus(CANMessage message)
-    { 
-        if (message.Command == Command.SystemCommand && message.SubCommand == SubCommand.Stop && message.Device == CentralStationBasic.AllDevices)
-        {
-            SystemStatus = SystemStatus.Stop;
-        }
-        if (message.Command == Command.SystemCommand && message.SubCommand == SubCommand.Go && message.Device == CentralStationBasic.AllDevices)
-        {
-            SystemStatus = SystemStatus.Go;
-        }
-    }
+    
 
     private void OnCsPropertyChanged(string? propertyName)
     {
@@ -67,6 +56,27 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Status
+
+    [ObservableProperty]
+    private SystemStatus status = SystemStatus.Default;
+
+
+    [RelayCommand]
+    private void OnStop()
+    {
+        switch (Status)
+        {
+        case SystemStatus.Default: cs.SystemStop(); break;
+        case SystemStatus.Go: cs.SystemStop(); break;
+        case SystemStatus.Stop: cs.SystemGo(); break;
+        default: throw new InvalidEnumArgumentException(nameof(Status), (int)Status, typeof(SystemStatus));
+        }
+    }
+
+
+    #endregion
 
     #region Locomotives
 
@@ -216,22 +226,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
 
     #endregion
-
-    #region Status
-
-    [ObservableProperty]
-    private SystemStatus systemStatus = SystemStatus.Default;
-
-
-    [RelayCommand]
-    private void OnSystemStop()
-    {
-        cs.SystemStop();
-        cs.SystemGo();
-    }
-
-
-    #endregion
+       
 
     #region Messages
 
