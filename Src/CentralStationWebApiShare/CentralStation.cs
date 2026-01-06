@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-public class CentralStation(string host, Protocol protocol = Protocol.UDP) : CentralStationBasic(host, protocol), INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
+public class CentralStation(string host, Protocol protocol = Protocol.TCP) : CentralStationBasic(host, protocol), INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
@@ -8,9 +8,9 @@ public class CentralStation(string host, Protocol protocol = Protocol.UDP) : Cen
     protected override void ReceiveHandler(CANMessage msg)
     {
         HandleStatus(msg);
-        HandleStreams(msg);
-        HandleParticipants(msg);
-        HandleStatusData(msg);
+        //HandleStreams(msg);
+        //HandleParticipants(msg);
+        //HandleStatusData(msg);
     }
 
     private readonly Dictionary<ushort, CSFileStream> fileDictionary = [];
@@ -92,13 +92,16 @@ public class CentralStation(string host, Protocol protocol = Protocol.UDP) : Cen
 
     #region Status
 
-    public SystemStatus Status = CentralStationWebApi.SystemStatus.Default;
+    public SystemStatus Status { get; private set; } = CentralStationWebApi.SystemStatus.Default;
 
     private void SetStatus(SystemStatus status)
     {
-        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Status)));
-        Status = status;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
+        if (Status != status)
+        {
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Status)));
+            Status = status;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
+        }
     }
 
     private void HandleStatus(CANMessage message)

@@ -7,16 +7,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     public MainViewModel()
     {
-        cs = new CentralStation(host);
-        cs.MessageReceived += (s, e) =>
-        {
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                Messages.Insert(0, e.Message);
-
-                UpdateLocomotive(e.Message);
-            });
-        };
+        cs = new CentralStation(host, Protocol.TCP);
+        cs.MessageReceived += (s, e) => App.Current.Dispatcher.Invoke(() => Messages.Insert(0, e.Message));
         cs.PropertyChanged += (s, e) => OnCsPropertyChanged(e.PropertyName);
     }
 
@@ -31,6 +23,9 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     {
         switch (propertyName)
         {
+        case "Status":
+            Status = cs.Status;
+            break;
         case "Locomotives":
             Locomotives = cs.Locomotives?.Locomotives_?.Select(i => new LocomotiveViewModel(host, i))?.ToList();
             break;
@@ -60,7 +55,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Status
 
     [ObservableProperty]
-    private SystemStatus status = SystemStatus.Default;
+    private SystemStatus status = SystemStatus.Stop;
 
 
     [RelayCommand]
