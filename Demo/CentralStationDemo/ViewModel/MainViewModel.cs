@@ -1,4 +1,7 @@
-﻿namespace CentralStationDemo.ViewModel;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using System.Net.NetworkInformation;
+
+namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
@@ -79,6 +82,29 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             SystemStatus = SystemStatus.Go;
         }
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Locomotives
+
+    [ObservableProperty]
+    private List<LocomotiveViewModel>? locomotives;
+
+    [RelayCommand]
+    private void OnRequestLocomotioves()
+    {
+        cs.RequestConfigDataLocomotives();
+    }
+
+    [RelayCommand]
+    private void OnSortLocomotives(string propertyName)
+    {
+        CollectionViewSource.GetDefaultView(Locomotives).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
+    }
+
+    #endregion
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void UpdateLocomotive(CANMessage message)
     {
@@ -191,8 +217,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     //{ 
     //}
 
-    [ObservableProperty]
-    private List<LocomotiveViewModel>? locomotives;
+    
 
     [ObservableProperty]
     private List<MagneticItemViewModel>? magneticItems;
@@ -271,11 +296,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     #region Requests
 
-    [RelayCommand]
-    private void OnRequestLocomotioves()
-    {
-        cs.RequestConfigDataLocomotives();
-    }
+   
 
     [RelayCommand]
     private void OnRequestArticles()
