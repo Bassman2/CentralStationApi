@@ -1,7 +1,4 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using System.Net.NetworkInformation;
-
-namespace CentralStationDemo.ViewModel;
+﻿namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
@@ -29,12 +26,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.Dispose();
     }
 
-    private readonly AutoResetEvent statusDataEvent = new(false);
+    
 
-    private const uint CS3 = 0x63736E38;
-    private const uint MS2 = 0x4D54E34D;
+    //private const uint CS3 = 0x63736E38;
+    //private const uint MS2 = 0x4D54E34D;
 
-    private readonly uint[] allDevices = [CS3, MS2];
+    //private readonly uint[] allDevices = [CS3, MS2];
 
     protected override void OnStartup()
     {
@@ -83,47 +80,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    #region Locomotives
-
-    [ObservableProperty]
-    private List<LocomotiveViewModel>? locomotives;
-
-    [RelayCommand]
-    private void OnRequestLocomotioves()
-    {
-        cs.RequestConfigDataLocomotives();
-    }
-
-    [RelayCommand]
-    private void OnSortLocomotives(string propertyName)
-    {
-        CollectionViewSource.GetDefaultView(Locomotives).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
-    }
-
-    #endregion
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private void UpdateLocomotive(CANMessage message)
-    {
-        if (message.Command == Command.LocoVelocity ||
-            message.Command == Command.LocoDirection ||
-            message.Command == Command.LocoFunction)
-        {
-            var locomotiveViewModel = Locomotives?.FirstOrDefault(l => l.Uid == message.Device);
-            locomotiveViewModel?.UpdateLocomotive(message);
-        }
-
-    }
-
     private void OnCsPropertyChanged(string? propertyName)
     {
         switch (propertyName)
         {
         case "Locomotives":
-            Locomotives = cs.Locomotives?.Locomotives_?.Select(i => new LocomotiveViewModel(host, i))?.ToList(); 
+            Locomotives = cs.Locomotives?.Locomotives_?.Select(i => new LocomotiveViewModel(host, i))?.ToList();
             break;
         case "MagneticItems":
             MagneticItems = cs.MagneticItems?.Articles?.Select(i => new MagneticItemViewModel(i))?.ToList();
@@ -146,23 +108,111 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    #region Locomotives
+
+    [ObservableProperty]
+    private List<LocomotiveViewModel>? locomotives;
+
+    [RelayCommand]
+    private void OnRequestLocomotioves()
+    {
+        cs.RequestConfigDataLocomotives();
+    }
+
+    [RelayCommand]
+    private void OnSortLocomotives(string propertyName)
+    {
+        CollectionViewSource.GetDefaultView(Locomotives).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
+    }
+
+    private void UpdateLocomotive(CANMessage message)
+    {
+        if (message.Command == Command.LocoVelocity ||
+            message.Command == Command.LocoDirection ||
+            message.Command == Command.LocoFunction)
+        {
+            var locomotiveViewModel = Locomotives?.FirstOrDefault(l => l.Uid == message.Device);
+            locomotiveViewModel?.UpdateLocomotive(message);
+        }
+    }
+
+    #endregion
+
+    #region Articles
+
+    [ObservableProperty]
+    private List<MagneticItemViewModel>? magneticItems;
+
+    [RelayCommand]
+    private void OnRequestArticles()
+    {
+        cs.RequestConfigDataMagneticItems();
+    }
+
+
+    #endregion
+
+    #region Routes
+
+    [ObservableProperty]
+    private List<RailwayRouteViewModel>? railwayRoutes;
+
+    [RelayCommand]
+    private void OnRequestRoutes()
+    {
+        cs.RequestConfigDataRailwayRoute();
+    }
+
+
+    #endregion
+
+    #region Tracks
+
+    [ObservableProperty]
+    private TrackDiagram? trackDiagram;
+
+    [RelayCommand]
+    private void OnRequestTracks()
+    {
+        cs.RequestConfigDataTrackDiagram();
+        //cs.RequestConfigDataTrackDiagramPage(1);
+        //cs.RequestConfigDataTrackDiagramPage(2);
+    }
+
+    #endregion
+
+    #region Controllers
+
+    private readonly AutoResetEvent statusDataEvent = new(false);
+
+    [ObservableProperty]
+    private List<ControlUnitViewModel> controlUnits = [];
+
+    [RelayCommand]
+    private void OnRequestControlUnits()
+    {
+        cs.RequestParticipants();
+    }
+
     private readonly Lock lockItem = new();
     //private uint reqDeviceId = 0;
     private ControlUnitViewModel? GetControlUnit(uint deviceId) => ControlUnits?.FirstOrDefault(d => d.DeviceId == deviceId);
-       
+
 
     private void UpdateControlUnits()
     {
         // store for parallel changes
         ControlUnitViewModel[] controlUnits = [.. ControlUnits.Where(c => !c.HasDetails).Reverse()];
-        
+
         Task.Run(() =>
         {
             lock (lockItem)
             {
                 foreach (var controlUnit in controlUnits)
                 {
-                    if (controlUnit.HasDetails == false)  
+                    if (controlUnit.HasDetails == false)
                     {
                         Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index 0");
 
@@ -182,7 +232,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
                                 Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout Index {index} Device {controlUnit.DeviceId:X8}");
                             }
                         }
-                    } 
+                    }
 
                     //for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
                     //{
@@ -207,136 +257,28 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     }
 
 
+    #endregion
+
+    #region Status
+
     [ObservableProperty]
     private SystemStatus systemStatus = SystemStatus.Default;
 
-    [ObservableProperty]
-    private uint device = 0;
 
-    //partial void OnDeviceChanged(uint value)
-    //{ 
-    //}
+    [RelayCommand]
+    private void OnSystemStop()
+    {
+        cs.SystemStop();
+        cs.SystemGo();
+    }
 
-    
 
-    [ObservableProperty]
-    private List<MagneticItemViewModel>? magneticItems;
+    #endregion
 
-    [ObservableProperty]
-    private List<RailwayRouteViewModel>? railwayRoutes;
-
-    [ObservableProperty]
-    private TrackDiagram? trackDiagram;
-
-    [ObservableProperty]
-    private List<ControlUnitViewModel> controlUnits = [];
-
-    //[ObservableProperty]
-    //private List<StatusDataViewModel>? statusData;
-
+    #region Messages
 
     [ObservableProperty]
     private ObservableCollection<CANMessage> messages = [];
 
-
-    #region System Sync Commands
-
-    [RelayCommand]
-    private void OnSystemStop() => cs.SystemStop();
-    
-    [RelayCommand]
-    private void OnSystemGo() => cs.SystemGo();
-    
-    [RelayCommand]
-    private void OnSystemHalt() => cs.SystemHalt();
-
-    [RelayCommand]
-    private void OnSystemLocoHalt() => cs.SystemLocoHalt();
-
-    [RelayCommand]
-    private void OnSystemLocoCycleStop() => cs.SystemLocoCycleStop();
-
-
     #endregion
-
-    #region System Async Commands
-
-    [RelayCommand]
-    private async Task OnSystemStopAsyncAsync()
-    {
-        await cs.SystemStopAsync();
-    }
-
-
-    [RelayCommand]
-    private async Task OnSystemGoAsyncAsync()
-    {
-        await cs.SystemGoAsync();
-    }
-
-    [RelayCommand]
-    private async Task OnSystemHaltAsyncAsync()
-    {
-        await cs.SystemHaltAsync();
-    }
-
-    [RelayCommand]
-    private async Task OnSystemLocoHaltAsyncAsync()
-    {
-        await cs.SystemLocoHaltAsync();
-    }
-
-    [RelayCommand]
-    private async Task OnSystemLocoCycleStopAsyncAsync()
-    {
-        await cs.SystemLocoCycleStopAsync();
-    }
-
-    #endregion
-
-    #region Requests
-
-   
-
-    [RelayCommand]
-    private void OnRequestArticles()
-    {
-        cs.RequestConfigDataMagneticItems();
-    }
-
-    [RelayCommand]
-    private void OnRequestRoutes()
-    {
-        cs.RequestConfigDataRailwayRoute();
-    }
-
-    [RelayCommand]
-    private void OnRequestTracks()
-    {
-        cs.RequestConfigDataTrackDiagram();
-        //cs.RequestConfigDataTrackDiagramPage(1);
-        //cs.RequestConfigDataTrackDiagramPage(2);
-    }
-
-    [RelayCommand]
-    private void OnRequestControlUnits()
-    {
-        cs.RequestParticipants();
-    }
-
-    #endregion
-
-    //[RelayCommand]
-    //private async Task OnLocoInfo()
-    //{
-    //    await cs.ConfigDataLocomotivesInfo();
-    //}
-
-    //[RelayCommand]
-    //private async Task OnLocos()
-    //{
-    //    string file = await cs.RequestConfigDataLocomotives();
-    //}
-
-
 }
