@@ -1,11 +1,18 @@
-﻿using CentralStationWebApi.Model;
+﻿using CentralStationWebApi.Internal;
 
 namespace CentralStationWebApi;
 
-public class CentralStation(string host, Protocol protocol = Protocol.TCP) : CentralStationBasic(host, protocol), INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
+public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
+
+    private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
+
+    public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
+    {
+        statusDataEventQueue = new (tuple => RequestStatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
+    }       
 
     protected override void ReceiveHandler(CANMessage msg)
     {
@@ -166,8 +173,6 @@ public class CentralStation(string host, Protocol protocol = Protocol.TCP) : Cen
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
     }
 
-
-
     public TrackDiagramPage? TrackPages;
 
     private void SetTrackPages(TrackDiagramPage trackPages)
@@ -195,31 +200,41 @@ public class CentralStation(string host, Protocol protocol = Protocol.TCP) : Cen
         }
     }
 
+    //private void UpdateController(Controller controller)
+    //{
+    //    if (!controllersDictionary.TryGetValue(controller.DeviceId, out Controller? value) && !controller.Equals(value))
+    //    {
+    //        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
+    //        controllersDictionary[controller.DeviceId] = controller;
+    //        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
+    //    }
+    //}
+
+    //private readonly BlockingCollection<T> queue = [];
+    //private void StatusDataWorkerLoop()
+    //{
+    //    foreach (var item in queue.GetConsumingEnumerable())
+    //    {
+    //        try { action(item); }
+    //        catch (Exception ex) { Debug.WriteLine(ex); }
+    //    }
+    //}
+
+    private DataCollector statusDataCollector = new();
+
     private void HandleController(CANMessage msg)
     {
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
             var controller = new Controller(msg);
             SetController(controller);
-            //if (!devices.TryGetValue(msg.Device, out var oldDevice) || !controller.Equals(oldDevice))
-            //{
-            //    devices[msg.Device] = new Device(msg);
-            //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
-            //    Controllers = devices.Values;
-            //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
-            //}
+
+            // request additional data if not already happened
+            if (controllersDictionary.TryGetValue(msg.Device, out var existingController))
+            {
+                statusDataEventQueue.Add((msg.Device, 0));
+            }
         }
-    }
-
-    //private Dictionary<uint, StatusDataDevice> statusData = [];
-    public List<StatusDataDevice> StatusData = [];
-    //private StatusDataDevice? curStatusData;
-    //private ushort nextStatusDataPackage = 1;
-
-    private DataCollector statusDataCollector = new();
-
-    private void HandleStatusData(CANMessage msg)
-    {
         if (msg.Command == Command.StatusData) // && msg.IsResponse)
         {
             switch (msg.DataLength)
@@ -233,18 +248,22 @@ public class CentralStation(string host, Protocol protocol = Protocol.TCP) : Cen
 
                 if (index == 0)
                 {
+                    if (controllersDictionary.TryGetValue(msg.Device, out var existingController))
+                    {
+                        StatusDataDevice statusDataDevice = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
 
-                    StatusDataDevice statusDataDevice = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
-                    StatusData.Add(statusDataDevice);
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
+                        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controller)));
+                        existingController.Update(statusDataDevice);
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controller)));
+                        statusDataEventQueue.Continue();
+                    }
                 }
                 else
                 {
-                    StatusDataValue statusDataValue = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
-                    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
-                    StatusData.First(d => d.DeviceId == msg.Device).Values[index - 1] = statusDataValue;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
+                    //StatusDataValue statusDataValue = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
+                    //PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
+                    //StatusData.First(d => d.DeviceId == msg.Device).Values[index - 1] = statusDataValue;
+                    //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
                 }
                 break;
             case 8:
@@ -261,6 +280,18 @@ public class CentralStation(string host, Protocol protocol = Protocol.TCP) : Cen
             }
         }
     }
+
+    //private Dictionary<uint, StatusDataDevice> statusData = [];
+    //public List<StatusDataDevice> StatusData = [];
+    //private StatusDataDevice? curStatusData;
+    //private ushort nextStatusDataPackage = 1;
+
+   
+
+    //private void HandleStatusData(CANMessage msg)
+    //{
+       
+    //}
 
     #endregion
 }

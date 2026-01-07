@@ -11,7 +11,7 @@
     <ListView ItemsSource="{Binding Controllers}">
         <ListView.ItemsPanel>
             <ItemsPanelTemplate>
-                <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>
+                <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal" VerticalAlignment="Top"/>
             </ItemsPanelTemplate>
         </ListView.ItemsPanel>
         <ListView.ContextMenu>
@@ -54,21 +54,22 @@
                             <RowDefinition Height="20"/>
                             <RowDefinition Height="20"/>
                             <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Image Grid.Row="0" Source="{Binding Icon}" Width="100" Height="80" Stretch="Uniform"/>
-                        <TextBlock Grid.Row="1" Text="{Binding Type}"/>
-                        <TextBlock Grid.Row="2" Text="{Binding DeviceId, StringFormat=X4}"/>
-                        <TextBlock Grid.Row="3" Text="{Binding SwVersion}"/>
+                        <TextBlock Grid.Row="1" Text="{Binding Type}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Text="{Binding DeviceId, StringFormat=X4}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="3" Text="{Binding SwVersion}" HorizontalAlignment="Center"/>
 
-                        <TextBlock Grid.Row="4" Text="{Binding DeviceName}"/>
-                        <TextBlock Grid.Row="5" Text="{Binding ArticleNumber, StringFormat=Article: {0}}"/>
-                        <TextBlock Grid.Row="6" Text="{Binding SerialNumber}"/>
+                        <TextBlock Grid.Row="4" Text="{Binding DeviceName}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="5" Text="{Binding ArticleNumber, StringFormat=Article: {0}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="6" Text="{Binding SerialNumber}" HorizontalAlignment="Center"/>
 
-                        <TextBlock Grid.Row="7" Text="{Binding Index}"/>
-                        <TextBlock Grid.Row="8" Text="{Binding NumOfPackages}"/>
+                        <TextBlock Grid.Row="7" Text="{Binding Index}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="8" Text="{Binding NumOfPackages}" HorizontalAlignment="Center"/>
 
-                        <TextBlock Grid.Row="9" Text="{Binding NumOfMeasuredValues, StringFormat=# Measures: {0}}"/>
-                        <TextBlock Grid.Row="10" Text="{Binding NumOfConfigurationChannels, StringFormat=# Channels {0}}"/>
+                        <TextBlock Grid.Row="9" Text="{Binding NumOfMeasuredValues, StringFormat=# Measures: {0}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="10" Text="{Binding NumOfConfigurationChannels, StringFormat=# Channels {0}}" HorizontalAlignment="Center"/>
 
                         <!--<DataGrid Grid.Row="4" 
                                       Grid.Column="0" 
