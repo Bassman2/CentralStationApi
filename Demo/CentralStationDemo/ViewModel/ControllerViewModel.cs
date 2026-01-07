@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+﻿using System.Windows.Media;
 
 namespace CentralStationDemo.ViewModel;
 
@@ -12,6 +10,15 @@ public partial class ControllerViewModel : ObservableObject
         SwVersion = $"{controller.MajorVersion}.{controller.MinorVersion}";
         Type = Enum.IsDefined<DeviceType>(controller.DeviceType) ? controller.DeviceType.ToString() : ((ushort)controller.DeviceType).ToString("X4");
 
+        //DeviceId = statusData.DeviceId;
+        Index = controller.Index;
+        NumOfPackages = controller.NumOfPackages;
+        NumOfMeasuredValues = controller.NumOfMeasuredValues;
+        NumOfConfigurationChannels = controller.NumOfConfigurationChannels;
+        SerialNumber = controller.SerialNumber;
+        ArticleNumber = controller.ArticleNumber ?? String.Empty;
+        DeviceName = controller.DeviceName;
+    
         string iconName = controller.DeviceType switch
         {
             CentralStationWebApi.DeviceType.GFP => "dashboard_gfp3",
@@ -37,7 +44,7 @@ public partial class ControllerViewModel : ObservableObject
             Icon = App.Current.Dispatcher.Invoke(() =>
             {
                 var uri = new Uri($"http://{host}/images/gui/{iconName}.png");
-                return new BitmapImage(uri);
+                return new System.Windows.Media.Imaging.BitmapImage(uri);
             });
         }
     }
@@ -54,18 +61,18 @@ public partial class ControllerViewModel : ObservableObject
     // http://cs3/images/gui/dashboard_smartphone.png
     // http://cs3/images/gui/dashboard_links88.png
 
-    public void UpdateStatusData(StatusDataDevice statusData)
-    {
-        //DeviceId = statusData.DeviceId;
-        Index = statusData.Index;
-        NumOfPackages = statusData.NumOfPackages;
-        NumOfMeasuredValues = statusData.NumOfMeasuredValues;
-        NumOfConfigurationChannels = statusData.NumOfConfigurationChannels;
-        SerialNumber = statusData.SerialNumber;
-        ArticleNumber = statusData.ArticleNumber ?? String.Empty;
-        DeviceName = statusData.DeviceName;
-        HasDetails = true;
-    }
+    //public void UpdateStatusData(StatusDataDevice statusData)
+    //{
+    //    //DeviceId = statusData.DeviceId;
+    //    Index = statusData.Index;
+    //    NumOfPackages = statusData.NumOfPackages;
+    //    NumOfMeasuredValues = statusData.NumOfMeasuredValues;
+    //    NumOfConfigurationChannels = statusData.NumOfConfigurationChannels;
+    //    SerialNumber = statusData.SerialNumber;
+    //    ArticleNumber = statusData.ArticleNumber ?? String.Empty;
+    //    DeviceName = statusData.DeviceName;
+    //    HasDetails = true;
+    //}
 
     public bool HasDetails = false;
 

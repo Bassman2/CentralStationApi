@@ -252,9 +252,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                     {
                         StatusDataDevice statusDataDevice = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
 
-                        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controller)));
+                        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
                         existingController.Update(statusDataDevice);
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controller)));
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
                         statusDataEventQueue.Continue();
                     }
                 }
