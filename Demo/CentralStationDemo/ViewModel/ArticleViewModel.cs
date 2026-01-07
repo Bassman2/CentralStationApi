@@ -1,8 +1,8 @@
 ﻿namespace CentralStationDemo.ViewModel;
 
-public partial class MagneticItemViewModel : ObservableObject
+public partial class ArticleViewModel : ObservableObject
 {
-    public MagneticItemViewModel(Article article)
+    public ArticleViewModel(Article article)
     {
         Id = article.Id;
         Name = article.Name;

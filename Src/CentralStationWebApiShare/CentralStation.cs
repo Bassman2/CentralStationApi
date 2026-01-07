@@ -1,4 +1,6 @@
-﻿namespace CentralStationWebApi;
+﻿using CentralStationWebApi.Model;
+
+namespace CentralStationWebApi;
 
 public class CentralStation(string host, Protocol protocol = Protocol.TCP) : CentralStationBasic(host, protocol), INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
@@ -8,8 +10,8 @@ public class CentralStation(string host, Protocol protocol = Protocol.TCP) : Cen
     protected override void ReceiveHandler(CANMessage msg)
     {
         HandleStatus(msg);
-        //HandleStreams(msg);
-        //HandleParticipants(msg);
+        HandleStreams(msg);
+        HandleController(msg);
         //HandleStatusData(msg);
     }
 
@@ -63,29 +65,19 @@ public class CentralStation(string host, Protocol protocol = Protocol.TCP) : Cen
         switch (line)
         {
         case "[lokomotive]":
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Locomotives)));
-            Locomotives = CsSerializer.Deserialize<Locomotives>(stream, "[lokomotive]");
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locomotives)));
+            SetLocomotives(CsSerializer.Deserialize<Locomotives>(stream, "[lokomotive]"));
             break;
         case "[magnetartikel]":
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(MagneticItems)));
-            MagneticItems = CsSerializer.Deserialize<MagneticItems>(stream, "[magnetartikel]");
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MagneticItems)));
+            SetArticles(CsSerializer.Deserialize<MagneticItems>(stream, "[magnetartikel]"));
             break;
         case "[fahrstrassen]":
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(RailwayRoutes)));
-            RailwayRoutes = CsSerializer.Deserialize<RailwayRoutes>(stream, "[fahrstrassen]");
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RailwayRoutes)));
+            SetRoutes(CsSerializer.Deserialize<RailwayRoutes>(stream, "[fahrstrassen]"));
             break;
         case "[gleisbild]":
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackDiagram)));
-            TrackDiagram = CsSerializer.Deserialize<TrackDiagram>(stream, "[gleisbild]");
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackDiagram)));
+            SetTracks(CsSerializer.Deserialize<TrackDiagram>(stream, "[gleisbild]"));
             break;
         case "[gleisbildseite]":
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackDiagram)));
-            TrackDiagramPages = CsSerializer.Deserialize<TrackDiagramPage>(stream, "[gleisbildseite]");
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackDiagram)));
+            SetTrackPages(CsSerializer.Deserialize<TrackDiagramPage>(stream, "[gleisbildseite]"));
             break;
         }
     }
@@ -126,48 +118,96 @@ public class CentralStation(string host, Protocol protocol = Protocol.TCP) : Cen
 
     public Locomotives? Locomotives;
 
+    private void SetLocomotives(Locomotives locomotives)
+    {
+        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Locomotives)));
+        Locomotives = locomotives;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locomotives)));
+    }
+
     #endregion
 
     #region Articles
 
-    public MagneticItems? MagneticItems;
+    public MagneticItems? Articles;
+
+    private void SetArticles(MagneticItems articles)
+    {
+        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Articles)));
+        Articles = articles;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Articles)));
+    }
 
 
     #endregion
 
     #region Routes
 
-    public RailwayRoutes? RailwayRoutes;
+    public RailwayRoutes? Routes;
+
+    private void SetRoutes(RailwayRoutes routes)
+    {
+        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Routes)));
+        Routes = routes;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Routes)));
+    }
 
 
     #endregion
 
     #region Tracks
 
-    public TrackDiagram? TrackDiagram;
+    public TrackDiagram? Tracks;
 
-    public TrackDiagramPage? TrackDiagramPages;
+    private void SetTracks(TrackDiagram tracks)
+    {
+        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Tracks)));
+        Tracks = tracks;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
+    }
+
+
+
+    public TrackDiagramPage? TrackPages;
+
+    private void SetTrackPages(TrackDiagramPage trackPages)
+    {
+        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackPages)));
+        TrackPages = trackPages;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackPages)));
+    }
 
     #endregion
 
     #region Controllers
 
-    public IEnumerable<Device> Devices = [];
+    public IEnumerable<Controller> Controllers => controllersDictionary.Values;
 
-    private readonly Dictionary<uint, Device> devices = [];
+    private readonly Dictionary<uint, Controller> controllersDictionary = [];
 
-    private void HandleParticipants(CANMessage msg)
+    private void SetController(Controller controller)
+    {
+        if (!controllersDictionary.TryGetValue(controller.DeviceId, out Controller? value) && !controller.Equals(value))
+        {
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
+            controllersDictionary[controller.DeviceId] = controller;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
+        }
+    }
+
+    private void HandleController(CANMessage msg)
     {
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
-            var device = new Device(msg);
-            if (!devices.TryGetValue(msg.Device, out var oldDevice) || !device.Equals(oldDevice))
-            {
-                devices[msg.Device] = new Device(msg);
-                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Devices)));
-                Devices = devices.Values;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Devices)));
-            }
+            var controller = new Controller(msg);
+            SetController(controller);
+            //if (!devices.TryGetValue(msg.Device, out var oldDevice) || !controller.Equals(oldDevice))
+            //{
+            //    devices[msg.Device] = new Device(msg);
+            //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
+            //    Controllers = devices.Values;
+            //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
+            //}
         }
     }
 

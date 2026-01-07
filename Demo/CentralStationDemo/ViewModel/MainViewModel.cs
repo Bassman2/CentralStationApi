@@ -13,11 +13,18 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     }
 
     public void Dispose() => cs.Dispose();
-    
-    //protected override void OnStartup()
-    //{ }
 
-    
+    protected override void OnStartup()
+    {
+        //http://cs3/app/assets/mag/magicon_a_005_01.svg
+
+        //string name = "magicon_a_005_01";
+        //var uri = new Uri($"http://{host}/app/assets/mag/{name}.svg");
+        //return new BitmapImage(uri);
+
+    }
+
+
 
     private void OnCsPropertyChanged(string? propertyName)
     {
@@ -27,25 +34,24 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             Status = cs.Status;
             break;
         case "Locomotives":
-            Locomotives = cs.Locomotives?.Locomotives_?.Select(i => new LocomotiveViewModel(host, i))?.ToList();
+            Locomotives = cs.Locomotives?.Locomotives_?.Select(i => new LocomotiveViewModel(i, host))?.ToList();
             break;
-        case "MagneticItems":
-            MagneticItems = cs.MagneticItems?.Articles?.Select(i => new MagneticItemViewModel(i))?.ToList();
+        case "Articles":
+            Articles = cs.Articles?.Articles?.Select(i => new ArticleViewModel(i))?.ToList();
             break;
-        case "RailwayRoutes":
-            RailwayRoutes = cs.RailwayRoutes?.RailwayRoutes_?.Select(i => new RailwayRouteViewModel(i))?.ToList();
+        case "Routes":
+            RailwayRoutes = cs.Routes?.RailwayRoutes_?.Select(i => new RailwayRouteViewModel(i))?.ToList();
             break;
-        case "TrackDiagram":
-            TrackDiagram = cs.TrackDiagram;
+        case "Tracks":
+            TrackDiagram = cs.Tracks;
             break;
-        case "Devices":
-            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"OnCsPropertyChanged Devices # {cs.Devices.Count()}");
-            ControlUnits = [.. cs.Devices.Select(i => new ControlUnitViewModel(i))];
-            UpdateControlUnits();
+        case "Controllers":
+            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"OnCsPropertyChanged Controllers # {cs.Controllers.Count()}");
+            Controllers = [.. cs.Controllers.Select(i => new ControllerViewModel(i, host))];
             break;
-        case "StatusData":
-            UpdateControlUnitDetails(cs.StatusData);
-            break;
+        //case "StatusData":
+        //    UpdateControlUnitDetails(cs.StatusData);
+        //    break;
 
         }
     }
@@ -106,7 +112,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Articles
 
     [ObservableProperty]
-    private List<MagneticItemViewModel>? magneticItems;
+    private List<ArticleViewModel>? articles;
 
     [RelayCommand]
     private void OnRequestArticles()
@@ -148,10 +154,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     #region Controllers
 
-    private readonly AutoResetEvent statusDataEvent = new(false);
-
     [ObservableProperty]
-    private List<ControlUnitViewModel> controlUnits = [];
+    private List<ControllerViewModel>? controllers;
 
     [RelayCommand]
     private void OnRequestControlUnits()
@@ -159,69 +163,87 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.RequestParticipants();
     }
 
-    private readonly Lock lockItem = new();
-    //private uint reqDeviceId = 0;
-    private ControlUnitViewModel? GetControlUnit(uint deviceId) => ControlUnits?.FirstOrDefault(d => d.DeviceId == deviceId);
-
-
-    private void UpdateControlUnits()
+    [RelayCommand]
+    private void OnSortControllers(string propertyName)
     {
-        // store for parallel changes
-        ControlUnitViewModel[] controlUnits = [.. ControlUnits.Where(c => !c.HasDetails).Reverse()];
-
-        Task.Run(() =>
-        {
-            lock (lockItem)
-            {
-                foreach (var controlUnit in controlUnits)
-                {
-                    if (controlUnit.HasDetails == false)
-                    {
-                        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index 0");
-
-                        cs.RequestStatusData(controlUnit.DeviceId, 0);
-                        if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
-                        {
-                            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout {controlUnit.DeviceId:X8}");
-                        }
-
-                        for (byte index = 1; index <= controlUnit.NumOfMeasuredValues; index++)
-                        {
-                            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index {index}");
-
-                            cs.RequestStatusData(controlUnit.DeviceId, index);
-                            if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
-                            {
-                                Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout Index {index} Device {controlUnit.DeviceId:X8}");
-                            }
-                        }
-                    }
-
-                    //for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
-                    //{
-                    //    cs.RequestStatusData(device, index);
-                    //    statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
-                    //}
-                }
-            }
-        });
+        CollectionViewSource.GetDefaultView(Controllers).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
     }
 
-    private void UpdateControlUnitDetails(IEnumerable<StatusDataDevice> statusDataDevices)
-    {
-        foreach (var device in statusDataDevices)
-        {
-            //var cu = Devices?.FirstOrDefault(d => d.DeviceId == device.DeviceId);
-            GetControlUnit(device.DeviceId)?.UpdateStatusData(device);
-        }
 
-        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnitDetails Set Event");
-        statusDataEvent.Set();
-    }
+    //private readonly AutoResetEvent statusDataEvent = new(false);
+
+    //[ObservableProperty]
+    //private List<ControllerViewModel> controlUnits = [];
+
+    //[RelayCommand]
+    //private void OnRequestControlUnits()
+    //{
+    //    cs.RequestParticipants();
+    //}
+
+    //private readonly Lock lockItem = new();
+    ////private uint reqDeviceId = 0;
+    //private ControllerViewModel? GetControlUnit(uint deviceId) => ControlUnits?.FirstOrDefault(d => d.DeviceId == deviceId);
+
+
+    //private void UpdateControlUnits()
+    //{
+    //    // store for parallel changes
+    //    ControllerViewModel[] controlUnits = [.. ControlUnits.Where(c => !c.HasDetails).Reverse()];
+
+    //    Task.Run(() =>
+    //    {
+    //        lock (lockItem)
+    //        {
+    //            foreach (var controlUnit in controlUnits)
+    //            {
+    //                if (controlUnit.HasDetails == false)
+    //                {
+    //                    Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index 0");
+
+    //                    cs.RequestStatusData(controlUnit.DeviceId, 0);
+    //                    if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
+    //                    {
+    //                        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout {controlUnit.DeviceId:X8}");
+    //                    }
+
+    //                    for (byte index = 1; index <= controlUnit.NumOfMeasuredValues; index++)
+    //                    {
+    //                        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index {index}");
+
+    //                        cs.RequestStatusData(controlUnit.DeviceId, index);
+    //                        if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
+    //                        {
+    //                            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout Index {index} Device {controlUnit.DeviceId:X8}");
+    //                        }
+    //                    }
+    //                }
+
+    //                //for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
+    //                //{
+    //                //    cs.RequestStatusData(device, index);
+    //                //    statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
+    //                //}
+    //            }
+    //        }
+    //    });
+    //}
+
+    //private void UpdateControlUnitDetails(IEnumerable<StatusDataDevice> statusDataDevices)
+    //{
+    //    foreach (var device in statusDataDevices)
+    //    {
+    //        //var cu = Controllers?.FirstOrDefault(d => d.DeviceId == device.DeviceId);
+    //        GetControlUnit(device.DeviceId)?.UpdateStatusData(device);
+    //    }
+
+    //    Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnitDetails Set Event");
+    //    statusDataEvent.Set();
+    //}
 
 
     #endregion
-       
+
 
     #region Messages
 

@@ -7,9 +7,9 @@ namespace CentralStationDemo.ViewModel;
 
 public partial class LocomotiveViewModel : ObservableObject
 {
-    private static MainViewModel mainViewModel = Ioc.Default.GetRequiredService<MainViewModel>();
+    //private static MainViewModel mainViewModel = Ioc.Default.GetRequiredService<MainViewModel>();
 
-    public LocomotiveViewModel(string host, Locomotive loco)
+    public LocomotiveViewModel(Locomotive loco, string host)
     {
         Name = loco.Name;
         Uid = loco.Uid;
@@ -82,6 +82,9 @@ public partial class LocomotiveViewModel : ObservableObject
     #region info
 
     [ObservableProperty]
+    private ImageSource? icon;
+
+    [ObservableProperty]
     private string? name;
 
     [ObservableProperty]
@@ -95,9 +98,6 @@ public partial class LocomotiveViewModel : ObservableObject
 
     [ObservableProperty]
     private string? iconName;
-
-    [ObservableProperty]
-    private ImageSource? icon;
 
     [ObservableProperty]
     private DecoderType type;

@@ -8,58 +8,69 @@
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <GroupBox Header="Devices">
-        <ListView ItemsSource="{Binding ControlUnits}">
-            <!--<ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>-->
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border BorderThickness="1" BorderBrush="LightGray" HorizontalAlignment="Stretch">
-                        <Grid HorizontalAlignment="Stretch">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="100"/>
-                            </Grid.RowDefinitions>
-                            <Label Grid.Row="0" Grid.Column="0" Content="Device ID"/>
-                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DeviceId, StringFormat=X4}" IsReadOnly="True" Margin="3"/>
-                            <Label Grid.Row="0" Grid.Column="2" Content="SW-Version"/>
-                            <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding SwVersion}" IsReadOnly="True" Margin="3"/>
-                            <Label Grid.Row="0" Grid.Column="4" Content="Device Type"/>
-                            <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding DeviceType}" IsReadOnly="True" Margin="3"/>
+    <ListView ItemsSource="{Binding Controllers}">
+        <ListView.ItemsPanel>
+            <ItemsPanelTemplate>
+                <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>
+            </ItemsPanelTemplate>
+        </ListView.ItemsPanel>
+        <ListView.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Sort">
+                    <MenuItem Header="By Name" Command="{Binding SortControllersCommand}" CommandParameter="Name"/>
+                    <MenuItem Header="By Symbol" Command="{Binding SortControllersCommand}" CommandParameter="Symbol"/>
+                    <MenuItem Header="By UID" Command="{Binding SortControllersCommand}" CommandParameter="Uid"/>
+                    <MenuItem Header="By Address" Command="{Binding SortControllersCommand}" CommandParameter="Address"/>
+                    <MenuItem Header="By SID" Command="{Binding SortControllersCommand}" CommandParameter="Sid"/>
+                    <MenuItem Header="By Type" Command="{Binding SortControllersCommand}" CommandParameter="Type"/>
+                    <MenuItem Header="By MFX Type" Command="{Binding SortControllersCommand}" CommandParameter="MfxType"/>
+                    <MenuItem Header="By MFX UID" Command="{Binding SortControllersCommand}" CommandParameter="MfxUid"/>
+                </MenuItem>
+            </ContextMenu>
+        </ListView.ContextMenu>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- info -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- control -->
+                    </Grid.RowDefinitions>
+                    <!-- info -->
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="80"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <Image Grid.Row="0" Source="{Binding Icon}" Width="100" Height="80" Stretch="Uniform"/>
+                        <TextBlock Grid.Row="1" Text="{Binding Type}"/>
+                        <TextBlock Grid.Row="2" Text="{Binding DeviceId, StringFormat=X4}"/>
+                        <TextBlock Grid.Row="3" Text="{Binding SwVersion}"/>
 
-                            <Label Grid.Row="1" Grid.Column="0" Content="Device Name"/>
-                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DeviceName}" IsReadOnly="True" Margin="3"/>
-                            <Label Grid.Row="1" Grid.Column="2" Content="Article Number"/>
-                            <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding ArticleNumber}" IsReadOnly="True" Margin="3"/>
-                            <Label Grid.Row="1" Grid.Column="4" Content="Serial Number"/>
-                            <TextBox Grid.Row="1" Grid.Column="5" Text="{Binding SerialNumber}" IsReadOnly="True" Margin="3"/>
+                        <TextBlock Grid.Row="4" Text="{Binding DeviceName}"/>
+                        <TextBlock Grid.Row="5" Text="{Binding ArticleNumber, StringFormat=Article: {0}}"/>
+                        <TextBlock Grid.Row="6" Text="{Binding SerialNumber}"/>
 
-                            <Label Grid.Row="2" Grid.Column="0" Content="Index"/>
-                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Index}" IsReadOnly="True" Margin="3"/>
-                            <Label Grid.Row="2" Grid.Column="2" Content="# Packages"/>
-                            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding NumOfPackages}" IsReadOnly="True" Margin="3"/>
+                        <TextBlock Grid.Row="7" Text="{Binding Index}"/>
+                        <TextBlock Grid.Row="8" Text="{Binding NumOfPackages}"/>
 
-                            <Label Grid.Row="3" Grid.Column="0" Content="# Measured Values"/>
-                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding NumOfMeasuredValues}" IsReadOnly="True" Margin="3"/>
-                            <Label Grid.Row="3" Grid.Column="2" Content="# Channels"/>
-                            <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding NumOfConfigurationChannels}" IsReadOnly="True" Margin="3"/>
+                        <TextBlock Grid.Row="9" Text="{Binding NumOfMeasuredValues, StringFormat=# Measures: {0}}"/>
+                        <TextBlock Grid.Row="10" Text="{Binding NumOfConfigurationChannels, StringFormat=# Channels {0}}"/>
 
-                            <DataGrid Grid.Row="4" 
+                        <!--<DataGrid Grid.Row="4" 
                                       Grid.Column="0" 
                                       Grid.ColumnSpan="7"
                                       ItemsSource="{Binding Values}" 
@@ -74,49 +85,29 @@
                                       CanUserSortColumns="True"
                                       IsSynchronizedWithCurrentItem="True"
                                       ClipboardCopyMode="IncludeHeader"
-                                      Margin="3">      
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Channel" Binding="{Binding Channel, StringFormat=X4}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="Potency" Binding="{Binding Potency}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="Color1" Binding="{Binding Color1}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="Color2" Binding="{Binding Color2}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="Color3" Binding="{Binding Color3}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="Color4" Binding="{Binding Color4}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="ZeroPoint" Binding="{Binding ZeroPoint}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="End1" Binding="{Binding End1}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="End2" Binding="{Binding End2}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="End3" Binding="{Binding End3}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="End4" Binding="{Binding End4}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="Measurement Designation" Binding="{Binding MeasurementDesignation}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="Start" Binding="{Binding Start}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="End" Binding="{Binding End}" Width="100" IsReadOnly="True"/>
-                                    <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="100" IsReadOnly="True"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            <!-- info -->
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ListView>
-        <!--<DataGrid 
-            ItemsSource="{Binding Devices}" 
-            AutoGenerateColumns="False" 
-            IsReadOnly="True"
-            HeadersVisibility="Column"
-            GridLinesVisibility="None"
-            CanUserAddRows="False"
-            CanUserDeleteRows="False"
-            CanUserResizeColumns="True"
-            CanUserReorderColumns="True"
-            CanUserSortColumns="True"
-            IsSynchronizedWithCurrentItem="True"
-            ClipboardCopyMode="IncludeHeader">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Device ID" Binding="{Binding DeviceId, StringFormat=X4}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="SW-Version" Binding="{Binding SwVersion}" Width="100" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Device Type" Binding="{Binding DeviceType}" Width="100" IsReadOnly="True"/>
-            </DataGrid.Columns>
-        </DataGrid>-->
-    </GroupBox>
+                                      Margin="3">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Channel" Binding="{Binding Channel, StringFormat=X4}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Potency" Binding="{Binding Potency}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Color1" Binding="{Binding Color1}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Color2" Binding="{Binding Color2}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Color3" Binding="{Binding Color3}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Color4" Binding="{Binding Color4}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="ZeroPoint" Binding="{Binding ZeroPoint}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="End1" Binding="{Binding End1}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="End2" Binding="{Binding End2}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="End3" Binding="{Binding End3}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="End4" Binding="{Binding End4}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Measurement Designation" Binding="{Binding MeasurementDesignation}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Start" Binding="{Binding Start}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="End" Binding="{Binding End}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="100" IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>-->
+                        <!-- info -->
+                    </Grid>
+                </Grid>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ListView>
 </UserControl>

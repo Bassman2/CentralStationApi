@@ -94,7 +94,7 @@ public partial class CentralStationBasic : IDisposable
 
     public static string DeviceDescription(uint device)
     {
-        string description = $"Invalid Device Type {device:X4}";
+        string description = $"Invalid Controller Type {device:X4}";
 
         CheckRange(ref description, device, 0x0000, 0x0000, "All", false);
         CheckRange(ref description, device, 0x0001, 0x03FF, "MM2");

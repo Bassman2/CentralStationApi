@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-public class Device(CANMessage msg) 
+public class Controller(CANMessage msg) 
 {
     public uint DeviceId => msg.Device;
     public byte MajorVersion => msg.GetDataByte(4);
@@ -10,7 +10,7 @@ public class Device(CANMessage msg)
     public override int GetHashCode() => (DeviceId, MajorVersion, MinorVersion, DeviceType).GetHashCode();
     public override bool Equals(object? obj)
     {
-        if (obj is Device device)
+        if (obj is Controller device)
         {
             return 
                 DeviceId == device.DeviceId && 

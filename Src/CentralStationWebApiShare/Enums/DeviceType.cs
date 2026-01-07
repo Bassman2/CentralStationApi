@@ -59,7 +59,7 @@ public enum DeviceType : ushort
     /// S88 Link
     /// SRSEII (non Märklin produkt)
     /// </summary>
-    S88Link = 0x0040,
+    LinkS88 = 0x0040,
 
     /// <summary>
     /// GFP3 from CS3
@@ -75,13 +75,13 @@ public enum DeviceType : ushort
     CS2 = 0xeeee,
 
     /// <summary>
-    /// Wireless Devices
+    /// Wireless Controllers
     /// </summary>
     Wireless = 0xffe0,
 
     /// <summary>
     /// CS2 Slave
-    /// Wired Device
+    /// Wired Controller
     /// </summary>
     Wired = 0xfff0,
 
