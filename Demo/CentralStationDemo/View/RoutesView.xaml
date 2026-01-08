@@ -8,30 +8,63 @@
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <GroupBox Header="Railway Routes">
-        <DataGrid 
-            Grid.Row="4" 
-            ItemsSource="{Binding RailwayRoutes}" 
-            AutoGenerateColumns="False" 
-            IsReadOnly="True"
-            HeadersVisibility="Column"
-            GridLinesVisibility="None"
-            CanUserAddRows="False"
-            CanUserDeleteRows="False"
-            CanUserResizeColumns="True"
-            CanUserReorderColumns="True"
-            CanUserSortColumns="True"
-            IsSynchronizedWithCurrentItem="True"
-            ClipboardCopyMode="IncludeHeader">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="110" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Uid" Binding="{Binding Uid}" Width="110" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Mfx Uid" Binding="{Binding MfxUid}" Width="260" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Address" Binding="{Binding Address}" Width="80" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Icon Name" Binding="{Binding IconName}" Width="140" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="70" IsReadOnly="True"/>
-                <DataGridTextColumn Header="MfxType" Binding="{Binding MfxType}" Width="50" IsReadOnly="True"/>
-            </DataGrid.Columns>
-        </DataGrid>
-    </GroupBox>
+    <ListView ItemsSource="{Binding Routes}" Margin="3">
+        <ListView.ItemsPanel>
+            <ItemsPanelTemplate>
+                <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal" VerticalAlignment="Top"/>
+            </ItemsPanelTemplate>
+        </ListView.ItemsPanel>
+        <ListView.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Sort">
+                    <MenuItem Header="By Name" Command="{Binding SortControllersCommand}" CommandParameter="Name"/>
+                    <MenuItem Header="By Symbol" Command="{Binding SortControllersCommand}" CommandParameter="Symbol"/>
+                    <MenuItem Header="By UID" Command="{Binding SortControllersCommand}" CommandParameter="Uid"/>
+                    <MenuItem Header="By Address" Command="{Binding SortControllersCommand}" CommandParameter="Address"/>
+                    <MenuItem Header="By SID" Command="{Binding SortControllersCommand}" CommandParameter="Sid"/>
+                    <MenuItem Header="By Type" Command="{Binding SortControllersCommand}" CommandParameter="Type"/>
+                    <MenuItem Header="By MFX Type" Command="{Binding SortControllersCommand}" CommandParameter="MfxType"/>
+                    <MenuItem Header="By MFX UID" Command="{Binding SortControllersCommand}" CommandParameter="MfxUid"/>
+                </MenuItem>
+            </ContextMenu>
+        </ListView.ContextMenu>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- info -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- control -->
+                    </Grid.RowDefinitions>
+                    <!-- info -->
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="80"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <!--<Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="100" Height="80" Stretch="Uniform"/>-->
+                        <TextBlock Grid.Row="1" Text="{Binding Id, StringFormat=Id: {0}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Text="{Binding Name}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="3" Text="{Binding S88, StringFormat=S88: {0}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Text="{Binding S88On, StringFormat=S88 On: {0}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="5" Text="{Binding IsExtern, StringFormat=Extern: {0}}" HorizontalAlignment="Center"/>
+                    </Grid>
+                </Grid>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ListView>
 </UserControl>

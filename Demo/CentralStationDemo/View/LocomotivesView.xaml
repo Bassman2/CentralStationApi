@@ -11,7 +11,7 @@
     <ListView ItemsSource="{Binding Locomotives}" Margin="3">
         <ListView.ItemsPanel>
             <ItemsPanelTemplate>
-                <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>
+                <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal" VerticalAlignment="Top"/>
             </ItemsPanelTemplate>
         </ListView.ItemsPanel>
         <ListView.ContextMenu>

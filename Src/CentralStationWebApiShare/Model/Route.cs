@@ -1,7 +1,7 @@
 ﻿namespace CentralStationWebApi.Model;
 
 [CsSerialize]
-public partial class RailwayRoute
+public partial class Route
 {
 
     [CsProperty("id")]
@@ -20,5 +20,5 @@ public partial class RailwayRoute
     public bool Extern { get; private set; }
 
     [CsProperty("item")]
-    public List<RailwayRouteItem>? Items { get; private set; }
+    public List<RouteItem>? Items { get; private set; }
 }

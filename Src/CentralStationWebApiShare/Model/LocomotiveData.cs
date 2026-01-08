@@ -1,11 +1,11 @@
 ﻿namespace CentralStationWebApi.Model;
 
 [CsSerialize]
-public partial class MagneticItems
-{
+public partial class LocomotiveData 
+{   
     [CsProperty("version")]
     public Version? Version { get; private set; }
 
-    [CsProperty("artikel")]
-    public List<Article>? Articles { get; private set; }
+    [CsProperty("lokomotive")]
+    public List<Locomotive>? Locomotives { get; private set; }
 }

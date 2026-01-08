@@ -34,13 +34,14 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             Status = cs.Status;
             break;
         case "Locomotives":
-            Locomotives = cs.Locomotives?.Locomotives_?.Select(i => new LocomotiveViewModel(i, host))?.ToList();
+            Locomotives = cs.Locomotives?.Locomotives?.ToViewModelList<LocomotiveViewModel>(host);
             break;
         case "Articles":
-            Articles = cs.Articles?.Articles?.Select(i => new ArticleViewModel(i))?.ToList();
+            //Articles = cs.Articles?.Articles?.Select(i => new ArticleViewModel(i))?.ToList();
+            Articles = cs.Articles?.Articles?.ToViewModelList<ArticleViewModel>();
             break;
         case "Routes":
-            RailwayRoutes = cs.Routes?.RailwayRoutes_?.Select(i => new RailwayRouteViewModel(i))?.ToList();
+            Routes = cs.Routes?.Routes?.ToViewModelList<RouteViewModel>();
             break;
         case "Tracks":
             TrackDiagram = cs.Tracks;
@@ -126,7 +127,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Routes
 
     [ObservableProperty]
-    private List<RailwayRouteViewModel>? railwayRoutes;
+    private List<RouteViewModel>? routes;
 
     [RelayCommand]
     private void OnRequestRoutes()
@@ -140,7 +141,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Tracks
 
     [ObservableProperty]
-    private TrackDiagram? trackDiagram;
+    private TrackData? trackDiagram;
 
     [RelayCommand]
     private void OnRequestTracks()

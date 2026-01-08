@@ -72,19 +72,19 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         switch (line)
         {
         case "[lokomotive]":
-            SetLocomotives(CsSerializer.Deserialize<Locomotives>(stream, "[lokomotive]"));
+            SetLocomotives(CsSerializer.Deserialize<LocomotiveData>(stream, "[lokomotive]"));
             break;
         case "[magnetartikel]":
-            SetArticles(CsSerializer.Deserialize<MagneticItems>(stream, "[magnetartikel]"));
+            SetArticles(CsSerializer.Deserialize<ArticleData>(stream, "[magnetartikel]"));
             break;
         case "[fahrstrassen]":
-            SetRoutes(CsSerializer.Deserialize<RailwayRoutes>(stream, "[fahrstrassen]"));
+            SetRoutes(CsSerializer.Deserialize<RouteData>(stream, "[fahrstrassen]"));
             break;
         case "[gleisbild]":
-            SetTracks(CsSerializer.Deserialize<TrackDiagram>(stream, "[gleisbild]"));
+            SetTracks(CsSerializer.Deserialize<TrackData>(stream, "[gleisbild]"));
             break;
         case "[gleisbildseite]":
-            SetTrackPages(CsSerializer.Deserialize<TrackDiagramPage>(stream, "[gleisbildseite]"));
+            SetTrackPages(CsSerializer.Deserialize<TrackPageData>(stream, "[gleisbildseite]"));
             break;
         }
     }
@@ -123,9 +123,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Locomotives
 
-    public Locomotives? Locomotives;
+    public LocomotiveData? Locomotives;
 
-    private void SetLocomotives(Locomotives locomotives)
+    private void SetLocomotives(LocomotiveData locomotives)
     {
         PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Locomotives)));
         Locomotives = locomotives;
@@ -136,9 +136,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Articles
 
-    public MagneticItems? Articles;
+    public ArticleData? Articles;
 
-    private void SetArticles(MagneticItems articles)
+    private void SetArticles(ArticleData articles)
     {
         PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Articles)));
         Articles = articles;
@@ -150,9 +150,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Routes
 
-    public RailwayRoutes? Routes;
+    public RouteData? Routes;
 
-    private void SetRoutes(RailwayRoutes routes)
+    private void SetRoutes(RouteData routes)
     {
         PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Routes)));
         Routes = routes;
@@ -164,18 +164,18 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Tracks
 
-    public TrackDiagram? Tracks;
+    public TrackData? Tracks;
 
-    private void SetTracks(TrackDiagram tracks)
+    private void SetTracks(TrackData tracks)
     {
         PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Tracks)));
         Tracks = tracks;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
     }
 
-    public TrackDiagramPage? TrackPages;
+    public TrackPageData? TrackPages;
 
-    private void SetTrackPages(TrackDiagramPage trackPages)
+    private void SetTrackPages(TrackPageData trackPages)
     {
         PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackPages)));
         TrackPages = trackPages;

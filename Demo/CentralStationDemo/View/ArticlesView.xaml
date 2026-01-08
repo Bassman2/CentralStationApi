@@ -11,7 +11,7 @@
     <ListView ItemsSource="{Binding Articles}" Margin="3">
         <ListView.ItemsPanel>
             <ItemsPanelTemplate>
-                <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal"/>
+                <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal" VerticalAlignment="Top"/>
             </ItemsPanelTemplate>
         </ListView.ItemsPanel>
         <ListView.ContextMenu>
@@ -22,7 +22,6 @@
                     <MenuItem Header="By Id" Command="{Binding SortArticlesCommand}" CommandParameter="Id"/>
                     <MenuItem Header="By Position" Command="{Binding SortArticlesCommand}" CommandParameter="Position"/>
                     <MenuItem Header="By DecoderType" Command="{Binding SortArticlesCommand}" CommandParameter="DecoderType"/>
-                    
                 </MenuItem>
             </ContextMenu>
         </ListView.ContextMenu>

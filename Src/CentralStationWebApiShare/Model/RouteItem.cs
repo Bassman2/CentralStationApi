@@ -2,7 +2,7 @@
 namespace CentralStationWebApi.Model;
 
 [CsSerialize]
-public partial class RailwayRouteItem
+public partial class RouteItem
 {
     /// <summary>
     /// Reference to another route. Either the route number or -1 for magnetic articles.

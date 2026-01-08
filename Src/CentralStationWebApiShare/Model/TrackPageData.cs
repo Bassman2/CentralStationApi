@@ -1,7 +1,7 @@
 ﻿namespace CentralStationWebApi.Model;
 
 [CsSerialize]
-public partial class TrackDiagramPage
+public partial class TrackPageData
 {
     [CsProperty("version")]
     public Version? Version { get; private set; }
