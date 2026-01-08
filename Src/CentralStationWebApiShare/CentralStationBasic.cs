@@ -5,7 +5,7 @@ public partial class CentralStationBasic : IDisposable
     private readonly IProtocolHandler client;
 
     private readonly Task receiver;
-    //private readonly string host;
+    protected readonly string host;
         
     public const uint AllDevices = 0x0000;  
 
@@ -17,7 +17,10 @@ public partial class CentralStationBasic : IDisposable
 
     public CentralStationBasic(string host, Protocol protocol = Protocol.UDP)
     {
-        //this.host = host;
+        ArgumentNullException.ThrowIfNullOrEmpty(host);
+        ArgumentOutOfRangeException.ThrowIfZero((int)Uri.CheckHostName(host), host);
+
+        this.host = host;
 
         client = protocol switch
         {

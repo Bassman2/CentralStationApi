@@ -8,5 +8,6 @@
         <conv:DeviceToDescriptionConverter x:Key="DeviceToDescriptionConverter"/>
         <conv:ResponseToArrowConverter x:Key="ResponseToArrowConverter"/>
         <conv:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
+        <conv:UriToImageSourceConverter x:Key="UriToImageSourceConverter"/>
     </Application.Resources>
 </Application>

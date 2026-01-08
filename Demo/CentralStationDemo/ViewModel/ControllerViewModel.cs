@@ -1,6 +1,4 @@
-﻿using System.Windows.Media;
-
-namespace CentralStationDemo.ViewModel;
+﻿namespace CentralStationDemo.ViewModel;
 
 public partial class ControllerViewModel : ObservableObject
 {
@@ -9,6 +7,7 @@ public partial class ControllerViewModel : ObservableObject
         DeviceId = controller.DeviceId;
         SwVersion = $"{controller.MajorVersion}.{controller.MinorVersion}";
         Type = Enum.IsDefined<DeviceType>(controller.DeviceType) ? controller.DeviceType.ToString() : ((ushort)controller.DeviceType).ToString("X4");
+        IconUri = controller.IconUri;
 
         //DeviceId = statusData.DeviceId;
         Index = controller.Index;
@@ -18,48 +17,9 @@ public partial class ControllerViewModel : ObservableObject
         SerialNumber = controller.SerialNumber;
         ArticleNumber = controller.ArticleNumber ?? String.Empty;
         DeviceName = controller.DeviceName;
-    
-        string iconName = controller.DeviceType switch
-        {
-            CentralStationWebApi.DeviceType.GFP => "dashboard_gfp3",
-            CentralStationWebApi.DeviceType.DCB => "dashboard_cs1",
-            CentralStationWebApi.DeviceType.DCB1 => "dashboard_cs1",
-            CentralStationWebApi.DeviceType.Connect => "dashboard_cs2",
-            CentralStationWebApi.DeviceType.MS2 => "dashboard_ms2",
-            CentralStationWebApi.DeviceType.MS2_1 => "dashboard_ms2",
-            CentralStationWebApi.DeviceType.MS2_2 => "dashboard_ms2",
-            CentralStationWebApi.DeviceType.MS2_3 => "dashboard_ms2",
-            CentralStationWebApi.DeviceType.MS2_4 => "dashboard_ms2",
-            CentralStationWebApi.DeviceType.LinkS88 => "dashboard_links88",
-            CentralStationWebApi.DeviceType.GFP3 => "dashboard_gfp3",
-            CentralStationWebApi.DeviceType.CS2 => "dashboard_cs2",
-            CentralStationWebApi.DeviceType.Wireless => "dashboard_tablet",
-            CentralStationWebApi.DeviceType.Wired => "dashboard_cs3",
-            CentralStationWebApi.DeviceType.GUI => "dashboard_cs3",
-            _ => string.Empty,
-        };
-
-        if (!string.IsNullOrEmpty(iconName))
-        {
-            Icon = App.Current.Dispatcher.Invoke(() =>
-            {
-                var uri = new Uri($"http://{host}/images/gui/{iconName}.png");
-                return new System.Windows.Media.Imaging.BitmapImage(uri);
-            });
-        }
     }
 
-    // http://cs3/images/gui/dashboard_desktop.png
-    // http://cs3/images/gui/dashboard_booster.png
-    // http://cs3/images/gui/dashboard_ms1.png
-    // http://cs3/images/gui/dashboard_ms2.png
-    // http://cs3/images/gui/dashboard_cs1.png
-    // http://cs3/images/gui/dashboard_cs2.png
-    // http://cs3/images/gui/dashboard_cs3.png
-    // http://cs3/images/gui/dashboard_gfp3.png
-    // http://cs3/images/gui/dashboard_tablet.png
-    // http://cs3/images/gui/dashboard_smartphone.png
-    // http://cs3/images/gui/dashboard_links88.png
+   
 
     //public void UpdateStatusData(StatusDataDevice statusData)
     //{
@@ -77,7 +37,7 @@ public partial class ControllerViewModel : ObservableObject
     public bool HasDetails = false;
 
     [ObservableProperty]
-    private ImageSource? icon;
+    private Uri? iconUri;
 
     [ObservableProperty]
     private uint deviceId;

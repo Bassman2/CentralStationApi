@@ -226,7 +226,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
-            var controller = new Controller(msg);
+            var controller = new Controller(msg, host);
             SetController(controller);
 
             // request additional data if not already happened

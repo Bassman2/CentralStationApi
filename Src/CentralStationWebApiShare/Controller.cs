@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-public class Controller(CANMessage msg) 
+public class Controller(CANMessage msg, string host) 
 {
     // from SoftwareVersion
     public uint DeviceId => msg.Device;
@@ -31,6 +31,36 @@ public class Controller(CANMessage msg)
     // Package 3 - 5
     public string DeviceName { get; internal set; } = String.Empty;
 
+    public Uri? IconUri
+    {
+        get
+        {
+            string? fileName = DeviceType switch
+            {
+                DeviceType.GFP => "dashboard_gfp3",             // http://cs3/images/gui/dashboard_gfp3.png  
+                DeviceType.DCB => "dashboard_cs1",              // http://cs3/images/gui/dashboard_cs1.png
+                DeviceType.DCB1 => "dashboard_cs1",             // http://cs3/images/gui/dashboard_cs1.png
+                DeviceType.Connect => "dashboard_cs2",          // http://cs3/images/gui/dashboard_cs2.png
+                DeviceType.MS2 => "dashboard_ms2",              // http://cs3/images/gui/dashboard_ms1.png
+                DeviceType.MS2_1 => "dashboard_ms2",            // http://cs3/images/gui/dashboard_ms1.png
+                DeviceType.MS2_2 => "dashboard_ms2",            // http://cs3/images/gui/dashboard_ms2.png
+                DeviceType.MS2_3 => "dashboard_ms2",            // http://cs3/images/gui/dashboard_ms2.png
+                DeviceType.MS2_4 => "dashboard_ms2",            // http://cs3/images/gui/dashboard_ms2.png
+                DeviceType.LinkS88 => "dashboard_links88",      // http://cs3/images/gui/dashboard_links88.png
+                DeviceType.GFP3 => "dashboard_gfp3",            // http://cs3/images/gui/dashboard_gfp3.png
+                DeviceType.CS2 => "dashboard_cs2",              // http://cs3/images/gui/dashboard_cs2.png
+                DeviceType.Wireless => "dashboard_tablet",      // http://cs3/images/gui/dashboard_tablet.png
+                DeviceType.Wired => "dashboard_cs3",            // http://cs3/images/gui/dashboard_cs3.png
+                DeviceType.GUI => "dashboard_cs3",              // http://cs3/images/gui/dashboard_cs3.png
+
+                // http://cs3/images/gui/dashboard_desktop.png
+                // http://cs3/images/gui/dashboard_booster.png
+                // http://cs3/images/gui/dashboard_smartphone.png
+                _ => null,
+            };
+            return fileName is not null ? new Uri($"http://{host}/images/gui/{fileName}.png") : null;
+        }
+    }
 
     public void Update(StatusDataDevice statusDataDevice)
     {
