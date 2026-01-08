@@ -15,7 +15,8 @@ public partial class LocomotiveViewModel : ObservableObject
         Uid = loco.Uid;
         MfxUid = loco.MfxUid;
         Address = loco.Address;
-        IconName = loco.Icon;
+        IconName = loco.IconName;
+        IconUri = loco.IconUri;
         Type = loco.Type;
         MfxType = loco.MfxType;
         Symbol = loco.Symbol;
@@ -33,16 +34,16 @@ public partial class LocomotiveViewModel : ObservableObject
         Direction = loco.Direction;
 
 
-        // http://cs3/app/assets/lok/NS%20186%20012-8.png
+        //// http://cs3/app/assets/lok/NS%20186%20012-8.png
 
-        if (!string.IsNullOrEmpty(IconName))
-        {
-            Icon = App.Current.Dispatcher.Invoke(() =>
-            {
-                var uri = new Uri($"http://{host}/app/assets/lok/{IconName}.png");
-                return new BitmapImage(uri);
-            });
-        }
+        //if (!string.IsNullOrEmpty(IconName))
+        //{
+        //    Icon = App.Current.Dispatcher.Invoke(() =>
+        //    {
+        //        var uri = new Uri($"http://{host}/app/assets/lok/{IconName}.png");
+        //        return new BitmapImage(uri);
+        //    });
+        //}
     }
 
     public void UpdateLocomotive(CANMessage msg)
@@ -83,6 +84,9 @@ public partial class LocomotiveViewModel : ObservableObject
 
     [ObservableProperty]
     private ImageSource? icon;
+
+    [ObservableProperty]
+    private Uri? iconUri;
 
     [ObservableProperty]
     private string? name;
@@ -150,11 +154,11 @@ public partial class LocomotiveViewModel : ObservableObject
     [ObservableProperty]
     private uint speed;
 
-    [RelayCommand]
-    private void OnEmergencyHalt()
-    {
+    //[RelayCommand]
+    //private void OnEmergencyHalt()
+    //{
 
-    }
+    //}
 
     #endregion
 

@@ -1,7 +1,9 @@
-﻿namespace CentralStationWebApi.Model;
+﻿using System.Reflection.Metadata;
+
+namespace CentralStationWebApi.Model;
 
 [CsSerialize]
-public partial class Locomotive 
+public partial class Locomotive
 {
     [CsProperty("name")]
     public string? Name { get; private set; }
@@ -19,7 +21,9 @@ public partial class Locomotive
     public uint Address { get; private set; }
 
     [CsProperty("icon")]
-    public string? Icon { get; private set; }
+    public string? IconName { get; private set; }
+
+    public Uri? IconUri => IconName != null ? new Uri($"http://{CentralStationBasic.Host}/app/assets/lok/{IconName}.png") : null;
 
     [CsProperty("typ")]
     public DecoderType Type { get; private set; }

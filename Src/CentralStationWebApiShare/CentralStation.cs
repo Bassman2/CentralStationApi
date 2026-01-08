@@ -1,4 +1,6 @@
 ﻿using CentralStationWebApi.Internal;
+using CentralStationWebApi.Model;
+using System.Threading;
 
 namespace CentralStationWebApi;
 
@@ -9,10 +11,15 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
 
+    private readonly CollectorThread trackCollectorThread;
+
     public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
     {
         statusDataEventQueue = new (tuple => RequestStatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
-    }       
+
+        trackCollectorThread = new CollectorThread(TrackCollectorWorkerLoop, TimeSpan.FromSeconds(2));
+    }
+        
 
     protected override void ReceiveHandler(CANMessage msg)
     {
@@ -82,9 +89,20 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             break;
         case "[gleisbild]":
             SetTracks(CsSerializer.Deserialize<TrackData>(stream, "[gleisbild]"));
+            intTrackData = CsSerializer.Deserialize<TrackData>(stream, "[gleisbild]");
+            intTrackPagesData = [];
+            foreach (var page in intTrackData.Pages!)
+            {
+                intTrackPagesData[page!.Id] = null;
+            }
             break;
         case "[gleisbildseite]":
             SetTrackPages(CsSerializer.Deserialize<TrackPageData>(stream, "[gleisbildseite]"));
+            TrackPageData trackPageData = CsSerializer.Deserialize<TrackPageData>(stream, "[gleisbildseite]");
+            if (intTrackPagesData != null)
+            {
+                intTrackPagesData[trackPageData.Page] = trackPageData;
+            }
             break;
         }
     }
@@ -182,6 +200,70 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackPages)));
     }
 
+
+    // track collector
+
+
+    //private readonly BlockingCollection<T> queue = [];
+    //private readonly AutoResetEvent autoResetEvent = new(false);
+    //private readonly TimeSpan timeout;
+
+    //public EventQueue(Action<T> action, TimeSpan timeout)
+    //{
+    //    this.action = action;
+    //    this.timeout = timeout;
+    //    thread = new Thread(WorkLoop) { Name = "EventQueueThread", IsBackground = true };
+
+    private TrackData? intTrackData = null;
+    private Dictionary<uint, TrackPageData?>? intTrackPagesData = null;
+
+
+    private bool isTrackCollectorRunning = false;
+    private void StartTrackCollector()
+    {
+        // clear all existing data
+        intTrackData = null;
+        intTrackPagesData = null;
+        // TODO
+
+        // start collecting track data
+        isTrackCollectorRunning = true;
+        trackCollectorThread.Next();
+    }
+
+    private void TrackCollectorWorkerLoop() //object? obj)
+    {
+        StartTrackCollector(); // remove later
+
+        if (!isTrackCollectorRunning) return;
+
+        if (intTrackData == null)
+        {
+            RequestConfigDataTrackDiagram();
+            return;
+        }
+        if (intTrackPagesData != null)
+        {
+            foreach (var page in intTrackPagesData)
+            {
+                if (page.Value == null)
+                {
+                    RequestConfigDataTrackDiagramPage(page.Key);
+                    return;
+                }
+            }
+        }
+
+        // check if finished 
+        if (intTrackData != null && intTrackPagesData != null && intTrackPagesData.Values.All(v => v != null))
+        {
+            isTrackCollectorRunning = false;
+        }
+    }
+
+
+
+
     #endregion
 
     #region Controllers
@@ -226,59 +308,59 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
-            var controller = new Controller(msg, host);
+            var controller = new Controller(msg, Host!);
             SetController(controller);
 
             // request additional data if not already happened
-            if (controllersDictionary.TryGetValue(msg.Device, out var existingController))
-            {
-                statusDataEventQueue.Add((msg.Device, 0));
-            }
+            //if (controllersDictionary.TryGetValue(msg.Device, out var existingController))
+            //{
+            //    statusDataEventQueue.Add((msg.Device, 0));
+            //}
         }
-        if (msg.Command == Command.StatusData) // && msg.IsResponse)
-        {
-            switch (msg.DataLength)
-            {
-            case 5:
-                Debug.WriteLineIf(TraceSwitches.StatusDataSwitch.TraceInfo, $"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
-                break;
-            case 6:
-                byte index = msg.GetDataByte(4);
-                Debug.WriteLineIf(TraceSwitches.StatusDataSwitch.TraceInfo, $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
+        //if (msg.Command == Command.StatusData) // && msg.IsResponse)
+        //{
+        //    switch (msg.DataLength)
+        //    {
+        //    case 5:
+        //        Debug.WriteLineIf(TraceSwitches.StatusDataSwitch.TraceInfo, $"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
+        //        break;
+        //    case 6:
+        //        byte index = msg.GetDataByte(4);
+        //        Debug.WriteLineIf(TraceSwitches.StatusDataSwitch.TraceInfo, $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
 
-                if (index == 0)
-                {
-                    if (controllersDictionary.TryGetValue(msg.Device, out var existingController))
-                    {
-                        StatusDataDevice statusDataDevice = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
+        //        if (index == 0)
+        //        {
+        //            if (controllersDictionary.TryGetValue(msg.Device, out var existingController))
+        //            {
+        //                StatusDataDevice statusDataDevice = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
 
-                        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
-                        existingController.Update(statusDataDevice);
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
-                        statusDataEventQueue.Continue();
-                    }
-                }
-                else
-                {
-                    //StatusDataValue statusDataValue = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
-                    //PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
-                    //StatusData.First(d => d.DeviceId == msg.Device).Values[index - 1] = statusDataValue;
-                    //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
-                }
-                break;
-            case 8:
-                ushort packageIndex = (byte)(msg.Hash & 0xff);
-                Debug.WriteLineIf(TraceSwitches.StatusDataSwitch.TraceInfo, $"HandleStatusData Length 8 HashIndex {packageIndex}");
-                if (packageIndex == 1)
-                {
-                    statusDataCollector = new();
-                }
-                statusDataCollector.AddData(msg.GetData());
-                break;
-            default:
-                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
-            }
-        }
+        //                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
+        //                existingController.Update(statusDataDevice);
+        //                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
+        //                statusDataEventQueue.Continue();
+        //            }
+        //        }
+        //        else
+        //        {
+        //            //StatusDataValue statusDataValue = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
+        //            //PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
+        //            //StatusData.First(d => d.DeviceId == msg.Device).Values[index - 1] = statusDataValue;
+        //            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
+        //        }
+        //        break;
+        //    case 8:
+        //        ushort packageIndex = (byte)(msg.Hash & 0xff);
+        //        Debug.WriteLineIf(TraceSwitches.StatusDataSwitch.TraceInfo, $"HandleStatusData Length 8 HashIndex {packageIndex}");
+        //        if (packageIndex == 1)
+        //        {
+        //            statusDataCollector = new();
+        //        }
+        //        statusDataCollector.AddData(msg.GetData());
+        //        break;
+        //    default:
+        //        throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
+        //    }
+        //}
     }
 
     //private Dictionary<uint, StatusDataDevice> statusData = [];

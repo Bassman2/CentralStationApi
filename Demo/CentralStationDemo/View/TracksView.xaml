@@ -6,7 +6,26 @@
              xmlns:local="clr-namespace:CentralStationDemo.View"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+    <TabControl ItemsSource="{Binding TrackPages}" Margin="3">
+        <!-- <TabControl.ItemTemplate>
+            <DataTemplate>
+                <TabItem Header="{Binding Name}">
+                    
+                </TabItem>
+            </DataTemplate>
+        </TabControl.ItemTemplate>-->
+
+        <TabControl.ItemTemplate>
+            <!-- this is the header template-->
+            <DataTemplate>
+                <TextBlock Text="{Binding Name}" />
+            </DataTemplate>
+        </TabControl.ItemTemplate>
+        <TabControl.ContentTemplate>
+            <!-- this is the body of the TabItem template-->
+            <DataTemplate>
+                <TextBlock Text="{Binding Id}" />
+            </DataTemplate>
+        </TabControl.ContentTemplate>
+    </TabControl>
 </UserControl>

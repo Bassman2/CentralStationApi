@@ -44,16 +44,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             Routes = cs.Routes?.Routes?.ToViewModelList<RouteViewModel>();
             break;
         case "Tracks":
-            TrackDiagram = cs.Tracks;
+            TrackPages = cs.Tracks?.Pages?.ToViewModelList<TrackPageViewModel>();
             break;
         case "Controllers":
             Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"OnCsPropertyChanged Controllers # {cs.Controllers.Count()}");
             Controllers = [.. cs.Controllers.Select(i => new ControllerViewModel(i, host))];
             break;
-        //case "StatusData":
-        //    UpdateControlUnitDetails(cs.StatusData);
-        //    break;
-
         }
     }
 
@@ -141,7 +137,10 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Tracks
 
     [ObservableProperty]
-    private TrackData? trackDiagram;
+    private TrackData? trackData;
+
+    [ObservableProperty]
+    private List<TrackPageViewModel>? trackPages;
 
     [RelayCommand]
     private void OnRequestTracks()
