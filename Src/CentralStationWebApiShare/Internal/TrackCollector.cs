@@ -2,13 +2,13 @@
 
 internal class TrackCollector 
 {
-    private int counter = 0;
+    //private int counter = 0;
     private TrackData? data = null;
     private readonly Dictionary<uint, (int counter, TrackPageData? data)> dictionary = [];
 
     public void Clear()
     {
-        counter = 0;
+        //counter = 0;
         data = null;
         dictionary.Clear();
     }

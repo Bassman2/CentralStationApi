@@ -1,6 +1,4 @@
-﻿using CentralStationWebApi.Model;
-
-namespace CentralStationWebApi;
+﻿namespace CentralStationWebApi;
 
 public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
@@ -10,6 +8,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
 
     private readonly CollectorThread trackCollectorThread;
+    private readonly CollectorThread contrCollectorThread;
 
     private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
     //private readonly int retry = 3;
@@ -19,6 +18,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         statusDataEventQueue = new (tuple => RequestStatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
 
         trackCollectorThread = new CollectorThread(TrackCollectorWorkerLoop, timeout);
+        contrCollectorThread = new CollectorThread(ContrCollectorWorkerLoop, timeout);
     }
         
 
@@ -173,6 +173,19 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Tracks
 
+    public void StartTrackCollector()
+    {
+        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request Start");
+        // clear all existing data
+        trackCollector.Clear();
+
+        // TODO
+
+        // start collecting track data
+        isTrackCollectorRunning = true;
+        trackCollectorThread.Next();
+    }
+
     public TrackData? Tracks;
 
     //private void SetTracks(TrackData tracks)
@@ -190,6 +203,8 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //    TrackPages = trackPages;
     //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackPages)));
     //}
+
+    
 
 
     // track collector
@@ -210,19 +225,6 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly TrackCollector trackCollector = new();
 
   
-
-    public void StartTrackCollector()
-    {
-        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request Start");
-        // clear all existing data
-        trackCollector.Clear();
-
-        // TODO
-
-        // start collecting track data
-        isTrackCollectorRunning = true;
-        trackCollectorThread.Next();
-    }
 
     private void TrackCollectorWorkerLoop() 
     {
@@ -293,19 +295,35 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Controllers
 
-    public IEnumerable<Controller> Controllers => controllersDictionary.Values;
-
-    private readonly Dictionary<uint, Controller> controllersDictionary = [];
-
-    private void SetController(Controller controller)
+    public void StartControllerCollection()
     {
-        if (!controllersDictionary.TryGetValue(controller.DeviceId, out Controller? value) && !controller.Equals(value))
+        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, "Controller Request Start");
+        
+        // clear all existing data
+        controllerCollector.Clear();
+
+        // start collecting track data
+        isControllerCollectorRunning = true;
+        RequestParticipants();
+
+        // wait on all Command.SoftwareVersion messages to be handled
+        Task.Run(() => { Thread.Sleep(5000); contrCollectorThread.Next(); });
+    }
+
+    public IEnumerable<Controller>? Controllers { get; private set; } = null;
+
+    private void SetController(IEnumerable<Controller> controllers)
+    {
+        //if (!controllersDictionary.TryGetValue(controller.DeviceId, out Controller? value) && !controller.Equals(value))
         {
             PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
-            controllersDictionary[controller.DeviceId] = controller;
+            Controllers = controllers;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
         }
     }
+
+
+
 
     //private void UpdateController(Controller controller)
     //{
@@ -327,65 +345,62 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //    }
     //}
 
-    //private DataCollector statusDataCollector = new();
+    private bool isControllerCollectorRunning = false;
+    private readonly ControllerCollector controllerCollector = new();
+    private DataCollector controllerDataCollector = new();
+
+    //private readonly Dictionary<uint, Controller> controllersDictionary = [];
+
+    private void ContrCollectorWorkerLoop()
+    {
+        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, "  Controller Loop");
+
+        if (!isControllerCollectorRunning)
+        {
+            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"  Controller not running");
+            return;
+        }
+
+        if (controllerCollector.ShouldRequest(out var controller))
+        {
+            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"Controller Reqest Device: {controller.deviceId:X8} Page: {controller.index}");
+            RequestStatusData(controller.deviceId, (byte)controller.index);
+        }
+    }
 
     private void HandleController(CANMessage msg)
     {
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
             var controller = new Controller(msg, Host!);
-            SetController(controller);
+            controllerCollector.Add(controller);
 
-            // request additional data if not already happened
-            //if (controllersDictionary.TryGetValue(msg.Device, out var existingController))
-            //{
-            //    statusDataEventQueue.Add((msg.Device, 0));
-            //}
+            // contrCollectorThread.Next() on timer 
         }
-        //if (msg.Command == Command.StatusData) // && msg.IsResponse)
-        //{
-        //    switch (msg.DataLength)
-        //    {
-        //    case 5:
-        //        Debug.WriteLineIf(TraceSwitches.StatusDataSwitch.TraceInfo, $"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
-        //        break;
-        //    case 6:
-        //        byte index = msg.GetDataByte(4);
-        //        Debug.WriteLineIf(TraceSwitches.StatusDataSwitch.TraceInfo, $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
-
-        //        if (index == 0)
-        //        {
-        //            if (controllersDictionary.TryGetValue(msg.Device, out var existingController))
-        //            {
-        //                StatusDataDevice statusDataDevice = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
-
-        //                PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
-        //                existingController.Update(statusDataDevice);
-        //                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
-        //                statusDataEventQueue.Continue();
-        //            }
-        //        }
-        //        else
-        //        {
-        //            //StatusDataValue statusDataValue = new(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), statusDataCollector);
-        //            //PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(StatusData)));
-        //            //StatusData.First(d => d.DeviceId == msg.Device).Values[index - 1] = statusDataValue;
-        //            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusData)));
-        //        }
-        //        break;
-        //    case 8:
-        //        ushort packageIndex = (byte)(msg.Hash & 0xff);
-        //        Debug.WriteLineIf(TraceSwitches.StatusDataSwitch.TraceInfo, $"HandleStatusData Length 8 HashIndex {packageIndex}");
-        //        if (packageIndex == 1)
-        //        {
-        //            statusDataCollector = new();
-        //        }
-        //        statusDataCollector.AddData(msg.GetData());
-        //        break;
-        //    default:
-        //        throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
-        //    }
-        //}
+        if (msg.Command == Command.StatusData) // && msg.IsResponse)
+        {
+            switch (msg.DataLength)
+            {
+            case 5:
+                Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
+                break;
+            case 6:
+                Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
+                controllerCollector.Add(msg.Device, msg.GetDataByte(4), controllerDataCollector);
+                break;
+            case 8:
+                ushort packageIndex = (byte)(msg.Hash & 0xff);
+                Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 8 HashIndex {packageIndex}");
+                if (packageIndex == 1)
+                {
+                    controllerDataCollector = new();
+                }
+                controllerDataCollector.AddData(msg.GetData());
+                break;
+            default:
+                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
+            }
+        }
     }
 
     //private Dictionary<uint, StatusDataDevice> statusData = [];

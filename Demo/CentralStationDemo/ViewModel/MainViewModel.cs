@@ -37,7 +37,6 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             Locomotives = cs.Locomotives?.Locomotives?.ToViewModelList<LocomotiveViewModel>(host);
             break;
         case "Articles":
-            //Articles = cs.Articles?.Articles?.Select(i => new ArticleViewModel(i))?.ToList();
             Articles = cs.Articles?.Articles?.ToViewModelList<ArticleViewModel>();
             break;
         case "Routes":
@@ -47,7 +46,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             TrackPages = cs.Tracks?.Pages?.ToViewModelList<TrackPageViewModel>();
             break;
         case "Controllers":
-            Controllers = cs.Controllers.ToViewModelList<ControllerViewModel>();
+            Controllers = cs.Controllers?.ToViewModelList<ControllerViewModel>();
             break;
         }
     }
@@ -160,7 +159,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     [RelayCommand]
     private void OnRequestControlUnits()
     {
-        cs.RequestParticipants();
+        //cs.RequestParticipants();
+        cs.StartControllerCollection();
     }
 
     [RelayCommand]

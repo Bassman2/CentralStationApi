@@ -9,8 +9,11 @@ public static class TraceSwitches
     public readonly static TraceSwitch SerializerSwitch = new("SerializerSwitch", "SerializerSwitch", "Warning");
 
 
-    public readonly static TraceSwitch StatusDataSwitch = new("StatusDataSwitch", "StatusDataSwitch", "Warning");
+    //public readonly static TraceSwitch StatusDataSwitch = new("StatusDataSwitch", "StatusDataSwitch", "Warning");
 
 
     public readonly static TraceSwitch TracksSwitch = new("TracksSwitch", "TracksSwitch", "Info");
+
+    public readonly static TraceSwitch ControllerSwitch = new("ControllerSwitch", "ControllerSwitch", "Info");
+
 }

@@ -10,7 +10,7 @@ public class Controller(CANMessage msg, string host)
 
     // from StatusData
 
-    public bool HasStatusData { get; internal set; } = false;
+    internal bool HasStatusData { get; set; } = false;
 
     public byte Index { get; internal set; }
 
@@ -62,17 +62,43 @@ public class Controller(CANMessage msg, string host)
         }
     }
 
-    public void Update(StatusDataDevice statusDataDevice)
+    internal void Add(int index, DataCollector col)
     {
-        HasStatusData = true;
-        Index = statusDataDevice.Index;
-        NumOfPackages = statusDataDevice.NumOfPackages;
-        NumOfMeasuredValues = statusDataDevice.NumOfMeasuredValues;
-        NumOfConfigurationChannels = statusDataDevice.NumOfConfigurationChannels;
-        SerialNumber = statusDataDevice.SerialNumber;
-        ArticleNumber = statusDataDevice.ArticleNumber;
-        DeviceName = statusDataDevice.DeviceName;
+        col.SetPositionToStart();
+        if (index == 0)
+        {
+            // package 1
+            NumOfMeasuredValues = col.ReadByte();
+            NumOfConfigurationChannels = col.ReadByte();
+            col.ReadByte();
+            col.ReadByte();
+            SerialNumber = col.ReadUInt32();
+
+            // package 2
+            ArticleNumber = col.ReadString(8);
+
+            // package 3, ...
+            DeviceName = col.ReadString();
+
+            HasStatusData = true;
+        }
+        else
+        {
+            // for future use
+        }
     }
+
+    //public void Update(StatusDataDevice statusDataDevice)
+    //{
+    //    HasStatusData = true;
+    //    Index = statusDataDevice.Index;
+    //    NumOfPackages = statusDataDevice.NumOfPackages;
+    //    NumOfMeasuredValues = statusDataDevice.NumOfMeasuredValues;
+    //    NumOfConfigurationChannels = statusDataDevice.NumOfConfigurationChannels;
+    //    SerialNumber = statusDataDevice.SerialNumber;
+    //    ArticleNumber = statusDataDevice.ArticleNumber;
+    //    DeviceName = statusDataDevice.DeviceName;
+    //}
 
     public override int GetHashCode() => (DeviceId, MajorVersion, MinorVersion, DeviceType).GetHashCode();
     public override bool Equals(object? obj)
