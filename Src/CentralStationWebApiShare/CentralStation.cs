@@ -1,8 +1,4 @@
-﻿using CentralStationWebApi.Internal;
-using CentralStationWebApi.Model;
-using System.Threading;
-
-namespace CentralStationWebApi;
+﻿namespace CentralStationWebApi;
 
 public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
@@ -13,11 +9,13 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private readonly CollectorThread trackCollectorThread;
 
+    private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
+
     public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
     {
         statusDataEventQueue = new (tuple => RequestStatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
 
-        trackCollectorThread = new CollectorThread(TrackCollectorWorkerLoop, TimeSpan.FromSeconds(2));
+        trackCollectorThread = new CollectorThread(TrackCollectorWorkerLoop, timeout);
     }
         
 
@@ -88,21 +86,10 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             SetRoutes(CsSerializer.Deserialize<RouteData>(stream, "[fahrstrassen]"));
             break;
         case "[gleisbild]":
-            SetTracks(CsSerializer.Deserialize<TrackData>(stream, "[gleisbild]"));
-            intTrackData = CsSerializer.Deserialize<TrackData>(stream, "[gleisbild]");
-            intTrackPagesData = [];
-            foreach (var page in intTrackData.Pages!)
-            {
-                intTrackPagesData[page!.Id] = null;
-            }
+            SetTrackData(CsSerializer.Deserialize<TrackData>(stream, "[gleisbild]"));
             break;
         case "[gleisbildseite]":
-            SetTrackPages(CsSerializer.Deserialize<TrackPageData>(stream, "[gleisbildseite]"));
-            TrackPageData trackPageData = CsSerializer.Deserialize<TrackPageData>(stream, "[gleisbildseite]");
-            if (intTrackPagesData != null)
-            {
-                intTrackPagesData[trackPageData.Page] = trackPageData;
-            }
+            SetTrackPageData(CsSerializer.Deserialize<TrackPageData>(stream, "[gleisbildseite]"));
             break;
         }
     }
@@ -145,6 +132,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private void SetLocomotives(LocomotiveData locomotives)
     {
+        DeviceCache.AddLocomotiveDevices(locomotives);
         PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Locomotives)));
         Locomotives = locomotives;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locomotives)));
@@ -184,21 +172,21 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     public TrackData? Tracks;
 
-    private void SetTracks(TrackData tracks)
-    {
-        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Tracks)));
-        Tracks = tracks;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
-    }
+    //private void SetTracks(TrackData tracks)
+    //{
+    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Tracks)));
+    //    Tracks = tracks;
+    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
+    //}
 
     public TrackPageData? TrackPages;
 
-    private void SetTrackPages(TrackPageData trackPages)
-    {
-        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackPages)));
-        TrackPages = trackPages;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackPages)));
-    }
+    //private void SetTrackPages(TrackPageData trackPages)
+    //{
+    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackPages)));
+    //    TrackPages = trackPages;
+    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackPages)));
+    //}
 
 
     // track collector
@@ -216,10 +204,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private TrackData? intTrackData = null;
     private Dictionary<uint, TrackPageData?>? intTrackPagesData = null;
-
-
     private bool isTrackCollectorRunning = false;
-    private void StartTrackCollector()
+
+    public void StartTrackCollector()
     {
         // clear all existing data
         intTrackData = null;
@@ -233,8 +220,6 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private void TrackCollectorWorkerLoop() //object? obj)
     {
-        StartTrackCollector(); // remove later
-
         if (!isTrackCollectorRunning) return;
 
         if (intTrackData == null)
@@ -248,7 +233,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             {
                 if (page.Value == null)
                 {
-                    RequestConfigDataTrackDiagramPage(page.Key);
+                    RequestConfigDataTrackDiagramPage((int)page.Key);
                     return;
                 }
             }
@@ -261,7 +246,32 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         }
     }
 
+    private void SetTrackData(TrackData trackData)
+    { 
+        if (!isTrackCollectorRunning) return;
 
+        intTrackData = trackData;
+        intTrackPagesData = [];
+        intTrackPagesData = (intTrackData.Pages ?? []).ToDictionary(page => page.Id, _ => (TrackPageData?)null);
+
+
+        //foreach (var page in intTrackData.Pages!)
+        //{
+        //    intTrackPagesData[page!.Id] = null;
+        //}
+        trackCollectorThread.Next();
+    }
+
+    private void SetTrackPageData(TrackPageData trackPageData)
+    {
+        if (!isTrackCollectorRunning) return;
+
+        if (intTrackPagesData != null)
+        {
+            intTrackPagesData[trackPageData.Page] = trackPageData;
+        }
+        trackCollectorThread.Next();
+    }
 
 
     #endregion

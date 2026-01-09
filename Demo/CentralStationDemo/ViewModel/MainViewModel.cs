@@ -145,7 +145,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     [RelayCommand]
     private void OnRequestTracks()
     {
-        cs.RequestConfigDataTrackDiagram();
+        cs.StartTrackCollector();
+        //cs.RequestConfigDataTrackDiagram();
         //cs.RequestConfigDataTrackDiagramPage(1);
         //cs.RequestConfigDataTrackDiagramPage(2);
     }

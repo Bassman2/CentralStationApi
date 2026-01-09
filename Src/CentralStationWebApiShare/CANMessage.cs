@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
 namespace CentralStationWebApi;
 
@@ -107,6 +108,12 @@ public class CANMessage
         Sender = sender;
         Timestamp = DateTime.Now;
         Array.Copy(data, Buffer, 13);
+
+        // add to DeviceCache
+        if (Command == Command.SoftwareVersion && DataLength == 8)
+        {
+            DeviceCache.AddDevice(Device, GetDataUShort(6));
+        }
     }
 
     public Priority Priority => (Priority)GetBits(GetHeader(), 25, 4);
@@ -180,7 +187,7 @@ public class CANMessage
 
     public uint Device => GetDataUInt(0);
 
-    public string DeviceName => GetDataUInt(0).ToString("X4");
+    public string DeviceName => DeviceCache.DeviceName(Device);
 
     #region Description
 
@@ -190,23 +197,23 @@ public class CANMessage
             Command.SystemCommand =>
                 SubCommand switch
                 {
-                    SubCommand.Stop => $"System Stop - Device: {DeviceName}",
-                    SubCommand.Go => $"System Go - Device: {DeviceName}",
-                    SubCommand.Halt => $"System Halt - Device: {DeviceName}",
-                    SubCommand.LocoHalt => $"System Loco Halt - Device: {DeviceName}",
-                    SubCommand.LocoCycleStop => $"Loco Cycle Stop - Device: {DeviceName}",
-                    SubCommand.LocoDataProtocol => $"Loco Buffer Protocol - Device: {DeviceName}",
-                    SubCommand.SwitchingTime => $"Switching Time - Device: {DeviceName}",
-                    SubCommand.FastRead => $"Fast Read - Device: {DeviceName}",
-                    SubCommand.TrackProtocol => $"Track Protocol - Device: {DeviceName}",
-                    SubCommand.NewRegistrationCounter => $"New Registration Counter - Device: {DeviceName}",
-                    SubCommand.Overload => $"Overload - Device: {DeviceName}",
-                    SubCommand.Status => $"Status - Device: {DeviceName}",
-                    SubCommand.Identifier => $"Identifier - Device: {DeviceName}",
-                    SubCommand.Unknown20 => $"Unknown20 - Device: {DeviceName}",
-                    SubCommand.MfxSeek => $"Mfx Seek - Device: {DeviceName}",
-                    SubCommand.Reset => $"System Reset - Device: {DeviceName}",
-                    _ => $"Unknown System Command {buffer[SUBC]:X2}" 
+                    SubCommand.Stop =>                      /* */ $"System Stop - Device: {DeviceName}",
+                    SubCommand.Go =>                        /* */ $"System Go - Device: {DeviceName}",
+                    SubCommand.Halt =>                      /* */ $"System Halt - Device: {DeviceName}",
+                    SubCommand.LocoHalt =>                  /* */ $"System Loco Halt - Device: {DeviceName}",
+                    SubCommand.LocoCycleStop =>             /* */ $"System Loco Cycle Stop - Device: {DeviceName}",
+                    SubCommand.LocoDataProtocol =>          /* */ $"System Loco Buffer Protocol - Device: {DeviceName}",
+                    SubCommand.SwitchingTime =>             /* */ $"System Switching Time - Device: {DeviceName}",
+                    SubCommand.FastRead =>                  /* */ $"System Fast Read - Device: {DeviceName}",
+                    SubCommand.TrackProtocol =>             /* */ $"System Track Protocol - Device: {DeviceName}",
+                    SubCommand.NewRegistrationCounter =>    /* */ $"System New Registration Counter - Device: {DeviceName}",
+                    SubCommand.Overload =>                  /* */ $"System Overload - Device: {DeviceName}",
+                    SubCommand.Status =>                    /* */ $"System Status - Device: {DeviceName} Channel: {GetDataByte(5)}" + (DataLength == 7 ? $" Value: {GetDataByte(6)}" : "") + (DataLength == 8 ? $" Value: {GetDataUShort(6)}" : ""),
+                    SubCommand.Identifier =>                /* */ $"System Identifier - Device: {DeviceName}",
+                    SubCommand.Unknown20 =>                 /* */ $"System Unknown20 - Device: {DeviceName}",
+                    SubCommand.MfxSeek =>                   /* */ $"System Mfx Seek - Device: {DeviceName}",
+                    SubCommand.Reset =>                     /* */ $"System Reset - Device: {DeviceName}",
+                    _ => $"Unknown System Command {buffer[SUBC]:X2}"
                 },
 
 
@@ -227,14 +234,21 @@ public class CANMessage
                     5 => $"Loco Direction - Loco: {DeviceName} Direction: {DirectionChange}",
                     _ => "Loco Direction unknown data size"
                 },
-            Command.LocoFunction => "Loco Function",
+            Command.LocoFunction =>
+                DataLength switch
+                {
+                    5 => $"Loco Function - Loco: {DeviceName} Function: {GetDataByte(4)}",
+                    6 => $"Loco Function - Loco: {DeviceName} Function: {GetDataByte(4)} Value: {GetDataByte(5)}",
+                    8 => $"Loco Function - Loco: {DeviceName} Function: {GetDataByte(4)} Value: {GetDataByte(5)} Function value: {GetDataUShort(6)}",
+                    _ => "Loco Function unknown data size"
+                },
             Command.ReadConfig => "Read Config",
             Command.WriteConfig => "Write Config",
             Command.SwitchAccessories => "Switch Accessories",
             Command.S88Polling => "S88 Polling",
             Command.S88Event => "S88 Event",
             Command.SX1Event => "SX1 Event",
-            Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - Sender: {Device:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceId: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2}",
+            Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - Device: {Device:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceType: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2}",
             Command.UpdateOffer => "Update Offer",
             Command.ReadConfigData => "Read Config Buffer",
             Command.BootloaderCANBound => "Bootloader CAN Bound",

@@ -4,7 +4,8 @@ internal sealed class CollectorThread : IDisposable
 {
     private readonly TimeSpan timeout;
     private readonly Action action;
-    private readonly Task task;
+    //private readonly Task task;
+    private readonly Thread thread;
     private readonly AutoResetEvent autoResetEvent = new(false);
 
     private bool isRunning = true;
@@ -13,17 +14,18 @@ internal sealed class CollectorThread : IDisposable
     {
         this.action = action;
         this.timeout = timeout;
-        this.task = Task.Run(WorkLoop);
+        
+        //this.task = Task.Run(WorkLoop);
 
-        //thread = new Thread(WorkLoop) { Name = "EventQueueThread", IsBackground = true };
-        //thread.Start();
+        thread = new Thread(WorkLoop) { Name = "EventQueueThread", IsBackground = true };
+        thread.Start();
     }
     
     public void Dispose()
     {
         isRunning = false;
         autoResetEvent.Set();
-        task.Wait();
+        //task.Wait();
     }
 
     private void WorkLoop()
