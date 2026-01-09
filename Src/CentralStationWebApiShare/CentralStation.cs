@@ -10,6 +10,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly CollectorThread trackCollectorThread;
 
     private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
+    private readonly int retry = 3;
 
     public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
     {
@@ -202,15 +203,18 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //    this.timeout = timeout;
     //    thread = new Thread(WorkLoop) { Name = "EventQueueThread", IsBackground = true };
 
-    private TrackData? intTrackData = null;
-    private Dictionary<uint, TrackPageData?>? intTrackPagesData = null;
     private bool isTrackCollectorRunning = false;
+    private DataCollector<TrackData> trackDataCollector = new();
+    private DictionaryCollector<uint, TrackPageData> trackPagesDataCollector = new();
+
+  
 
     public void StartTrackCollector()
     {
         // clear all existing data
-        intTrackData = null;
-        intTrackPagesData = null;
+        trackDataCollector.Clear();
+        trackPagesDataCollector.Clear();
+
         // TODO
 
         // start collecting track data
@@ -222,25 +226,17 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         if (!isTrackCollectorRunning) return;
 
-        if (intTrackData == null)
-        {
+        if (trackDataCollector.ShouldRequest)
+        {            
             RequestConfigDataTrackDiagram();
-            return;
         }
-        if (intTrackPagesData != null)
+        else if (trackPagesDataCollector.ShouldRequest(out var page))
         {
-            foreach (var page in intTrackPagesData)
-            {
-                if (page.Value == null)
-                {
-                    RequestConfigDataTrackDiagramPage((int)page.Key);
-                    return;
-                }
-            }
+            RequestConfigDataTrackDiagramPage((int)page);
         }
 
         // check if finished 
-        if (intTrackData != null && intTrackPagesData != null && intTrackPagesData.Values.All(v => v != null))
+        if (trackDataCollector.IsFinished && trackPagesDataCollector.IsFinished)
         {
             isTrackCollectorRunning = false;
         }

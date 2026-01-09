@@ -47,8 +47,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             TrackPages = cs.Tracks?.Pages?.ToViewModelList<TrackPageViewModel>();
             break;
         case "Controllers":
-            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"OnCsPropertyChanged Controllers # {cs.Controllers.Count()}");
-            Controllers = [.. cs.Controllers.Select(i => new ControllerViewModel(i, host))];
+            Controllers = cs.Controllers.ToViewModelList<ControllerViewModel>();
             break;
         }
     }

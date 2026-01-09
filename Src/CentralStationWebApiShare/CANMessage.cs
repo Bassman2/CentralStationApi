@@ -187,7 +187,7 @@ public class CANMessage
 
     public uint Device => GetDataUInt(0);
 
-    public string DeviceName => DeviceCache.DeviceName(Device);
+    public string DeviceName => $"\"{DeviceCache.DeviceName(Device)}\"";
 
     #region Description
 

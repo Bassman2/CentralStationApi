@@ -2,7 +2,7 @@
 
 public partial class ControllerViewModel : ObservableObject
 {
-    public ControllerViewModel(Controller controller, string host)
+    public ControllerViewModel(Controller controller)
     {
         DeviceId = controller.DeviceId;
         SwVersion = $"{controller.MajorVersion}.{controller.MinorVersion}";

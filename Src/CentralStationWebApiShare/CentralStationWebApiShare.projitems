@@ -15,8 +15,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)CANMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.Sync.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CSFileStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\CollectorData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\CollectorDictionary.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CollectorThread.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\DataCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\DeviceCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\DictionaryCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\EventQueue.cs" />
     <Compile Include="..\CentralStationWebApiShare\Controller.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Command.cs" />
@@ -24,7 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Enums\DeviceType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Direction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Protocol.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\DataCollector.cs" />
+    <Compile Include="..\CentralStationWebApiShare\Internal\StreamCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\IProtocolHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\TcpHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\Tracer.cs" />
