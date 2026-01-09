@@ -1,4 +1,6 @@
-﻿namespace CentralStationWebApi;
+﻿using CentralStationWebApi.Model;
+
+namespace CentralStationWebApi;
 
 public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
@@ -10,7 +12,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly CollectorThread trackCollectorThread;
 
     private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
-    private readonly int retry = 3;
+    //private readonly int retry = 3;
 
     public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
     {
@@ -204,13 +206,14 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //    thread = new Thread(WorkLoop) { Name = "EventQueueThread", IsBackground = true };
 
     private bool isTrackCollectorRunning = false;
-    private DataCollector<TrackData> trackDataCollector = new();
-    private DictionaryCollector<uint, TrackPageData> trackPagesDataCollector = new();
+    private readonly DataCollector<TrackData> trackDataCollector = new();
+    private readonly DictCollector<TrackPageData> trackPagesDataCollector = new();
 
   
 
     public void StartTrackCollector()
     {
+        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request Start");
         // clear all existing data
         trackDataCollector.Clear();
         trackPagesDataCollector.Clear();
@@ -222,39 +225,55 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         trackCollectorThread.Next();
     }
 
-    private void TrackCollectorWorkerLoop() //object? obj)
+    private void TrackCollectorWorkerLoop() 
     {
-        if (!isTrackCollectorRunning) return;
+        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "  Track Loop");
+
+        if (!isTrackCollectorRunning)
+        {
+            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
+            return;
+        }
 
         if (trackDataCollector.ShouldRequest)
-        {            
+        {
+            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request");
             RequestConfigDataTrackDiagram();
         }
         else if (trackPagesDataCollector.ShouldRequest(out var page))
         {
+            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Reqest Page: {page}");
             RequestConfigDataTrackDiagramPage((int)page);
         }
-
-        // check if finished 
-        if (trackDataCollector.IsFinished && trackPagesDataCollector.IsFinished)
+        else
         {
-            isTrackCollectorRunning = false;
+            // check if finished 
+            if (trackDataCollector.IsFinished && trackPagesDataCollector.IsFinished)
+            {
+                Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Request finished");
+                isTrackCollectorRunning = false;
+            }
+            else
+            {
+                Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Nothing");
+            }
         }
     }
 
     private void SetTrackData(TrackData trackData)
-    { 
-        if (!isTrackCollectorRunning) return;
+    {
+        if (!isTrackCollectorRunning)
+        {
+            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
+            return;
+        }
 
-        intTrackData = trackData;
-        intTrackPagesData = [];
-        intTrackPagesData = (intTrackData.Pages ?? []).ToDictionary(page => page.Id, _ => (TrackPageData?)null);
+        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Response");
 
 
-        //foreach (var page in intTrackData.Pages!)
-        //{
-        //    intTrackPagesData[page!.Id] = null;
-        //}
+        trackDataCollector.Data = trackData;
+        trackPagesDataCollector.Init(trackData.Pages!.Select(p => p.Id));
+       
         trackCollectorThread.Next();
     }
 
@@ -262,10 +281,11 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         if (!isTrackCollectorRunning) return;
 
-        if (intTrackPagesData != null)
-        {
-            intTrackPagesData[trackPageData.Page] = trackPageData;
-        }
+        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Response Page {trackPageData.Page}");
+
+
+        trackPagesDataCollector[trackPageData.Page] = trackPageData;
+
         trackCollectorThread.Next();
     }
 
@@ -308,7 +328,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //    }
     //}
 
-    private DataCollector statusDataCollector = new();
+    //private DataCollector statusDataCollector = new();
 
     private void HandleController(CANMessage msg)
     {

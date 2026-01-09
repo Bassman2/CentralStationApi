@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace CentralStationWebApi.Internal;
+﻿namespace CentralStationWebApi.Internal;
 
 internal class DataCollector<T> where T : class
 {
@@ -12,8 +10,6 @@ internal class DataCollector<T> where T : class
         counter = 0;
         data = null;
     }
-
-    public void Increment() => counter++;
 
     public T? Data
     {
