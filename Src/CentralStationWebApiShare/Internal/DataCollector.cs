@@ -1,32 +1,30 @@
-﻿namespace CentralStationWebApi.Internal;
+﻿//namespace CentralStationWebApi.Internal;
 
-internal class DataCollector<T> where T : class
-{
-    private int counter = 0;
-    private T? data = null;
+//internal class DataCollector<T> where T : class
+//{
+    
 
-    public void Clear()
-    { 
-        counter = 0;
-        data = null;
-    }
+//    public void Clear()
+//    { 
+       
+//    }
 
-    public T? Data
-    {
-        get => data;
-        set => data = value;
-    }
+//    public T? Data
+//    {
+//        get => data;
+//        set => data = value;
+//    }
 
-    public bool ShouldRequest
-    {
-        get
-        {
-            counter++;
-            return data == null;
-        }
-    }
+//    public bool ShouldRequest
+//    {
+//        get
+//        {
+//            counter++;
+//            return data == null;
+//        }
+//    }
 
-    public bool IsFinished => data != null;
-}
+//    public bool IsFinished => data != null;
+//}
 
 

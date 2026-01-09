@@ -246,7 +246,14 @@ public class CANMessage
             Command.WriteConfig => "Write Config",
             Command.SwitchAccessories => "Switch Accessories",
             Command.S88Polling => "S88 Polling",
-            Command.S88Event => "S88 Event",
+            Command.S88Event => 
+                DataLength switch
+                {
+                    4 => $"S88 Event - Device ID: {GetDataUShort(0)} Contact ID: {GetDataUShort(2)}",
+                    5 => $"S88 Event - Device ID: {GetDataUShort(0)} Contact ID: {GetDataUShort(2)} Parameter: {GetDataByte(4)}",
+                    8 => $"S88 Event - Device ID: {GetDataUShort(0)} Contact ID: {GetDataUShort(2)} Old: {GetDataByte(4)} New: {GetDataByte(5)} Time: {GetDataUShort(6)}",
+                    _ => "S88 Event unknown data size"
+                },
             Command.SX1Event => "SX1 Event",
             Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - Device: {Device:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceType: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2}",
             Command.UpdateOffer => "Update Offer",

@@ -20,7 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CollectorThread.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\DataCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\DeviceCache.cs" />
-    <Compile Include="..\CentralStationWebApiShare\Internal\DictCollector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\TrackCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\EventQueue.cs" />
     <Compile Include="..\CentralStationWebApiShare\Controller.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Command.cs" />

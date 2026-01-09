@@ -245,6 +245,15 @@ partial class CentralStationBasic
         SendMessage(message);
     }
 
+    //Filename: mfxbver
+    public void RequestConfigDataMfxBVverPage(int page)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(page, 1, nameof(page));
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash).
+            AddString("mfxbver");
+        SendMessage(message);
+    }
+
     #endregion
 
     #region 9 Automation
