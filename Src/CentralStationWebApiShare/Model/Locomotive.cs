@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata;
-
-namespace CentralStationWebApi.Model;
+﻿namespace CentralStationWebApi.Model;
 
 [CsSerialize]
 public partial class Locomotive
@@ -92,7 +90,7 @@ public partial class Locomotive
     public uint InTraction { get; private set; }
 
     [CsProperty("velocity")]
-    public uint Velocity { get; private set; }
+    public ushort Velocity { get; private set; }
 
     [CsProperty("richtung")]
     public Direction Direction { get; private set; }

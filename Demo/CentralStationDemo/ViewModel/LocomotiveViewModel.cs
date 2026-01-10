@@ -1,16 +1,16 @@
-﻿//using DocumentFormat.OpenXml.Bibliography;
-//using DocumentFormat.OpenXml.Drawing.Diagrams;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+﻿//using System.Windows.Media;
 
 namespace CentralStationDemo.ViewModel;
 
 public partial class LocomotiveViewModel : ObservableObject
 {
     //private static MainViewModel mainViewModel = Ioc.Default.GetRequiredService<MainViewModel>();
+    private readonly CentralStation cs;
 
-    public LocomotiveViewModel(Locomotive loco, string host)
+    public LocomotiveViewModel(Locomotive loco, CentralStation cs)
     {
+        this.cs = cs;
+
         Name = loco.Name;
         Uid = loco.Uid;
         MfxUid = loco.MfxUid;
@@ -82,8 +82,8 @@ public partial class LocomotiveViewModel : ObservableObject
 
     #region info
 
-    [ObservableProperty]
-    private ImageSource? icon;
+    //[ObservableProperty]
+    //private ImageSource? icon;
 
     [ObservableProperty]
     private Uri? iconUri;
@@ -140,8 +140,7 @@ public partial class LocomotiveViewModel : ObservableObject
     private uint spm;
 
     [ObservableProperty]
-    private uint velocity;
-
+    private ushort velocity;
 
     [ObservableProperty]
     private Direction direction;
@@ -151,14 +150,22 @@ public partial class LocomotiveViewModel : ObservableObject
 
     #region control
 
-    [ObservableProperty]
-    private uint speed;
+    partial void OnVelocityChanged(ushort value)
+    {
+        cs.SetLocomotiveVelocity(Uid, value);
+    }
 
-    //[RelayCommand]
-    //private void OnEmergencyHalt()
-    //{
+    [RelayCommand]
+    private void OnEmergencyHalt()
+    {
+        cs.SystemLocomotiveEmergencyHalt(Uid);
+    }
 
-    //}
+    [RelayCommand]
+    private void OnDirection()
+    { 
+        cs.SetLocomotiveDirection(Uid, DirectionChange.Toggle);
+    }
 
     #endregion
 

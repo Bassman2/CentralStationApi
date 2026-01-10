@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CANMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CSFileStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\TrackProtocol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CollectorThread.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\ControllerCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\DeviceCache.cs" />

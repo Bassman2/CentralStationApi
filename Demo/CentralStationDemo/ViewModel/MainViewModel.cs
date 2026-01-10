@@ -34,7 +34,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             Status = cs.Status;
             break;
         case "Locomotives":
-            Locomotives = cs.Locomotives?.Locomotives?.ToViewModelList<LocomotiveViewModel>(host);
+            Locomotives = cs.Locomotives?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
             break;
         case "Articles":
             Articles = cs.Articles?.Articles?.ToViewModelList<ArticleViewModel>();

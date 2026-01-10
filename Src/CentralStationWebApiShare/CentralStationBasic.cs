@@ -7,7 +7,9 @@ public partial class CentralStationBasic : IDisposable
     private readonly Task receiver;
     internal static string? Host;
         
-    public const uint AllDevices = 0x0000;  
+    public const uint AllDevices = 0x0000;
+    public const uint MinVelocity = 0;
+    public const uint MaxVelocity = 1000;
 
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
     private readonly MessageQueue<CANMessage> messageReceivedQueue;
@@ -119,7 +121,7 @@ public partial class CentralStationBasic : IDisposable
         SendMessage(message);
     }
 
-    public void SystemLocoHalt(uint device = AllDevices)
+    public void SystemLocomotiveEmergencyHalt(uint device = AllDevices)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
@@ -127,7 +129,7 @@ public partial class CentralStationBasic : IDisposable
         SendMessage(message);
     }
 
-    public void SystemLocoCycleStop(uint device = AllDevices)
+    public void SystemLocomotiveCycleStop(uint device = AllDevices)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
@@ -135,7 +137,7 @@ public partial class CentralStationBasic : IDisposable
         SendMessage(message);
     }
 
-    public void SystemLocoDataProtocol(uint device = AllDevices, byte protocoll = 0xff)
+    public void SystemLocomotiveDataProtocol(uint device = AllDevices, byte protocoll = 0xff)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
@@ -144,7 +146,7 @@ public partial class CentralStationBasic : IDisposable
         SendMessage(message);
     }
 
-    public void SystemSwitchingTimel(uint device, ushort time)
+    public void SystemArticleSwitchingTimel(uint device, ushort time)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
@@ -153,7 +155,7 @@ public partial class CentralStationBasic : IDisposable
         SendMessage(message);
     }
 
-    public void SystemFastRead(uint device, ushort mfxSid)
+    public void SystemMfxFastRead(uint device, ushort mfxSid)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
@@ -162,16 +164,16 @@ public partial class CentralStationBasic : IDisposable
         SendMessage(message);
     }
 
-    public void SystemTrackProtocol(uint device, byte protocoll)
+    public void SystemTrackProtocolSwitch(uint device, TrackProtocol protocoll)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
             AddSubCommand(SubCommand.TrackProtocol).
-            AddByte(protocoll);
+            AddByte((byte)protocoll);
         SendMessage(message);
     }
 
-    public void SystemNewRegistrationCounter(uint device, ushort newRegistrationCounter)
+    public void SystemMfxNewRegistrationCounter(uint device, ushort newRegistrationCounter)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
@@ -229,6 +231,34 @@ public partial class CentralStationBasic : IDisposable
 
     #region 3 Administration
 
+    public void GetLocomotiveDiscovery(uint locoId)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.Discovery, hash).AddUInt32(locoId);
+        SendMessage(message);
+    }
+
+    public void SetLocomotiveDiscovery(uint locoId, ushort velocity)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.Discovery, hash).AddUInt32(locoId).AddUInt16(velocity);
+        SendMessage(message);
+    }
+
+    public void SetMfxBinding(uint mfxUID, ushort mfxSID)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.Bind, hash).
+            AddUInt32(mfxUID).
+            AddUInt16(mfxSID);
+        SendMessage(message);
+    }
+
+    public void SetMfxVerify(uint mfxUID, ushort mfxSID)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.Bind, hash).
+            AddUInt32(mfxUID).
+            AddUInt16(mfxSID);
+        SendMessage(message);
+    }
+
     public void GetLocomotiveVelocity(uint locoId)
     {
         var message = new CANMessage(Priority.Proirity1, Command.LocoVelocity, hash).AddUInt32(locoId);
@@ -237,6 +267,8 @@ public partial class CentralStationBasic : IDisposable
 
     public void SetLocomotiveVelocity(uint locoId, ushort velocity)
     {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(velocity, MaxVelocity, nameof(velocity));
+
         var message = new CANMessage(Priority.Proirity1, Command.LocoVelocity, hash).AddUInt32(locoId).AddUInt16(velocity);
         SendMessage(message);
     }
