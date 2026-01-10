@@ -5,7 +5,7 @@
              xmlns:conv="clr-namespace:CentralStationDemo.Converter"
              Startup="OnApplicationStartup">
     <Application.Resources>
-        <conv:DeviceToDescriptionConverter x:Key="DeviceToDescriptionConverter"/>
+        <!--<conv:DeviceToDescriptionConverter x:Key="DeviceToDescriptionConverter"/>-->
         <conv:ResponseToArrowConverter x:Key="ResponseToArrowConverter"/>
         <conv:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
         <conv:UriToImageSourceConverter x:Key="UriToImageSourceConverter"/>

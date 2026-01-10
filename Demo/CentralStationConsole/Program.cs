@@ -10,7 +10,7 @@ namespace CentralStationConsole
             using var cs = new CentralStationBasic("CS2");
 
             
-            await cs.SystemStopAsync();
+            //await cs.SystemStopAsync();
 
             Console.WriteLine("Ready");
 

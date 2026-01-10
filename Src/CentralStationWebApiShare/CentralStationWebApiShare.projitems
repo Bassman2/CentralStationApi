@@ -10,10 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CentralStation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.Async.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CANMessage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.Sync.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CSFileStream.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CollectorThread.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\ControllerCollector.cs" />
