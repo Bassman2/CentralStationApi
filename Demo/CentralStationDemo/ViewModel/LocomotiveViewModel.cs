@@ -1,5 +1,8 @@
 ﻿//using System.Windows.Media;
 
+using CentralStationWebApi;
+using CentralStationWebApi.Model;
+
 namespace CentralStationDemo.ViewModel;
 
 public partial class LocomotiveViewModel : ObservableObject
@@ -78,6 +81,26 @@ public partial class LocomotiveViewModel : ObservableObject
         default:
             throw new NotImplementedException();
         }
+    }
+    
+    public void SetVelocity(ushort velocity) => Velocity = velocity;
+    
+
+    public void SetDirection(DirectionChange direction)
+    {
+        Direction = direction switch
+        {
+            DirectionChange.Remain => Direction,
+            DirectionChange.Forward => Direction.Forward,
+            DirectionChange.Backward => Direction.Backward,
+            DirectionChange.Toggle => Direction == Direction.Forward ? Direction.Backward : Direction.Forward,
+            _ => Direction
+        };
+    }
+    
+
+    public static void SetFunction(byte function, bool value)
+    { 
     }
 
     #region info

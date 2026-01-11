@@ -10,6 +10,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs = new CentralStation(host, Protocol.TCP);
         cs.MessageReceived += (s, e) => App.Current.Dispatcher.Invoke(() => Messages.Insert(0, e.Message));
         cs.PropertyChanged += (s, e) => OnCsPropertyChanged(e.PropertyName);
+
+        cs.LocomotiveVelocity += (s,e) => OnLocomotiveVelocity(e.LocomotiveId, e.Velocity);
+        cs.LocomotiveDirection += (s, e) => OnLocomotiveDirection(e.LocomotiveId, e.Direction); 
+        cs.LocomotiveFunction += (s, e) => OnLocomotiveFunction(e.LocomotiveId, e.Function, e.Value);
+
+
     }
 
     public void Dispose() => cs.Dispose();
@@ -101,6 +107,21 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             locomotiveViewModel?.UpdateLocomotive(message);
         }
     }
+
+    private void OnLocomotiveVelocity(uint locomotiveId, ushort velocity)
+    {   
+        Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.SetVelocity(velocity);
+    }
+
+    private void OnLocomotiveDirection(uint locomotiveId, DirectionChange direction)
+    { 
+        Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.SetDirection(direction);
+    }
+
+    private void OnLocomotiveFunction(uint locomotiveId, byte function, bool value)
+    {
+        Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.SetFunction(function, value);
+    } 
 
     #endregion
 
