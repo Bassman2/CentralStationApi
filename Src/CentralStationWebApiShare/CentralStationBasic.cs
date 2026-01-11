@@ -59,7 +59,7 @@ public partial class CentralStationBasic : IDisposable
 
     //private string fileName;
     //private uint streamLength;
-    //private List<byte> stream;
+    //private List<byte> mem;
     //private string streamText;
 
     protected virtual void ReceiveHandler(CANMessage msg)

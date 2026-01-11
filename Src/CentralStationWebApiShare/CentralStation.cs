@@ -5,6 +5,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     public event PropertyChangedEventHandler? PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
+    public event EventHandler<FileReceivedEventArgs>? FileReceived;
+
+    public event EventHandler<LocomotiveEventArgs>? LocomotiveHalt;
     public event EventHandler<LocomotiveVelocityEventArgs>? LocomotiveVelocity;
     public event EventHandler<LocomotiveDirectionEventArgs>? LocomotiveDirection;
     public event EventHandler<LocomotiveFunctionEventArgs>? LocomotiveFunction;
@@ -59,7 +62,8 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             }
             else if (msg.DataLength == 8 && fileDictionary.TryGetValue(msg.Hash, out var fileStream))
             {
-                if (fileStream.AddData(msg.GetData()))
+                fileStream.AddData(msg.GetData());
+                if (fileStream.IsReady())
                 {
                     //fileReceivedQueue.Add(fileStream);
                     SetFile(fileStream.GetFileStream(), fileStream.FileName);
@@ -76,6 +80,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private void SetFile(Stream stream, string fileName)
     {
+        FileReceived?.Invoke(this, new FileReceivedEventArgs(fileName, stream));
 
         Tracer.TraceStream(stream, fileName);
 
@@ -140,6 +145,12 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         switch (msg.Command)
         {
+        case Command.SystemCommand:
+            if (msg.SubCommand == SubCommand.LocoHalt && msg.IsResponse && msg.DataLength == 5)
+            {
+                LocomotiveHalt?.Invoke(this, new LocomotiveEventArgs(msg.Device));
+            }
+            break;
         case Command.LocoVelocity:
             if (msg.IsResponse && msg.DataLength == 6)
             {

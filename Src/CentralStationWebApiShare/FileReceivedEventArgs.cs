@@ -1,14 +1,7 @@
 ﻿namespace CentralStationWebApi;
 
-public class FileReceivedEventArgs : EventArgs
+public class FileReceivedEventArgs(string fileName, Stream stream) : EventArgs
 {
-    internal FileReceivedEventArgs(CSFileStream scFileStream)
-    {
-        CSFileStream = scFileStream;
-    }
-
-    public CSFileStream CSFileStream { get; }
-
-    
-
+    public string FileName => fileName;
+    public Stream Stream => stream;
 }

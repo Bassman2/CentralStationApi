@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Internal\TrackCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\EventQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LocomotiveDirectionEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LocomotiveEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LocomotiveFunctionEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LocomotiveVelocityEventArgs.cs" />
     <Compile Include="..\CentralStationWebApiShare\Controller.cs" />

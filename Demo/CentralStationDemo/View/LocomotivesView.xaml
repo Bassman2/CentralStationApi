@@ -144,7 +144,10 @@
                             <Button Grid.Column="3" Grid.Row="5" Margin="1"/>
                             <Button Grid.Column="3" Grid.Row="6" Margin="1"/>
                             <Button Grid.Column="3" Grid.Row="7" Margin="1"/>
-                            <Slider Grid.Column="4" Grid.RowSpan="8" Value="{Binding Velocity}" Minimum="0" Maximum="1000"  Orientation="Vertical" HorizontalAlignment="Center" Margin="1"/>
+                            <TextBlock Grid.Column="4" Grid.Row="0" Text="km/h" />
+                            <TextBlock Grid.Column="4" Grid.Row="1" Text="{Binding MaxSpeed}" />
+                            <Slider Grid.Column="4" Grid.Row="2" Grid.RowSpan="5" Value="{Binding Velocity, Delay=500}" Minimum="0" Maximum="1000"  Orientation="Vertical" HorizontalAlignment="Center" Margin="1"/>
+                            <TextBlock Grid.Column="4" Grid.Row="7" Text="{Binding Velocity}" />
                         </Grid>
                         <Button Grid.Row="4" Command="{Binding DirectionCommand}" Content="{Binding Direction}" HorizontalAlignment="Stretch" Margin="1"/>
                     </Grid>

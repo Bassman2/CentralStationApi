@@ -1,62 +1,74 @@
 ﻿namespace CentralStationWebApi;
 
-public class CSFileStream
+public class CSFileStream(CSFileStreamMode mode, string fileName, uint length, ushort cRC, byte reserved = 0)
 {
-    public CSFileStream(CSFileStreamMode mode, string fileName,uint length, ushort cRC, byte reserved = 0)
-    {
-        Mode = mode;
-        FileName = fileName;
-        Length = length;
-        CRC = cRC;
-        Reserved = reserved;
-    }
-
     private readonly MemoryStream mem = new(4 * 1024);
 
-    public CSFileStreamMode Mode { get; }
+    public CSFileStreamMode Mode => mode;
 
-    public string FileName { get; }
+    public string FileName => fileName;
 
-    public uint Length { get; }
+    public uint Length => length;
 
-    public ushort CRC { get; }
+    public ushort CRC => cRC;
 
-    public byte Reserved { get; }
+    public byte Reserved => reserved;
 
-    public bool AddData(byte[] chunk)
+    public void AddData(byte[] chunk) => mem.Write(chunk, 0, chunk.Length);
+    
+    public bool IsReady() => mem.Length >= Length;
+
+    private bool IsCompressed()
     {
-        mem.Write(chunk, 0, chunk.Length);
-        return mem.Length >= Length;
+        mem.Position = 0;
+        var buffer = new byte[6];
+        mem.Read(buffer, 0, 6);
+        mem.Position = 0;
+        return buffer[4] == 0x78;
     }
 
     public Stream GetFileStream()
     {
         if (mem.Length < Length)
         {
-            throw new InvalidOperationException("Not enough data in stream");
+            throw new InvalidOperationException("Not enough data in CSFileStream");
         }
 
         // TODO check CRC
 
         try
         {
-            
+
             //WriteLog("rawdata.zlib", mem);
 
-            // remove first 4 bytes
-            var inputStream = new MemoryStream(mem.ToArray(), 4, (int)Length - 4);
-            //WriteLog("input.zlib", inputStream);
+            //mem.Position = 0;
 
-            var zLibStream = new ZLibStream(inputStream, CompressionMode.Decompress);
+            if (IsCompressed())
+            {
 
-            var outputStream = new MemoryStream();
-            zLibStream.CopyTo(outputStream);
+                // remove first 4 bytes
+                //var inputStream = new MemoryStream(mem.ToArray(), 4, (int)Length - 4);
 
-            //WriteLog("output.zlib", outputStream);
 
-            //string text = Encoding.UTF8.GetString(outputStream.GetBuffer());
-            return outputStream;
+                //var inputStream = mem;
+                mem.Position = 4;
+                //WriteLog("input.zlib", inputStream);
 
+                var zLibStream = new ZLibStream(mem, CompressionMode.Decompress);
+
+                var outputStream = new MemoryStream();
+                zLibStream.CopyTo(outputStream);
+
+                //WriteLog("output.zlib", outputStream);
+
+                //string text = Encoding.UTF8.GetString(outputStream.GetBuffer());
+                return outputStream;
+            }
+            else
+            {
+                // not compressed
+                return new MemoryStream(mem.ToArray(), 4, (int)Length - 4);
+            }
         }
         catch (Exception ex)
         {
@@ -68,19 +80,19 @@ public class CSFileStream
     public string GetFileText()
     {
         return Encoding.UTF8.GetString(((MemoryStream)GetFileStream()).GetBuffer());
-        //using var stream = GetFileStream();
-        //using var reader = new StreamReader(stream, System.Text.Encoding.ASCII);
+        //using var mem = GetFileStream();
+        //using var reader = new StreamReader(mem, System.Text.Encoding.ASCII);
         //return reader.ReadToEnd();
     }
 
-    //private void WriteLog(string fileName, MemoryStream stream)
-    //{
-    //    using (var file = File.Create(fileName))
-    //    {
-    //        file.Write(stream.ToArray());
-    //    }
-    //    stream.Seek(0, SeekOrigin.Begin);
-    //}
+    private static void WriteLog(string fileName, MemoryStream stream)
+    {
+        using (var file = File.Create(fileName))
+        {
+            file.Write(stream.ToArray());
+        }
+        stream.Seek(0, SeekOrigin.Begin);
+    }
 }
 
 

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace CentralStationWebApi;
 
-namespace CentralStationWebApi;
-
-public class LocomotiveDirectionEventArgs(uint locomotiveId, DirectionChange direction) : EventArgs
+public class LocomotiveDirectionEventArgs(uint locomotiveId, DirectionChange direction) : LocomotiveEventArgs(locomotiveId)
 {
-    public uint LocomotiveId => locomotiveId;
     public DirectionChange Direction => direction;
 }

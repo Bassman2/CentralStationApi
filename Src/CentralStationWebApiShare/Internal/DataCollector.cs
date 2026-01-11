@@ -2,27 +2,27 @@
 
 internal class DataCollector
 {
-    private readonly MemoryStream stream = new(100);
+    private readonly MemoryStream mem = new(4 * 1024);
 
     //public long Position
     //{         
-    //    get => stream.Position;
-    //    set => stream.Position = value;
+    //    get => mem.Position;
+    //    set => mem.Position = value;
     //}
 
     public void SetPositionToStart()
     {
-        stream.Position = 0;
+        mem.Position = 0;
     }
 
     public void AddData(byte[] data, int offset = 0, int count = 8)
     {
-        stream.Write(data, offset, count);
+        mem.Write(data, offset, count);
     }
 
     public byte ReadByte()
     {
-        int value = stream.ReadByte();
+        int value = mem.ReadByte();
         if (value == -1)
         {
             throw new EndOfStreamException("No more data available to read a byte.");
@@ -32,8 +32,8 @@ internal class DataCollector
 
     public ushort ReadUInt16()
     {
-        int highByte = stream.ReadByte();
-        int lowByte = stream.ReadByte();
+        int highByte = mem.ReadByte();
+        int lowByte = mem.ReadByte();
         if (lowByte == -1 || highByte == -1)
         {
             throw new EndOfStreamException("No more data available to read a UInt16.");
@@ -43,10 +43,10 @@ internal class DataCollector
 
     public uint ReadUInt32()
     {
-        int byte1 = stream.ReadByte();
-        int byte2 = stream.ReadByte();
-        int byte3 = stream.ReadByte();
-        int byte4 = stream.ReadByte();
+        int byte1 = mem.ReadByte();
+        int byte2 = mem.ReadByte();
+        int byte3 = mem.ReadByte();
+        int byte4 = mem.ReadByte();
         if (byte1 == -1 || byte2 == -1 || byte3 == -1 || byte4 == -1)
         {
             throw new EndOfStreamException("No more data available to read a UInt32.");
@@ -58,7 +58,7 @@ internal class DataCollector
     {
         StringBuilder sb = new();
         int value;
-        while ((value = stream.ReadByte()) > 0)
+        while ((value = mem.ReadByte()) > 0)
         {
             sb.Append((char)value);
         }
@@ -68,7 +68,7 @@ internal class DataCollector
     public string ReadString(int length)
     {
         byte[] mem = new byte[length];
-        stream.Read(mem, 0, length);
+        this.mem.Read(mem, 0, length);
         return Encoding.ASCII.GetString(mem, 0, length).Trim((char)0);
     }
 

@@ -49,40 +49,43 @@ public partial class LocomotiveViewModel : ObservableObject
         //}
     }
 
-    public void UpdateLocomotive(CANMessage msg)
-    {
-        switch (msg.Command)
-        {
-        case Command.LocoVelocity:
-            Velocity = msg.GetDataUShort(4);
-            break;
-        case Command.LocoDirection:
-            DirectionChange directionChange = (DirectionChange)msg.GetDataByte(4);
-            switch (directionChange)
-            {
-            case DirectionChange.Remain:
-                break;
-            case DirectionChange.Forward:
-                break;
-            case DirectionChange.Backward:
-                break;
-            case DirectionChange.Toggle:
-                break;
-            case DirectionChange.Unknown4:
-                break;
-            case DirectionChange.Unknown5:
-                break;
-            default:
-                throw new NotImplementedException();
-            }
-            break;
-        case Command.LocoFunction:
-            break;
-        default:
-            throw new NotImplementedException();
-        }
-    }
+    //public void UpdateLocomotive(CANMessage msg)
+    //{
+    //    switch (msg.Command)
+    //    {
+    //    case Command.LocoVelocity:
+    //        Velocity = msg.GetDataUShort(4);
+    //        break;
+    //    case Command.LocoDirection:
+    //        DirectionChange directionChange = (DirectionChange)msg.GetDataByte(4);
+    //        switch (directionChange)
+    //        {
+    //        case DirectionChange.Remain:
+    //            break;
+    //        case DirectionChange.Forward:
+    //            break;
+    //        case DirectionChange.Backward:
+    //            break;
+    //        case DirectionChange.Toggle:
+    //            break;
+    //        case DirectionChange.Unknown4:
+    //            break;
+    //        case DirectionChange.Unknown5:
+    //            break;
+
+    //        default:
+    //            throw new NotImplementedException();
+    //        }
+    //        break;
+    //    case Command.LocoFunction:
+    //        break;
+    //    default:
+    //        throw new NotImplementedException();
+    //    }
+    //}
     
+    public void Halt() => Velocity = 0;
+
     public void SetVelocity(ushort velocity) => Velocity = velocity;
     
 
@@ -96,11 +99,13 @@ public partial class LocomotiveViewModel : ObservableObject
             DirectionChange.Toggle => Direction == Direction.Forward ? Direction.Backward : Direction.Forward,
             _ => Direction
         };
+        Velocity = 0;
     }
     
 
-    public static void SetFunction(byte function, bool value)
+    public void SetFunction(byte function, byte value)
     { 
+        Debug.WriteLine($"SetFunction Locomotive {Uid} Function {function} Value {value}");
     }
 
     #region info

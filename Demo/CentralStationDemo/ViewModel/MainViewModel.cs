@@ -1,4 +1,6 @@
-﻿namespace CentralStationDemo.ViewModel;
+﻿using System.IO;
+
+namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
@@ -11,10 +13,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.MessageReceived += (s, e) => App.Current.Dispatcher.Invoke(() => Messages.Insert(0, e.Message));
         cs.PropertyChanged += (s, e) => OnCsPropertyChanged(e.PropertyName);
 
+        cs.LocomotiveHalt += (s, e) => OnLocomotiveHalt(e.LocomotiveId);
         cs.LocomotiveVelocity += (s,e) => OnLocomotiveVelocity(e.LocomotiveId, e.Velocity);
         cs.LocomotiveDirection += (s, e) => OnLocomotiveDirection(e.LocomotiveId, e.Direction); 
         cs.LocomotiveFunction += (s, e) => OnLocomotiveFunction(e.LocomotiveId, e.Function, e.Value);
 
+        cs.FileReceived += (s, e) => OnFileReceived(e.FileName, e.Stream);
 
     }
 
@@ -54,6 +58,15 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         case "Controllers":
             Controllers = cs.Controllers?.ToViewModelList<ControllerViewModel>();
             break;
+        }
+    }
+
+    private void OnFileReceived(string fileName, System.IO.Stream stream)
+    {
+        stream.Position = 0;
+        using (var file = File.Create($"{fileName}.cs2"))
+        {
+            stream.CopyTo(file);
         }
     }
 
@@ -97,17 +110,21 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         CollectionViewSource.GetDefaultView(Locomotives).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
     }
 
-    private void UpdateLocomotive(CANMessage message)
-    {
-        if (message.Command == Command.LocoVelocity ||
-            message.Command == Command.LocoDirection ||
-            message.Command == Command.LocoFunction)
-        {
-            var locomotiveViewModel = Locomotives?.FirstOrDefault(l => l.Uid == message.Device);
-            locomotiveViewModel?.UpdateLocomotive(message);
-        }
-    }
+    //private void UpdateLocomotive(CANMessage message)
+    //{
+    //    if (message.Command == Command.LocoVelocity ||
+    //        message.Command == Command.LocoDirection ||
+    //        message.Command == Command.LocoFunction)
+    //    {
+    //        var locomotiveViewModel = Locomotives?.FirstOrDefault(l => l.Uid == message.Device);
+    //        locomotiveViewModel?.UpdateLocomotive(message);
+    //    }
+    //}
 
+    private void OnLocomotiveHalt(uint locomotiveId)
+    {
+        Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.Halt();
+    }
     private void OnLocomotiveVelocity(uint locomotiveId, ushort velocity)
     {   
         Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.SetVelocity(velocity);
@@ -118,7 +135,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.SetDirection(direction);
     }
 
-    private void OnLocomotiveFunction(uint locomotiveId, byte function, bool value)
+    private void OnLocomotiveFunction(uint locomotiveId, byte function, byte value)
     {
         Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.SetFunction(function, value);
     } 

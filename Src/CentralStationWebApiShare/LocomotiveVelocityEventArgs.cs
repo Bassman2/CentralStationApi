@@ -1,7 +1,8 @@
-﻿namespace CentralStationWebApi;
+﻿using CentralStationWebApi.Model;
 
-public class LocomotiveVelocityEventArgs(uint locomotiveId, ushort velocity) : EventArgs
+namespace CentralStationWebApi;
+
+public class LocomotiveVelocityEventArgs(uint locomotiveId, ushort velocity) : LocomotiveEventArgs(locomotiveId)
 {
-    public uint LocomotiveId => locomotiveId;
     public ushort Velocity => velocity;
 }
