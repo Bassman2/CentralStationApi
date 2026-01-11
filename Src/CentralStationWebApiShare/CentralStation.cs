@@ -5,6 +5,10 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     public event PropertyChangedEventHandler? PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
+    public event EventHandler<LocomotiveVelocityEventArgs>? LocomotiveVelocity;
+    public event EventHandler<LocomotiveDirectionEventArgs>? LocomotiveDirection;
+    public event EventHandler<LocomotiveFunctionEventArgs>? LocomotiveFunction;
+
     private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
 
     private readonly CollectorThread trackCollectorThread;
@@ -24,6 +28,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     protected override void ReceiveHandler(CANMessage msg)
     {
+        HandleLocomotive(msg);
         HandleStatus(msg);
         HandleStreams(msg);
         HandleController(msg);
@@ -130,6 +135,31 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     #endregion
 
     #region Locomotives
+
+    private void HandleLocomotive(CANMessage msg)
+    {
+        switch (msg.Command)
+        {
+        case Command.LocoVelocity:
+            if (msg.IsResponse && msg.DataLength == 6)
+            {
+                LocomotiveVelocity?.Invoke(this, new LocomotiveVelocityEventArgs(msg.Device, Math.Min(MaxVelocity, msg.GetDataUShort(4))));
+            }
+            break;
+        case Command.LocoDirection:
+            if (msg.IsResponse && msg.DataLength == 5)
+            {
+                LocomotiveDirection?.Invoke(this, new LocomotiveDirectionEventArgs(msg.Device, (DirectionChange)msg.GetDataByte(4)));
+            }
+            break;
+        case Command.LocoFunction:
+            if (msg.IsResponse && (msg.DataLength == 6 || msg.DataLength == 8))
+            {
+                LocomotiveFunction?.Invoke(this, new LocomotiveFunctionEventArgs(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), msg.DataLength == 8 ? msg.GetDataUShort(6) : null));
+            }
+            break;
+        }
+    }
 
     public LocomotiveData? Locomotives;
 

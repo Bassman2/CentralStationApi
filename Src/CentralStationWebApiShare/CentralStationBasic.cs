@@ -8,8 +8,8 @@ public partial class CentralStationBasic : IDisposable
     internal static string? Host;
         
     public const uint AllDevices = 0x0000;
-    public const uint MinVelocity = 0;
-    public const uint MaxVelocity = 1000;
+    public const ushort MinVelocity = 0;
+    public const ushort MaxVelocity = 1000;
 
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
     private readonly MessageQueue<CANMessage> messageReceivedQueue;
