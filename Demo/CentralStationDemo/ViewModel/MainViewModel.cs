@@ -1,10 +1,16 @@
-﻿using System.IO;
+﻿using CentralStationWebApi.Serializer;
+using System.IO;
 
 namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
     private const string host = "CS3";
+    private const string locomotivesFileName = "Lokomotive.cs2";
+    private const string articlesFileName = "magnetartikel.cs2";
+    private const string routesFileName = "fahrstrassen.cs2";
+    private const string tracksFileName = "gleisbild.cs2";
+
     private readonly CentralStation cs; 
 
     public MainViewModel()
@@ -28,6 +34,59 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     {
         //http://cs3/app/assets/mag/magicon_a_005_01.svg
 
+        // load locomotive data 
+        if (File.Exists(locomotivesFileName))
+        {
+            using var file = File.OpenRead(locomotivesFileName);
+            var locomotives = CsSerializer.Deserialize<LocomotiveData>(file);
+            Locomotives = locomotives.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        }
+
+        // load articles data 
+        if (File.Exists(articlesFileName))
+        {
+            using var file = File.OpenRead(articlesFileName);
+            var articles = CsSerializer.Deserialize<ArticleData>(file);
+            Articles = articles.Articles?.ToViewModelList<ArticleViewModel>(cs);
+        }
+
+        // load routes data 
+        if (File.Exists(routesFileName))
+        {
+            using var file = File.OpenRead(routesFileName);
+            var routes = CsSerializer.Deserialize<RouteData>(file);
+            Routes = routes.Routes?.ToViewModelList<RouteViewModel>();
+        }
+
+        // load tracks data 
+        if (File.Exists(tracksFileName))
+        {
+            using (var file = File.OpenRead(tracksFileName))
+            {
+                var tracks = CsSerializer.Deserialize<TrackData>(file);
+                TrackData = tracks;
+            }
+            TrackPages = [];
+            foreach (var page in TrackData?.Pages ?? [])
+            {
+                string pageFileName = $"gleisbild-{page.Id}.cs2";
+                if (File.Exists(pageFileName))
+                {
+                    using var file2 = File.OpenRead(pageFileName);
+                    var trackPage = CsSerializer.Deserialize<TrackPageData>(file2);
+                    TrackPages.Add(new TrackPageViewModel(page, trackPage));
+                }
+                else
+                {
+                    TrackPages.Add(new TrackPageViewModel(page, null));
+                }
+            }
+
+
+        }
+
+
+
         //string name = "magicon_a_005_01";
         //var uri = new Uri($"http://{host}/app/assets/mag/{name}.svg");
         //return new BitmapImage(uri);
@@ -47,7 +106,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             Locomotives = cs.Locomotives?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
             break;
         case "Articles":
-            Articles = cs.Articles?.Articles?.ToViewModelList<ArticleViewModel>();
+            Articles = cs.Articles?.Articles?.ToViewModelList<ArticleViewModel>(cs);
             break;
         case "Routes":
             Routes = cs.Routes?.Routes?.ToViewModelList<RouteViewModel>();
@@ -64,7 +123,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private void OnFileReceived(string fileName, System.IO.Stream stream)
     {
         stream.Position = 0;
-        using (var file = File.Create($"{fileName}.cs2"))
+        using (var file = File.Create(fileName))
         {
             stream.CopyTo(file);
         }

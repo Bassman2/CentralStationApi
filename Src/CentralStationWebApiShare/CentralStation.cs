@@ -39,26 +39,26 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     }
 
     private readonly Dictionary<ushort, CSFileStream> fileDictionary = [];
-    private string filename = "empty";
+    private string fileKey = "empty";
 
     private void HandleStreams(CANMessage msg)
     {
 
         if (msg.IsResponse && msg.Command == Command.RequestConfigData)
         {
-            filename = msg.GetDataString().Trim('\0');
+            fileKey = msg.GetDataString().Trim('\0');
         }
         if (/*msg.IsResponse && */ msg.Command == Command.ConfigDataStream)
         {
             if (msg.DataLength == 6)
             {
                 // overwrite existing
-                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, filename, msg.GetDataUInt(0), msg.GetDataUShort(0));
+                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, fileKey, msg.GetDataUInt(0), msg.GetDataUShort(0));
             }
             else if (msg.DataLength == 7)
             {
                 // overwrite existing
-                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, filename, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
+                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, fileKey, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
             }
             else if (msg.DataLength == 8 && fileDictionary.TryGetValue(msg.Hash, out var fileStream))
             {
@@ -66,7 +66,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                 if (fileStream.IsReady())
                 {
                     //fileReceivedQueue.Add(fileStream);
-                    SetFile(fileStream.GetFileStream(), fileStream.FileName);
+                    SetFile(fileStream.GetFileStream(), fileStream.FileKey, fileStream.FileName);
                     fileDictionary.Remove(msg.Hash);
                 }
             }
@@ -78,9 +78,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         }
     }
 
-    private void SetFile(Stream stream, string fileName)
+    private void SetFile(Stream stream, string filerKey, string fileName)
     {
-        FileReceived?.Invoke(this, new FileReceivedEventArgs(fileName, stream));
+        FileReceived?.Invoke(this, new FileReceivedEventArgs(fileKey, fileName, stream));
 
         Tracer.TraceStream(stream, fileName);
 
@@ -90,19 +90,19 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         switch (line)
         {
         case "[lokomotive]":
-            SetLocomotives(CsSerializer.Deserialize<LocomotiveData>(stream, "[lokomotive]"));
+            SetLocomotives(CsSerializer.Deserialize<LocomotiveData>(stream));
             break;
         case "[magnetartikel]":
-            SetArticles(CsSerializer.Deserialize<ArticleData>(stream, "[magnetartikel]"));
+            SetArticles(CsSerializer.Deserialize<ArticleData>(stream));
             break;
         case "[fahrstrassen]":
-            SetRoutes(CsSerializer.Deserialize<RouteData>(stream, "[fahrstrassen]"));
+            SetRoutes(CsSerializer.Deserialize<RouteData>(stream));
             break;
         case "[gleisbild]":
-            SetTrackData(CsSerializer.Deserialize<TrackData>(stream, "[gleisbild]"));
+            SetTrackData(CsSerializer.Deserialize<TrackData>(stream));
             break;
         case "[gleisbildseite]":
-            SetTrackPageData(CsSerializer.Deserialize<TrackPageData>(stream, "[gleisbildseite]"));
+            SetTrackPageData(CsSerializer.Deserialize<TrackPageData>(stream));
             break;
         }
     }

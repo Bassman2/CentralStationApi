@@ -2,8 +2,12 @@
 
 public partial class ArticleViewModel : ObservableObject
 {
-    public ArticleViewModel(Article article)
+    private readonly CentralStation cs;
+
+    public ArticleViewModel(Article article, CentralStation cs)
     {
+        this.cs = cs;
+
         Id = article.Id;
         Name = article.Name;
         Type = article.Type;

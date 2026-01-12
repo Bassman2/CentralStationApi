@@ -2,7 +2,7 @@
 
 public partial class TrackPageViewModel : ObservableObject
 {
-    public TrackPageViewModel(Page page)
+    public TrackPageViewModel(Page page, TrackPageData? pageData)
     {
         Id = page.Id;
         Name = page.Name;

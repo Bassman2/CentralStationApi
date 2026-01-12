@@ -2,13 +2,13 @@
 
 public static class CsSerializer
 {
-    public static T Deserialize<T>(Stream stream, string id) where T : ICsSerialize, new()
+    public static T Deserialize<T>(Stream stream) where T : ICsSerialize, new()
     {
         stream.Position = 0;
 
         Debug.IndentLevel = 0;
         Debug.IndentSize = 2;
-        Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Deserialize {typeof(T).Name} {id}");
+        Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"Deserialize {typeof(T).Name}");
 
         var root = new T();
         ICsSerialize? leave = root;
@@ -21,10 +21,10 @@ public static class CsSerializer
         int curLevel = 0;        
         int lineNum = 1;
         string? line = reader.ReadLine();
-        if (line == null || !line.StartsWith(id))
-        {
-            throw new InvalidDataException("Invalid lokomotive file data");
-        }
+        //if (line == null)
+        //{
+        //    throw new InvalidDataException("Invalid lokomotive file data");
+        //}
         Debug.WriteLineIf(TraceSwitches.SerializerSwitch.TraceInfo, $"{lineNum++} {line}");
 
         while ((line = reader.ReadLine()) != null)

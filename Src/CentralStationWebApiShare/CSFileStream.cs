@@ -1,12 +1,24 @@
 ﻿namespace CentralStationWebApi;
 
-public class CSFileStream(CSFileStreamMode mode, string fileName, uint length, ushort cRC, byte reserved = 0)
+public class CSFileStream(CSFileStreamMode mode, string fileKey, uint length, ushort cRC, byte reserved = 0)
 {
     private readonly MemoryStream mem = new(4 * 1024);
 
     public CSFileStreamMode Mode => mode;
 
-    public string FileName => fileName;
+    public string FileKey => fileKey;
+    public string FileName => fileKey switch
+    {
+        "loks" => "lokomotive.cs2",
+        "mags" => "magnetartikel.cs2",
+        "gbs" => "gleisbild.cs2",
+        "fs" => "fahrstrassen.cs2",
+        "lokstat" => "lokomotive.sr2",
+        "magstat" => "magnetartikel.sr2",
+        "gbsstat" => "gleisbild.sr2",
+        "fsstat" => "fahrstrassen.sr2",
+        _ => fileKey.StartsWith("gbs-") ? $"gleisbild-{int.Parse(fileKey.Split('-')[1])}.cs2" : throw new InvalidDataException($"Unknown file key {fileKey}")
+    };
 
     public uint Length => length;
 
