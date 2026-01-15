@@ -93,5 +93,31 @@ public enum ArticleType
     TurntableOld,
 
     [EnumMember(Value = "digitaldrehscheibe")]
-    TurntableDigital
+    TurntableDigital,
+
+
+
+    [EnumMember(Value = "drehscheibe_mfx")]
+    TurntableMfx,
+
+    [EnumMember(Value = "licht_str_lampe")]
+    LightStreetLamp,
+
+    [EnumMember(Value = "licht_str_neon")]
+    LightStreetNeon,
+
+    [EnumMember(Value = "licht_lampe")]
+    LightLamp,
+
+    [EnumMember(Value = "sound_misc")]
+    SoundMisc,
+
+    [EnumMember(Value = "ueberwachungs_signal")]
+    ÜberwachungsSignal,
+
+    [EnumMember(Value = "abfahrtsignal")]
+    StartSignal,
+
+
+
 }

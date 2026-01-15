@@ -1,4 +1,7 @@
-﻿namespace CentralStationWebApi.Model;
+﻿using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
+
+namespace CentralStationWebApi.Model;
 
 [CsSerialize]
 public partial class Article
@@ -47,5 +50,57 @@ public partial class Article
 
     [CsProperty("decoder")]
     public string? Decoder { get; private set; }
+
+    public Uri? IconUri
+    {
+        get
+        {
+            string file = Type switch
+            {
+                ArticleType.Unknown => "magicon_a_000_00",
+                ArticleType.StdRedGreen => "magicon_a_000_01",
+                ArticleType.StdRed => "magicon_a_001_01",
+                ArticleType.StdGreen => "magicon_a_000_01",
+                ArticleType.Uncoupler => "magicon_a_003_01",
+                ArticleType.Uncoupler1 => "magicon_a_003_01",
+                ArticleType.RightTurnout => "magicon_a_005_01",
+                ArticleType.LeftTurnout => "magicon_a_006_01",
+                ArticleType.YSwitch => "magicon_a_007_01",
+                ArticleType.K84Exit => "magicon_a_008_01",
+                ArticleType.K84DoubleExit => "magicon_a_009_01",
+                ArticleType.ThreeWaySwitch => "magicon_a_010_01",
+                ArticleType.DKW2Drive => "magicon_a_011_00",
+                ArticleType.DKW1Drive => "magicon_a_012_01",
+                ArticleType.LightSignalHp01 => "magicon_a_015_01",
+                ArticleType.LightSignalHp02 => "magicon_a_016_01",
+                ArticleType.LightSignalHp012 => "magicon_a_017_01",
+                ArticleType.LightSignalHp012Sh01 => "magicon_a_018_01",
+                ArticleType.LightSignalSh01 => "magicon_a_019_01",
+                ArticleType.SemaphoreSignalHp01 => "magicon_a_020_01",
+                ArticleType.SemaphoreSignalHp02 => "magicon_a_021_01",
+                ArticleType.SemaphoreSignalHp012 => "magicon_a_022_01",
+                ArticleType.SemaphoreSignalHp012Sh01 => "magicon_a_023_01",
+                ArticleType.SemaphoreSignalHp01Sh01 => "magicon_a_024_01",  // ??
+                ArticleType.UrcLightSignalHp01 => "magicon_a_015_01",
+                ArticleType.UrcLightSignalHp012 => "magicon_a_017_01",
+                ArticleType.UrcLightSignalHp012Sh01 => "magicon_a_027_01",
+                ArticleType.UrcLightSignalSh01 => "magicon_a_019_01",
+                ArticleType.Slideway => "magicon_a_000_00",
+                ArticleType.TurntableOld => "magicon_a_000_00",
+                ArticleType.TurntableDigital => "magicon_a_000_00",
+                ArticleType.TurntableMfx => "magicon_a_000_00",
+                ArticleType.LightStreetLamp => "magicon_a_033_01",
+                ArticleType.LightStreetNeon => "magicon_a_034_01",
+                ArticleType.LightLamp => "magicon_a_036_01",
+                ArticleType.SoundMisc => "magicon_a_000_00",
+                ArticleType.ÜberwachungsSignal => "magicon_a_000_00",
+                ArticleType.StartSignal => "magicon_a_000_00",
+                // "magicon_a_033_01"
+                _ => throw new NotImplementedException()
+            };
+            return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/{file}.svg");
+        }
+    }
+
 
 }

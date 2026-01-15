@@ -40,7 +40,7 @@
                     <!-- info -->
                     <Grid Grid.Row="0">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="100"/>
                             <RowDefinition Height="20"/>
                             <RowDefinition Height="20"/>
                             <RowDefinition Height="20"/>
@@ -61,7 +61,8 @@
                             <RowDefinition Height="20"/>
                             <RowDefinition Height="20"/>
                         </Grid.RowDefinitions>
-                        <!--<Image Grid.Row="0" Source="{Binding Icon}" Width="100" Height="40" Stretch="Uniform" ToolTip="{Binding IconName}"/>-->
+                        <Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="100" Height="100" Stretch="Uniform"/>
+                        <!--<Image Grid.Row="0" Source="{Binding Image}" Width="100" Height="100" Stretch="Uniform" ToolTip="{Binding IconName}"/>-->
                         <TextBlock Grid.Row="1" Text="{Binding Type}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="2" Text="{Binding Name}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="3" Text="{Binding Id, StringFormat=Id: {0:X4}}" HorizontalAlignment="Center"/>

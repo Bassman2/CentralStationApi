@@ -7,7 +7,7 @@ public class ResponseToArrowConverter : IValueConverter
     {
         if (value is bool flag)
         {
-            return flag ? "←◄" : "→►";
+            return flag ? "◄" : "►";
         }
         throw new InvalidOperationException("The value must be a bool");
     }
