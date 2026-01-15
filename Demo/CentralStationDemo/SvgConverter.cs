@@ -217,6 +217,9 @@ public static class SvgConverter
         fill = element.GetFillAttribute(fill);
         stroke = element.GetStrokeAttribute(stroke);
 
+        // TODO
+
+
         //int x1 = element.GetIntAttribute("x1");
         //int y1 = element.GetIntAttribute("y1");
         //int x2 = element.GetIntAttribute("x2");

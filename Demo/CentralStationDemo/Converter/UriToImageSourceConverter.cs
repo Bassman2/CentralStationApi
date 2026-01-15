@@ -1,4 +1,6 @@
-﻿using System.Windows.Media;
+﻿using System.IO;
+using System.Net.Http;
+using System.Windows.Media;
 
 namespace CentralStationDemo.Converter;
 
@@ -16,14 +18,18 @@ public class UriToImageSourceConverter : IValueConverter
             string dir = System.IO.Path.GetDirectoryName(filePath)!;
             System.IO.Directory.CreateDirectory(dir);
 
+            if (!System.IO.File.Exists(filePath))
+            {
+                Task.Run(async () =>
+                {
+                    var client = new HttpClient();
+                    using var stream = await client.GetStreamAsync(uri);
+                    using var writer = File.Create(filePath);
+                    await stream.CopyToAsync(writer);
+                });
+            }
             
-
             
-
-            string p1 = Environment.CurrentDirectory;
-            string p2 = AppDomain.CurrentDomain.BaseDirectory;
-            string p3 = System.IO.Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName)!;
-
             if (uri.AbsolutePath.EndsWith(".png"))
             {
                 return new System.Windows.Media.Imaging.BitmapImage(uri);
