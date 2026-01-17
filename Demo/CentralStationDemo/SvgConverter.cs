@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -39,7 +40,7 @@ public static class SvgConverter
         }
         RenderTargetBitmap bitmap = new((int)viewBoxRect.Width, (int)viewBoxRect.Height, 96, 96, PixelFormats.Default);
         bitmap.Render(drawingVisual);
-        return bitmap;
+        return (ImageSource)bitmap;
     }
 
     private static Rect GetRectAttribute(this XElement element, string name)
@@ -99,14 +100,12 @@ public static class SvgConverter
 
     private static Point[] GetPointsAttribute(this XElement element, string name)
     {
-        List<Point> points = [];
         string? value = element.Attribute(name)?.Value;
-        var list = value?.Split(' ')?.Select(i => double.Parse(i)).ToArray() ?? [];
-        for (int i = 0; i < list.Length / 2; i++)
-        {
-            points.Add(new Point(list[i * 2], list[i * 2 + 1]));
-        }
-        return points.ToArray();
+        return value?.Split(' ')?.Select(i => 
+        { 
+            var p = i.Split(','); 
+            return new Point(double.Parse(p[0], CultureInfo.InvariantCulture), double.Parse(p[1], CultureInfo.InvariantCulture)); 
+        }) .ToArray() ?? [];
     }
 
     private static void DrawGroup(DrawingContext drawingContext, XElement element, Brush? fill = null, Pen? stroke = null)
@@ -196,25 +195,25 @@ public static class SvgConverter
         int rx = element.GetIntAttribute("rx");
         int ry = element.GetIntAttribute("ry");
         //drawingContext.DrawRectangle(fill, null, new Rect(x, y, width, height));
-        drawingContext.DrawRoundedRectangle(fill, stroke, new Rect(x, y, width, height), ry, ry);
+        drawingContext.DrawRoundedRectangle(fill, stroke, new Rect(x, y, width, height), rx, ry);
     }
 
     private static void DrawLine(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
     {
-        fill = element.GetFillAttribute(fill);
+        //fill = element.GetFillAttribute(fill);
         stroke = element.GetStrokeAttribute(stroke);
 
         int x1 = element.GetIntAttribute("x1");
         int y1 = element.GetIntAttribute("y1");
         int x2 = element.GetIntAttribute("x2");
         int y2 = element.GetIntAttribute("y2");
-        int width = element.GetIntAttribute("width");
+        //int width = element.GetIntAttribute("width");
         drawingContext.DrawLine(stroke, new Point(x1, y1), new Point(x2,y2));
     }
 
     private static void DrawPolyline(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
     {
-        fill = element.GetFillAttribute(fill);
+        //fill = element.GetFillAttribute(fill);
         stroke = element.GetStrokeAttribute(stroke);
 
         // TODO
@@ -258,7 +257,6 @@ public static class SvgConverter
     {
         fill = element.GetFillAttribute(fill);
         stroke = element.GetStrokeAttribute(stroke);
-
 
         var points = element.GetPointsAttribute("points");
         
