@@ -1,6 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using DocumentFormat.OpenXml.Office2010.Word;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Linq;
@@ -158,8 +160,74 @@ public static class SvgConverter
             case "g":
                 DrawGroup(drawingContext, elm, fill, stroke);
                 break;
+            case "style":
+                HandleStyle(elm);
+                break;
+            default:
+                throw new InvalidCastException($"Unklnown element {elm.Name.LocalName}");
             }
         }
+    }
+
+    private static SvgStyles HandleStyle(XElement element)
+    {
+        string ste = element.Attribute("type")?.Value ?? string.Empty;
+        if (ste == "text/css")
+        {
+            SvgStyles svgStyles = new SvgStyles();
+            string text = element.Value;
+
+            foreach (var line in text.Split( ['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+
+                Match match = Regex.Match(line, @"\.(\w+){([^}]*)}", RegexOptions.Singleline);
+                if (match.Success)
+                {
+                    SvgStyle style = new SvgStyle();
+                    style.Name = match.Groups[1].Value;
+                    string value = match.Groups[2].Value;
+                    var values = value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    foreach (var v in values)
+                    {
+                        var l = value.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        string attr = l[0];
+                        string val = l[1];
+                        switch (attr)
+                        {
+                        case "fill":
+                            style.Fill = new SolidColorBrush(GetColor(val));
+                            break;
+                        default:
+                            throw new InvalidCastException();
+                        }
+
+                    }
+
+                    svgStyles.Styles.Add(style.Name, style);
+
+                }
+            }
+
+            return svgStyles;
+
+        }
+        else
+        {
+            throw new InvalidCastException($"Unknown style type {ste}");
+        }
+    }
+
+    private class SvgStyles
+    {
+        public Dictionary<string, SvgStyle> Styles = [];
+
+    }
+
+    private class SvgStyle
+    {
+        public string? Name { get; set; }
+
+        public Brush? Fill { get; set; }
     }
 
     private static void DrawPath(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
