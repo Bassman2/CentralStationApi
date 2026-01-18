@@ -59,12 +59,12 @@ public partial class Article
             var memberInfo = typeof(ArticleType).GetMember(Type.ToString()).FirstOrDefault();
             if (memberInfo != null)
             {
-                var attr = memberInfo.GetCustomAttributes(typeof(FileNameIdAttribute), false)
-                                     .OfType<FileNameIdAttribute>()
+                var attr = memberInfo.GetCustomAttributes(typeof(FileNameAttribute), false)
+                                     .OfType<FileNameAttribute>()
                                      .FirstOrDefault();
                 if (attr != null)
                 {
-                    return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/magicon_a_{attr.Id:000}_01.svg");
+                    return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/{attr.FileName}");
                 }
             }
             return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/magicon_a_000_00.svg"); 

@@ -16,7 +16,18 @@ public static class SvgConverter
 
     public static ImageSource ConvertSvg(Uri uri)
     {
-        return RenderBitmap(XDocument.Load(uri.AbsoluteUri));
+        try
+        {
+            if (uri.AbsolutePath.Contains("magicon_a_064"))
+            {
+
+            }
+            return RenderBitmap(XDocument.Load(uri.AbsoluteUri));
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 
     public static ImageSource ConvertSvg(Stream stream)
@@ -93,7 +104,7 @@ public static class SvgConverter
     private static Pen? GetStrokeAttribute(this XElement element, Pen? stroke)
     {
         var attr = element.Attribute("stroke");
-        var width = int.Parse(element.Attribute("stroke-width")?.Value ?? "1");
+        double width = double.Parse(element.Attribute("stroke-width")?.Value ?? "1", CultureInfo.InvariantCulture);
 
         return attr is null ? stroke : new Pen(new SolidColorBrush(GetColor(attr.Value)), width);
     }
