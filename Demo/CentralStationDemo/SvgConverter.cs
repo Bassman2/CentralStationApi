@@ -202,48 +202,8 @@ public static class SvgConverter
                     throw new InvalidCastException($"{declaration.Property}: {styleType}");
                 }
             }
-
-
-
             styleCache.Styles.Add(styleRule.Name, styleRule);
         }
-
-
-        //string text = element.Value.Replace("\r", "").Replace("\n", "");
-
-        //foreach (var line in text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        //{
-
-        //    Match match = Regex.Match(line, @"\.(\w+){([^}]*)}", RegexOptions.Singleline);
-        //    if (match.Success)
-        //    {
-        //        StyleRule style = new StyleRule();
-        //        style.Name = match.Groups[1].Value;
-        //        string value = match.Groups[2].Value;
-        //        var values = value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        //        foreach (var v in values)
-        //        {
-        //            var l = value.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        //            string attr = l[0];
-        //            string val = l[1];
-        //            switch (attr)
-        //            {
-        //            case "fill":
-        //                style.Fill = new SolidColorBrush(GetColor(val));
-        //                break;
-        //            default:
-        //                throw new InvalidCastException();
-        //            }
-
-        //        }
-
-        //        svgStyles.Styles.Add(style.Name, style);
-
-        //    }
-        //}
-
-        //return svgStyles;
-
     }
 
     private class StyleCache
@@ -443,19 +403,21 @@ public static class SvgConverter
         public List<CssRule> Rules { get; set; } = [];
     }
 
+    [DebuggerDisplay("Selector: {Selector} (#{Declarations.Count})")]
     private class CssRule
     {
         public string Selector { get; set; } = string.Empty;
         public List<CssDeclaration> Declarations { get; set; } = [];
     }
 
+    [DebuggerDisplay("Declaration: Property: {Property} Value: {Value}")]
     private class CssDeclaration
     {
         public string Property { get; set; } = string.Empty;
         public string Value { get; set; } = string.Empty;
     }
 
-    private enum CssState { Selector, Property, Value, BehindValue }
+    private enum CssState { Selector, Property, Value }
 
     // rule = selector, '{', declaration-list, '}';
     // declaration-list = { declaration, ';' };
@@ -463,17 +425,16 @@ public static class SvgConverter
 
     private static CssDocument ParseCss(string text)
     {
-        text = text.Replace("\r", "").Replace("\n", "");
+        text = text.Replace("\r", "").Replace("\n", "").Replace(" ", "");
 
         var doc = new CssDocument();
-
 
         CssState state = CssState.Selector;
 
         CssRule rule = new();
         CssDeclaration declaration = new ();
         StringBuilder builder = new();
-
+                
         foreach (char c in text)
         {
             switch (state)
@@ -482,7 +443,7 @@ public static class SvgConverter
                 switch (c)
                 {
                 case '{':
-                    rule.Selector = builder.ToString();
+                    rule.Selector = builder.ToString().Trim('.');
                     builder.Clear();
                     state = CssState.Property;
                     break;
@@ -499,6 +460,13 @@ public static class SvgConverter
                     builder.Clear();
                     state = CssState.Value;
                     break;
+                case '}':
+                    doc.Rules.Add(rule);
+                    rule = new();
+                    declaration = new();
+                    builder.Clear();
+                    state = CssState.Property;
+                    break;
                 default:
                     builder.Append(c);
                     break;
@@ -510,25 +478,19 @@ public static class SvgConverter
                 case ';':
                     declaration.Value = builder.ToString();
                     builder.Clear();
-                    state = CssState.BehindValue;
+                    state = CssState.Property;
                     rule.Declarations.Add(declaration);
                     declaration = new ();
                     break;
-                default:
-                    builder.Append(c);
-                    break;
-                }
-                break;
-            case CssState.BehindValue:
-                switch (c)
-                { 
                 case '}':
-                    // end of declaration list
+                    doc.Rules.Add(rule);
+                    rule = new();
+                    declaration = new();
+                    builder.Clear();
+                    state = CssState.Property;
                     break;
                 default:
-                    // next declaration in list
                     builder.Append(c);
-                    state = CssState.Selector;
                     break;
                 }
                 break;
