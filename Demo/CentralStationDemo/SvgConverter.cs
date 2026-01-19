@@ -398,22 +398,29 @@ public static class SvgConverter
 
     #region CSS Parser
 
+    private static string ToStringAndClear(this StringBuilder stringBuilder)
+    {
+        string str = stringBuilder.ToString();
+        stringBuilder.Clear();
+        return str;
+    }
+
     private class CssDocument 
     {
         public List<CssRule> Rules { get; set; } = [];
     }
 
     [DebuggerDisplay("Selector: {Selector} (#{Declarations.Count})")]
-    private class CssRule
+    private class CssRule(string selector)
     {
-        public string Selector { get; set; } = string.Empty;
+        public string Selector => selector;
         public List<CssDeclaration> Declarations { get; set; } = [];
     }
 
     [DebuggerDisplay("Declaration: Property: {Property} Value: {Value}")]
-    private class CssDeclaration
+    private class CssDeclaration(string property)
     {
-        public string Property { get; set; } = string.Empty;
+        public string Property => property;
         public string Value { get; set; } = string.Empty;
     }
 
@@ -431,68 +438,57 @@ public static class SvgConverter
 
         CssState state = CssState.Selector;
 
-        CssRule rule = new();
-        CssDeclaration declaration = new ();
+        CssRule? rule = null;
+        CssDeclaration? declaration = null;
         StringBuilder builder = new();
                 
         foreach (char c in text)
         {
-            switch (state)
+            switch (c)
             {
-            case CssState.Selector:
-                switch (c)
+            case '{':
+                if (CssState.Selector == state)
                 {
-                case '{':
-                    rule.Selector = builder.ToString().Trim('.');
-                    builder.Clear();
+                    rule = new CssRule(builder.ToStringAndClear());
                     state = CssState.Property;
-                    break;
-                default:
-                    builder.Append(c);
-                    break;
                 }
+                else throw new Exception();
                 break;
-            case CssState.Property:
-                switch (c)
+            case ':':
+                if (CssState.Property == state)
                 {
-                case ':':
-                    declaration.Property = builder.ToString();
-                    builder.Clear();
+                    declaration = new(builder.ToStringAndClear());
                     state = CssState.Value;
-                    break;
-                case '}':
-                    doc.Rules.Add(rule);
-                    rule = new();
-                    declaration = new();
-                    builder.Clear();
-                    state = CssState.Property;
-                    break;
-                default:
-                    builder.Append(c);
-                    break;
                 }
+                else throw new Exception();
                 break;
-            case CssState.Value:
-                switch (c)
+            case '}':
+                if (CssState.Property == state || CssState.Value == state)
                 {
-                case ';':
-                    declaration.Value = builder.ToString();
-                    builder.Clear();
-                    state = CssState.Property;
-                    rule.Declarations.Add(declaration);
-                    declaration = new ();
-                    break;
-                case '}':
-                    doc.Rules.Add(rule);
-                    rule = new();
-                    declaration = new();
-                    builder.Clear();
-                    state = CssState.Property;
-                    break;
-                default:
-                    builder.Append(c);
-                    break;
+                    if (declaration != null)
+                    {
+                        declaration.Value = declaration!.Value = builder.ToStringAndClear();
+                        rule!.Declarations.Add(declaration);
+                        declaration = null;
+                    }
+                    doc.Rules.Add(rule!);
+                    rule = null;
+                    state = CssState.Selector;
                 }
+                else throw new Exception();
+                break;
+            case ';':
+                if (CssState.Value == state)
+                {
+                    declaration!.Value = builder.ToStringAndClear();
+                    rule!.Declarations.Add(declaration);
+                    declaration = null;
+                    state = CssState.Property;
+                }
+                else throw new Exception();
+                break;
+            default:
+                builder.Append(c);
                 break;
             }
         }
