@@ -1,10 +1,12 @@
-﻿using DocumentFormat.OpenXml.Office2010.Word;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Office2010.Word;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Xps.Packaging;
 using System.Xml.Linq;
 
 namespace CentralStationDemo;
@@ -49,7 +51,8 @@ public static class SvgConverter
             // background for testing
             //drawingContext.DrawGeometry(new SolidColorBrush(Colors.Blue), new Pen(new SolidColorBrush(Colors.Yellow), 3), new RectangleGeometry(viewBoxRect));
 
-            DrawGroup(drawingContext, root);
+            var styles = new StyleCache();
+            DrawGroup(drawingContext, root, styles);
         }
         RenderTargetBitmap bitmap = new((int)viewBoxRect.Width, (int)viewBoxRect.Height, 96, 96, PixelFormats.Default);
         bitmap.Render(drawingVisual);
@@ -64,6 +67,11 @@ public static class SvgConverter
         ArgumentOutOfRangeException.ThrowIfLessThan(values.Length, 4);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(values.Length, 4);
         return new Rect(values[0], values[1], values[2], values[3]);
+    }
+
+    private static string GetStringAttribute(this XElement element, string name)
+    {
+        return element.Attribute(name)?.Value ?? string.Empty;
     }
 
     private static int GetIntAttribute(this XElement element, string name)
@@ -121,7 +129,7 @@ public static class SvgConverter
         }) .ToArray() ?? [];
     }
 
-    private static void DrawGroup(DrawingContext drawingContext, XElement element, Brush? fill = null, Pen? stroke = null)
+    private static void DrawGroup(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke = null, Brush ? fill = null)
     {
         fill = element.GetFillAttribute(fill);
         stroke = element.GetStrokeAttribute(stroke);
@@ -131,37 +139,37 @@ public static class SvgConverter
             switch (elm.Name.LocalName)
             {
             case "path":
-                DrawPath(drawingContext, elm, fill, stroke);
+                DrawPath(drawingContext, elm, styles, stroke, fill);
                 break;
             case "circle":
-                DrawCircle(drawingContext, elm, fill, stroke);
+                DrawCircle(drawingContext, elm, styles, stroke, fill);
                 break;
             case "ellipse ":
-                DrawEllipse(drawingContext, elm, fill, stroke);
+                DrawEllipse(drawingContext, elm, styles, stroke, fill);
                 break;
             case "rect":
-                DrawRect(drawingContext, elm, fill, stroke);
+                DrawRect(drawingContext, elm, styles, stroke, fill);
                 break;
             case "line":
-                DrawLine(drawingContext, elm, fill, stroke);
+                DrawLine(drawingContext, elm, styles, stroke, fill);
                 break;
             case "polyline":
-                DrawPolyline(drawingContext, elm, fill, stroke);
+                DrawPolyline(drawingContext, elm, styles, stroke, fill);
                 break;
             case "text":
-                DrawText(drawingContext, elm, fill, stroke);
+                DrawText(drawingContext, elm, styles, stroke, fill);
                 break;
             case "image":
-                DrawImage(drawingContext, elm, fill, stroke);
+                DrawImage(drawingContext, elm, styles, stroke, fill);
                 break;
             case "polygon":
-                DrawPolygon(drawingContext, elm, fill, stroke);
+                DrawPolygon(drawingContext, elm, styles, stroke, fill);
                 break;
             case "g":
-                DrawGroup(drawingContext, elm, fill, stroke);
+                DrawGroup(drawingContext, elm, styles, stroke, fill);
                 break;
             case "style":
-                HandleStyle(elm);
+                HandleStyle(elm, styles);
                 break;
             default:
                 throw new InvalidCastException($"Unklnown element {elm.Name.LocalName}");
@@ -169,80 +177,142 @@ public static class SvgConverter
         }
     }
 
-    private static SvgStyles HandleStyle(XElement element)
+    private static void HandleStyle(XElement element, StyleCache styleCache)
     {
-        string ste = element.Attribute("type")?.Value ?? string.Empty;
-        if (ste == "text/css")
+        string styleType = element.GetStringAttribute("type");
+        if (styleType != "text/css") throw new InvalidCastException($"Unknown style type {styleType}");
+                
+
+        // get text without linebreak;
+
+        CssDocument cssDocument = ParseCss(element.Value);
+
+        foreach (var rule in cssDocument.Rules)
         {
-            SvgStyles svgStyles = new SvgStyles();
-            string text = element.Value;
+            var styleRule = new StyleRule(rule.Selector.Trim('.'));
 
-            foreach (var line in text.Split( ['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            foreach (var declaration in rule.Declarations)
             {
-
-                Match match = Regex.Match(line, @"\.(\w+){([^}]*)}", RegexOptions.Singleline);
-                if (match.Success)
+                switch (declaration.Property)
                 {
-                    SvgStyle style = new SvgStyle();
-                    style.Name = match.Groups[1].Value;
-                    string value = match.Groups[2].Value;
-                    var values = value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                    foreach (var v in values)
-                    {
-                        var l = value.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                        string attr = l[0];
-                        string val = l[1];
-                        switch (attr)
-                        {
-                        case "fill":
-                            style.Fill = new SolidColorBrush(GetColor(val));
-                            break;
-                        default:
-                            throw new InvalidCastException();
-                        }
-
-                    }
-
-                    svgStyles.Styles.Add(style.Name, style);
-
+                case "fill":
+                    styleRule.Fill = new SolidColorBrush(GetColor(declaration.Value));
+                    break;
+                default:
+                    throw new InvalidCastException($"{declaration.Property}: {styleType}");
                 }
             }
 
-            return svgStyles;
 
+
+            styleCache.Styles.Add(styleRule.Name, styleRule);
         }
-        else
+
+
+        //string text = element.Value.Replace("\r", "").Replace("\n", "");
+
+        //foreach (var line in text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        //{
+
+        //    Match match = Regex.Match(line, @"\.(\w+){([^}]*)}", RegexOptions.Singleline);
+        //    if (match.Success)
+        //    {
+        //        StyleRule style = new StyleRule();
+        //        style.Name = match.Groups[1].Value;
+        //        string value = match.Groups[2].Value;
+        //        var values = value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        //        foreach (var v in values)
+        //        {
+        //            var l = value.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        //            string attr = l[0];
+        //            string val = l[1];
+        //            switch (attr)
+        //            {
+        //            case "fill":
+        //                style.Fill = new SolidColorBrush(GetColor(val));
+        //                break;
+        //            default:
+        //                throw new InvalidCastException();
+        //            }
+
+        //        }
+
+        //        svgStyles.Styles.Add(style.Name, style);
+
+        //    }
+        //}
+
+        //return svgStyles;
+
+    }
+
+    private class StyleCache
+    {
+        public Dictionary<string, StyleRule> Styles = [];
+
+    }
+
+    private class StyleRule(string name)    
+    {
+        public string Name => name;
+
+        public Brush? Fill { get; set; } = null;
+
+        public Pen? Stroke { get; set; } = null;
+    }
+
+    private static void HanleStyleAtributes(XElement element, StyleCache styleCache, ref Pen? stroke, ref Brush? fill)
+    {
+        var classAttr = element.Attribute("class");
+        if (classAttr != null)
         {
-            throw new InvalidCastException($"Unknown style type {ste}");
+            if(styleCache.Styles.TryGetValue(classAttr.Value ?? "", out var rule))
+            {
+                if (rule.Fill != null)
+                {
+                    fill = rule.Fill;
+                }
+                if (rule.Stroke != null)
+                {
+                    stroke = rule.Stroke;
+                }
+            }
+        }
+
+        var fillAttr = element.Attribute("fill");
+        if (fillAttr != null)
+        {
+            fill = new SolidColorBrush(GetColor(fillAttr.Value));
+        }
+
+        var strokeAttr = element.Attribute("stroke");
+        if (strokeAttr != null)
+        {
+            var strokeWidthAttr = element.Attribute("stroke-width");
+
+            double width = 1.0;
+            double.TryParse(strokeWidthAttr?.Value ?? "", CultureInfo.InvariantCulture, out width);
+
+            stroke = new Pen(new SolidColorBrush(GetColor(strokeAttr.Value)), width);
         }
     }
 
-    private class SvgStyles
+    private static void DrawPath(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        public Dictionary<string, SvgStyle> Styles = [];
+        HanleStyleAtributes(element, styles, ref stroke, ref fill);
 
-    }
-
-    private class SvgStyle
-    {
-        public string? Name { get; set; }
-
-        public Brush? Fill { get; set; }
-    }
-
-    private static void DrawPath(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
-    {
-        fill = element.GetFillAttribute(fill);
-        stroke = element.GetStrokeAttribute(stroke);
+        //fill = element.GetFillAttribute(fill);
+        //stroke = element.GetStrokeAttribute(stroke);
 
         string d = element.Attribute("d")?.Value ?? string.Empty;
         drawingContext.DrawGeometry(fill, stroke, Geometry.Parse(d));
     }
 
-    private static void DrawCircle(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
+    private static void DrawCircle(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        fill = element.GetFillAttribute(fill);
-        stroke = element.GetStrokeAttribute(stroke);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        //fill = element.GetFillAttribute(fill);
+        //stroke = element.GetStrokeAttribute(stroke);
 
         double cx = element.GetDoubleAttribute("cx");
         double cy = element.GetDoubleAttribute("cy");
@@ -250,10 +320,11 @@ public static class SvgConverter
         drawingContext.DrawEllipse(fill, stroke, new Point(cx, cy), r, r);
     }
 
-    private static void DrawEllipse(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
+    private static void DrawEllipse(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        fill = element.GetFillAttribute(fill);
-        stroke = element.GetStrokeAttribute(stroke);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        //fill = element.GetFillAttribute(fill);
+        //stroke = element.GetStrokeAttribute(stroke);
 
         double cx = element.GetDoubleAttribute("cx");
         double cy = element.GetDoubleAttribute("cy");
@@ -262,10 +333,11 @@ public static class SvgConverter
         drawingContext.DrawEllipse(fill, stroke, new Point(cx, cy), rx, ry);
     }
 
-    private static void DrawRect(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
+    private static void DrawRect(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        fill = element.GetFillAttribute(fill);
-        stroke = element.GetStrokeAttribute(stroke);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        //fill = element.GetFillAttribute(fill);
+        //stroke = element.GetStrokeAttribute(stroke);
 
         int x = element.GetIntAttribute("x");
         int y = element.GetIntAttribute("y");
@@ -277,10 +349,11 @@ public static class SvgConverter
         drawingContext.DrawRoundedRectangle(fill, stroke, new Rect(x, y, width, height), rx, ry);
     }
 
-    private static void DrawLine(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
+    private static void DrawLine(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        //fill = element.GetFillAttribute(fill);
-        stroke = element.GetStrokeAttribute(stroke);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        ////fill = element.GetFillAttribute(fill);
+        //stroke = element.GetStrokeAttribute(stroke);
 
         int x1 = element.GetIntAttribute("x1");
         int y1 = element.GetIntAttribute("y1");
@@ -290,10 +363,11 @@ public static class SvgConverter
         drawingContext.DrawLine(stroke, new Point(x1, y1), new Point(x2,y2));
     }
 
-    private static void DrawPolyline(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
+    private static void DrawPolyline(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
+        HanleStyleAtributes(element, styles, ref stroke, ref fill);
         //fill = element.GetFillAttribute(fill);
-        stroke = element.GetStrokeAttribute(stroke);
+        //stroke = element.GetStrokeAttribute(stroke);
 
         // TODO
 
@@ -307,10 +381,11 @@ public static class SvgConverter
         throw new NotImplementedException();
     }
 
-    private static void DrawText(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
+    private static void DrawText(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        fill = element.GetFillAttribute(fill);
-        stroke = element.GetStrokeAttribute(stroke);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        //fill = element.GetFillAttribute(fill);
+        //stroke = element.GetStrokeAttribute(stroke);
 
         //int x1 = element.GetIntAttribute("x1");
         //int y1 = element.GetIntAttribute("y1");
@@ -321,8 +396,10 @@ public static class SvgConverter
         throw new NotImplementedException();
     }
 
-    private static void DrawImage(DrawingContext drawingContext, XElement element, Brush? fill, Pen? strokel)
+    private static void DrawImage(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
+        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+
         //int x1 = element.GetIntAttribute("x1");
         //int y1 = element.GetIntAttribute("y1");
         //int x2 = element.GetIntAttribute("x2");
@@ -332,10 +409,12 @@ public static class SvgConverter
         throw new NotImplementedException();
     }
 
-    private static void DrawPolygon(DrawingContext drawingContext, XElement element, Brush? fill, Pen? stroke)
+    private static void DrawPolygon(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        fill = element.GetFillAttribute(fill);
-        stroke = element.GetStrokeAttribute(stroke);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+
+        //fill = element.GetFillAttribute(fill);
+        //stroke = element.GetStrokeAttribute(stroke);
 
         var points = element.GetPointsAttribute("points");
         
@@ -357,6 +436,106 @@ public static class SvgConverter
         drawingContext.DrawGeometry(fill, stroke, pathGeometry);
     }
 
-    
+    #region CSS Parser
 
+    private class CssDocument 
+    {
+        public List<CssRule> Rules { get; set; } = [];
+    }
+
+    private class CssRule
+    {
+        public string Selector { get; set; } = string.Empty;
+        public List<CssDeclaration> Declarations { get; set; } = [];
+    }
+
+    private class CssDeclaration
+    {
+        public string Property { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+    }
+
+    private enum CssState { Selector, Property, Value, BehindValue }
+
+    // rule = selector, '{', declaration-list, '}';
+    // declaration-list = { declaration, ';' };
+    // declaration = property, ':', value;
+
+    private static CssDocument ParseCss(string text)
+    {
+        text = text.Replace("\r", "").Replace("\n", "");
+
+        var doc = new CssDocument();
+
+
+        CssState state = CssState.Selector;
+
+        CssRule rule = new();
+        CssDeclaration declaration = new ();
+        StringBuilder builder = new();
+
+        foreach (char c in text)
+        {
+            switch (state)
+            {
+            case CssState.Selector:
+                switch (c)
+                {
+                case '{':
+                    rule.Selector = builder.ToString();
+                    builder.Clear();
+                    state = CssState.Property;
+                    break;
+                default:
+                    builder.Append(c);
+                    break;
+                }
+                break;
+            case CssState.Property:
+                switch (c)
+                {
+                case ':':
+                    declaration.Property = builder.ToString();
+                    builder.Clear();
+                    state = CssState.Value;
+                    break;
+                default:
+                    builder.Append(c);
+                    break;
+                }
+                break;
+            case CssState.Value:
+                switch (c)
+                {
+                case ';':
+                    declaration.Value = builder.ToString();
+                    builder.Clear();
+                    state = CssState.BehindValue;
+                    rule.Declarations.Add(declaration);
+                    declaration = new ();
+                    break;
+                default:
+                    builder.Append(c);
+                    break;
+                }
+                break;
+            case CssState.BehindValue:
+                switch (c)
+                { 
+                case '}':
+                    // end of declaration list
+                    break;
+                default:
+                    // next declaration in list
+                    builder.Append(c);
+                    state = CssState.Selector;
+                    break;
+                }
+                break;
+            }
+        }
+        return doc;
+    }
+    
+    #endregion
 }
