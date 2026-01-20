@@ -141,65 +141,82 @@ public enum ArticleType
     #region Light Signals
 
     /// <summary>
-    /// Light Signal HP0/1  Code: 015
+    /// Light Signal HP0/1 
     /// </summary>
     [EnumMember(Value = "lichtsignal_HP01")]
+    [Description("Light Hp0/1")]
     [FileName("magicon_a_015_01.svg")]
     LightSignalHp01,
-
-    [EnumMember(Value = "urc_lichtsignal_HP01")]
-    [FileName("magicon_a_015_01.svg")]
-    UrcLightSignalHp01,
-
+    
     /// <summary>
-    /// Light Signal HP0/2  Code: 016
+    /// Light Signal Hp0/2 
     /// </summary>
     [EnumMember(Value = "lichtsignal_HP02")]
+    [Description("Light Hp0/2")]
     [FileName("magicon_a_016_01.svg")]
     LightSignalHp02,
 
     /// <summary>
-    /// Light Signal HP0/1/2  Code: 017
+    /// Light Signal Hp0/1/2  
     /// </summary>
     [EnumMember(Value = "lichtsignal_HP012")]
+    [Description("Light Hp0/1/2")]
     [FileName("magicon_a_017_01.svg")]
-    LightSignalHp012,
-
-    [EnumMember(Value = "urc_lichtsignal_HP012")]
-    [FileName("magicon_a_017_01.svg")]
-    UrcLightSignalHp012,
+    LightSignalHp012,   
 
     /// <summary>
-    /// Light Signal HP0/1/2 + SH0/1  Code: 018
+    /// Light Signal Hp0/1/2 + Sh0/1  
     /// </summary>
     [EnumMember(Value = "lichtsignal_HP012_SH01")]
+    [Description("Light Hp0/1/2 + Sh0/1")]
     [FileName("magicon_a_018_01.svg")]
     LightSignalHp012Sh01,
 
     /// <summary>
-    /// Light Signal SH0/1  Code: 019
+    /// Light Signal Sh0/1  
     /// </summary>
     [EnumMember(Value = "lichtsignal_SH01")]
+    [Description("Light Sh0/1")]
     [FileName("magicon_a_019_01.svg")]
     LightSignalSh01,
 
-    [EnumMember(Value = "urc_lichtsignal_SH01")]
-    [FileName("magicon_a_019_01.svg")]
-    UrcLightSignalSh01,
-
     /// <summary>
-    /// Light Signal HP0/1/2 + SH0/1  Code: 027
+    /// Light Signal Vr0/1/2  
     /// </summary>
-    [EnumMember(Value = "urc_lichtsignal_HP012_SH01")]
-    [FileName("magicon_a_027_01.svg")]
-    UrcLightSignalHp012Sh01,
-
-    /// <summary>
-    /// Light Signal VR0/1/2  Code: 029
-    /// </summary>
-    [EnumMember(Value = "lichtsignal_VR012")]
+    [EnumMember(Value = "lichtvorsignal_VR012")]
+    [Description("Light Vr0/1/2")]
     [FileName("magicon_a_029_01.svg")]
     LightSignalVr012,
+
+    // Scale
+
+    [EnumMember(Value = "urc_lichtsignal_HP01")]
+    [Description("Light Hp0/1 Scale")]
+    [FileName("magicon_a_015_01.svg")]
+    ScaleLightSignalHp01,
+
+    [EnumMember(Value = "urc_lichtsignal_HP012")]
+    [Description("Light Hp0/1/2 Scale")]
+    [FileName("magicon_a_017_01.svg")]
+    ScaleLightSignalHp012,
+    
+    /// <summary>
+    /// Light Signal HP0/1/2 + SH0/1  
+    /// </summary>
+    [EnumMember(Value = "urc_lichtsignal_HP012_SH01")]
+    [Description("Light Hp0/1/2 + SH0/1 Scale")]
+    [FileName("magicon_a_027_01.svg")]
+    ScaleLightSignalHp012Sh01,
+
+    [EnumMember(Value = "urc_lichtsignal_SH01")]
+    [Description("Light Sh0/1 Scale")]
+    [FileName("magicon_a_019_01.svg")]
+    ScaleLightSignalSh01,
+
+    [EnumMember(Value = "urc_lichtsignal_VR012")]
+    [Description("Light Vr0/1/2 Scale")]
+    [FileName("magicon_a_029_01.svg")]
+    ScaleLightSignalVr012,
 
     /// <summary>
     /// Monitoring Signal BÜ100/101  
