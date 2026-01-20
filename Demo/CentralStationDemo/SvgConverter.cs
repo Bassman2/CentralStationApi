@@ -51,8 +51,7 @@ public static class SvgConverter
             // background for testing
             //drawingContext.DrawGeometry(new SolidColorBrush(Colors.Blue), new Pen(new SolidColorBrush(Colors.Yellow), 3), new RectangleGeometry(viewBoxRect));
 
-            var styles = new StyleCache();
-            DrawGroup(drawingContext, root, styles);
+            DrawGroup(drawingContext, root, new StyleCache(), null, new SolidColorBrush(Colors.Black));
         }
         RenderTargetBitmap bitmap = new((int)viewBoxRect.Width, (int)viewBoxRect.Height, 96, 96, PixelFormats.Default);
         bitmap.Render(drawingVisual);
@@ -74,16 +73,16 @@ public static class SvgConverter
         return element.Attribute(name)?.Value ?? string.Empty;
     }
 
-    private static int GetIntAttribute(this XElement element, string name)
-    {
-        string? value = element.Attribute(name)?.Value;
-        return int.TryParse(value, out var val) ? val : 0;
-    }
+    //private static int GetIntAttribute(this XElement element, string name)
+    //{
+    //    string? value = element.Attribute(name)?.Value;
+    //    return int.TryParse(value, out var val) ? val : 0;
+    //}
 
     private static double GetDoubleAttribute(this XElement element, string name)
     {
         string? value = element.Attribute(name)?.Value;
-        return double.TryParse(value, out var val) ? val : 0.0;
+        return double.TryParse(value, CultureInfo.InvariantCulture, out var val) ? val : 0.0;
     }
 
     private static Color GetColor(string value)
@@ -239,6 +238,21 @@ public static class SvgConverter
             }
         }
 
+        var styleAttr = element.Attribute("style");
+        if (styleAttr is not null)
+        {
+            string style = styleAttr.Value;
+            var items = style.Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            switch (items[0])
+            {
+            case "fill":
+                fill = new SolidColorBrush(GetColor(items[1]));
+                break;
+            default:
+                throw new InvalidCastException($"Unknown style attribute {items[0]}");
+            }
+        }
+
         var fillAttr = element.Attribute("fill");
         if (fillAttr != null)
         {
@@ -261,9 +275,6 @@ public static class SvgConverter
     {
         HanleStyleAtributes(element, styles, ref stroke, ref fill);
 
-        //fill = element.GetFillAttribute(fill);
-        //stroke = element.GetStrokeAttribute(stroke);
-
         string d = element.Attribute("d")?.Value ?? string.Empty;
         drawingContext.DrawGeometry(fill, stroke, Geometry.Parse(d));
     }
@@ -271,9 +282,7 @@ public static class SvgConverter
     private static void DrawCircle(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
         HanleStyleAtributes(element, styles, ref stroke, ref fill);
-        //fill = element.GetFillAttribute(fill);
-        //stroke = element.GetStrokeAttribute(stroke);
-
+        
         double cx = element.GetDoubleAttribute("cx");
         double cy = element.GetDoubleAttribute("cy");
         double r = element.GetDoubleAttribute("r");
@@ -283,8 +292,6 @@ public static class SvgConverter
     private static void DrawEllipse(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
         HanleStyleAtributes(element, styles, ref stroke, ref fill);
-        //fill = element.GetFillAttribute(fill);
-        //stroke = element.GetStrokeAttribute(stroke);
 
         double cx = element.GetDoubleAttribute("cx");
         double cy = element.GetDoubleAttribute("cy");
@@ -296,30 +303,24 @@ public static class SvgConverter
     private static void DrawRect(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
         HanleStyleAtributes(element, styles, ref stroke, ref fill);
-        //fill = element.GetFillAttribute(fill);
-        //stroke = element.GetStrokeAttribute(stroke);
 
-        int x = element.GetIntAttribute("x");
-        int y = element.GetIntAttribute("y");
-        int width = element.GetIntAttribute("width");
-        int height = element.GetIntAttribute("height");
-        int rx = element.GetIntAttribute("rx");
-        int ry = element.GetIntAttribute("ry");
-        //drawingContext.DrawRectangle(fill, null, new Rect(x, y, width, height));
+        double x = element.GetDoubleAttribute("x");
+        double y = element.GetDoubleAttribute("y");
+        double width = element.GetDoubleAttribute("width");
+        double height = element.GetDoubleAttribute("height");
+        double rx = element.GetDoubleAttribute("rx");
+        double ry = element.GetDoubleAttribute("ry");
         drawingContext.DrawRoundedRectangle(fill, stroke, new Rect(x, y, width, height), rx, ry);
     }
 
     private static void DrawLine(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
         HanleStyleAtributes(element, styles, ref stroke, ref fill);
-        ////fill = element.GetFillAttribute(fill);
-        //stroke = element.GetStrokeAttribute(stroke);
 
-        int x1 = element.GetIntAttribute("x1");
-        int y1 = element.GetIntAttribute("y1");
-        int x2 = element.GetIntAttribute("x2");
-        int y2 = element.GetIntAttribute("y2");
-        //int width = element.GetIntAttribute("width");
+        double x1 = element.GetDoubleAttribute("x1");
+        double y1 = element.GetDoubleAttribute("y1");
+        double x2 = element.GetDoubleAttribute("x2");
+        double y2 = element.GetDoubleAttribute("y2");
         drawingContext.DrawLine(stroke, new Point(x1, y1), new Point(x2,y2));
     }
 
