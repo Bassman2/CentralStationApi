@@ -144,7 +144,7 @@ public enum ArticleType
     [EnumMember(Value = "urc_formsignal_HP012")]
     [FileName("magicon_a_022_01.svg")]
     UrcSemaphoreSignalHp012,
-
+    
     /// <summary>
     /// Semaphore Signal HP0/1/2 + SH0/1  Code: 023
     /// </summary>
@@ -166,6 +166,10 @@ public enum ArticleType
     [EnumMember(Value = "urc_formsignal_SH01")]
     [FileName("magicon_a_024_01.svg")]
     UrcSemaphoreSignalSh01,
+
+    [EnumMember(Value = "profi_formsignal_SH01")]
+    [FileName("magicon_a_024_01.svg")]
+    ProfiSemaphoreSignalSh01,
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -255,12 +259,27 @@ public enum ArticleType
     [Description("Crossing Signal")]
     [FileName("magicon_a_038_01.svg")]
     CrossingSignal,
-    
+
+    // <summary>
+    /// Profi vorsignal HP01
+    /// </summary>
+    [EnumMember(Value = "profi_vorsignal_HP01")]
+    [Description("Prof vorsignal HP01")]
+    [FileName("magicon_a_044_01.svg")]
+    ProfiVorsignalHP01,
+
+    // <summary>
+    /// Profi vorsignal HP012
+    /// </summary>
+    [EnumMember(Value = "profi_vorsignal_HP012")]
+    [Description("Prof vorsignal HP012")]
+    [FileName("magicon_a_045_02.svg")]
+    ProfiVorsignalHP012,
 
     // <summary>
     /// Light outdoor  
     /// </summary>
-    [EnumMember(Value = "licht_aussen ``")]
+    [EnumMember(Value = "licht_aussen2")]
     [Description("Outside")]
     [FileName("magicon_a_047_01.svg")]
     LightOutdoor2,

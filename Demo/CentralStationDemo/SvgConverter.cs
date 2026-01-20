@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.Drawing.Charts;
-using DocumentFormat.OpenXml.Office2010.Word;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -102,6 +100,14 @@ public static class SvgConverter
             Color color = (Color)ColorConverter.ConvertFromString(value);
             return color;
         }
+    }
+
+    private static double[] GetDoubleArray(string value)
+    {
+        value = value.Trim('(', ')');
+        var list = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var items = list?.Select(i => double.Parse(i, CultureInfo.InvariantCulture)).ToArray() ?? [];
+        return items;
     }
 
     private static Brush? GetFillAttribute(this XElement element, Brush? fill)
@@ -220,7 +226,7 @@ public static class SvgConverter
         public Pen? Stroke { get; set; } = null;
     }
 
-    private static void HanleStyleAtributes(XElement element, StyleCache styleCache, ref Pen? stroke, ref Brush? fill)
+    private static void HanleStyleAtributes(XElement element, StyleCache styleCache, ref Pen? stroke, ref Brush? fill, out Transform? transform)
     {
         var classAttr = element.Attribute("class");
         if (classAttr != null)
@@ -269,40 +275,87 @@ public static class SvgConverter
 
             stroke = new Pen(new SolidColorBrush(GetColor(strokeAttr.Value)), width);
         }
+
+        var transformAttr = element.Attribute("transform");
+        if (transformAttr != null)
+        {
+            string transf = transformAttr.Value;
+            var items = transf.Split('(', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            switch (items[0])
+            {
+            case "matrix":
+                var values = GetDoubleArray(items[1]);
+                transform = new MatrixTransform(values[0], values[1], values[2], values[3], values[4], values[5]); 
+                break;
+            default:
+                throw new InvalidCastException($"Unknown transform attribute {items[0]}");
+            }
+        }
+        else
+        {
+            transform = null;
+        }
     }
 
     private static void DrawPath(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill, out var transform);
 
         string d = element.Attribute("d")?.Value ?? string.Empty;
+
+        if (transform is not null)
+        {
+            drawingContext.PushTransform(transform);
+        }
         drawingContext.DrawGeometry(fill, stroke, Geometry.Parse(d));
+        if (transform is not null)
+        {
+            drawingContext.Pop();
+        }
     }
 
     private static void DrawCircle(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill, out var transform);
         
         double cx = element.GetDoubleAttribute("cx");
         double cy = element.GetDoubleAttribute("cy");
         double r = element.GetDoubleAttribute("r");
+
+        if (transform is not null)
+        {
+            drawingContext.PushTransform(transform);
+        }
         drawingContext.DrawEllipse(fill, stroke, new Point(cx, cy), r, r);
+        if (transform is not null)
+        {
+            drawingContext.Pop();
+        }
     }
 
     private static void DrawEllipse(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill, out var transform);
 
         double cx = element.GetDoubleAttribute("cx");
         double cy = element.GetDoubleAttribute("cy");
         double rx = element.GetDoubleAttribute("rx");
         double ry = element.GetDoubleAttribute("ry");
+
+        if (transform is not null)
+        {
+            drawingContext.PushTransform(transform);
+        }
         drawingContext.DrawEllipse(fill, stroke, new Point(cx, cy), rx, ry);
+        if (transform is not null)
+        {
+            drawingContext.Pop();
+        }
     }
 
     private static void DrawRect(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill, out var transform);
 
         double x = element.GetDoubleAttribute("x");
         double y = element.GetDoubleAttribute("y");
@@ -310,41 +363,64 @@ public static class SvgConverter
         double height = element.GetDoubleAttribute("height");
         double rx = element.GetDoubleAttribute("rx");
         double ry = element.GetDoubleAttribute("ry");
+
+        if (transform is not null)
+        {
+            drawingContext.PushTransform(transform);
+        }
         drawingContext.DrawRoundedRectangle(fill, stroke, new Rect(x, y, width, height), rx, ry);
+        if (transform is not null)
+        {
+            drawingContext.Pop();
+        }
     }
 
     private static void DrawLine(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill, out var transform);
 
         double x1 = element.GetDoubleAttribute("x1");
         double y1 = element.GetDoubleAttribute("y1");
         double x2 = element.GetDoubleAttribute("x2");
         double y2 = element.GetDoubleAttribute("y2");
+
+        if (transform is not null)
+        {
+            drawingContext.PushTransform(transform);
+        }
         drawingContext.DrawLine(stroke, new Point(x1, y1), new Point(x2,y2));
+        if (transform is not null)
+        {
+            drawingContext.Pop();
+        }
     }
 
     private static void DrawPolyline(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        HanleStyleAtributes(element, styles, ref stroke, ref fill);
-        //fill = element.GetFillAttribute(fill);
-        //stroke = element.GetStrokeAttribute(stroke);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill, out var transform);
 
-        // TODO
+        var points = element.GetPointsAttribute("points");
 
+        
+        
+        var fig = new PathFigure(points[0], points.Skip(1).Select(p => new LineSegment(p, true)), false);
+        PathGeometry pathGeometry = new PathGeometry([fig]);
 
-        //int x1 = element.GetIntAttribute("x1");
-        //int y1 = element.GetIntAttribute("y1");
-        //int x2 = element.GetIntAttribute("x2");
-        //int y2 = element.GetIntAttribute("y2");
-        //int width = element.GetIntAttribute("width");
-        //drawingContext.DrawLine(null, new Point(x1, y1), new Point(x2, y2));
-        throw new NotImplementedException();
+        if (transform is not null)
+        {
+            drawingContext.PushTransform(transform);
+        }
+        drawingContext.DrawGeometry(null, stroke, pathGeometry);
+        if (transform is not null)
+        {
+            drawingContext.Pop();
+        }
+
     }
 
     private static void DrawText(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill, out var transform);
         //fill = element.GetFillAttribute(fill);
         //stroke = element.GetStrokeAttribute(stroke);
 
@@ -359,7 +435,7 @@ public static class SvgConverter
 
     private static void DrawImage(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill, out var transform);
 
         //int x1 = element.GetIntAttribute("x1");
         //int y1 = element.GetIntAttribute("y1");
@@ -372,7 +448,7 @@ public static class SvgConverter
 
     private static void DrawPolygon(DrawingContext drawingContext, XElement element, StyleCache styles, Pen? stroke, Brush? fill)
     {
-        HanleStyleAtributes(element, styles, ref stroke, ref fill);
+        HanleStyleAtributes(element, styles, ref stroke, ref fill, out var transform);
 
         //fill = element.GetFillAttribute(fill);
         //stroke = element.GetStrokeAttribute(stroke);
@@ -393,8 +469,16 @@ public static class SvgConverter
         }
         
         pathGeometry.Figures.Add(fig);
-                
+
+        if (transform is not null)
+        {
+            drawingContext.PushTransform(transform);
+        }
         drawingContext.DrawGeometry(fill, stroke, pathGeometry);
+        if (transform is not null)
+        {
+            drawingContext.Pop();
+        }
     }
 
     #region CSS Parser
