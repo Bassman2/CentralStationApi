@@ -49,38 +49,17 @@
                             <RowDefinition Height="20"/>
                             <RowDefinition Height="20"/>
                             <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
+                            
                         </Grid.RowDefinitions>
                         <Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="100" Height="100" Stretch="Uniform" ToolTip="{Binding IconUri}"/>
-                        <!--<Image Grid.Row="0" Source="{Binding Image}" Width="100" Height="100" Stretch="Uniform" ToolTip="{Binding IconName}"/>-->
                         <TextBlock Grid.Row="1" Text="{Binding Type}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="2" Text="{Binding Name}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="3" Text="{Binding Id, StringFormat=Id: {0:X4}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="4" Text="{Binding Position, StringFormat=Position: {0:X4}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="5" Text="{Binding SwitchingTime, StringFormat=SwitchingTime: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="6" Text="{Binding Odd, StringFormat=Odd: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="7" Text="{Binding DecoderType, StringFormat=DecoderType: {0}}" HorizontalAlignment="Center"/>
-                        <!--<TextBlock Grid.Row="8" Text="{Binding MfxUid, StringFormat=MFX UID: {0:X4}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="9" Text="{Binding MaxSpeed, StringFormat=MaxSpeed: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="10" Text="{Binding VMax, StringFormat=VMax: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="11" Text="{Binding VMin, StringFormat=VMin: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="12" Text="{Binding Av, StringFormat=Av: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="13" Text="{Binding Bv, StringFormat=Bv: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="14" Text="{Binding Volume, StringFormat=Volume: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="15" Text="{Binding Spa, StringFormat=Spa: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="16" Text="{Binding Spm, StringFormat=Spm: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="17" Text="{Binding Velocity, StringFormat=Velocity: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="18" Text="{Binding Direction, StringFormat=Direction: {0}}" HorizontalAlignment="Center"/>-->
+                        <TextBlock Grid.Row="2" Text="{Binding TypeName}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="3" Text="{Binding Name}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Text="{Binding Id, StringFormat=Id: {0:X4}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="5" Text="{Binding Position, StringFormat=Position: {0:X4}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="6" Text="{Binding SwitchingTime, StringFormat=SwitchingTime: {0}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="7" Text="{Binding Odd, StringFormat=Odd: {0}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="8" Text="{Binding DecoderType, StringFormat=DecoderType: {0}}" HorizontalAlignment="Center"/>
                     </Grid>
                     <!-- control -->
                 </Grid>

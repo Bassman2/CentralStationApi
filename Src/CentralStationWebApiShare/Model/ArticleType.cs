@@ -239,65 +239,58 @@ public enum ArticleType
     #region Semaphore Signals
 
     /// <summary>
-    /// Semaphore Signal HP0/1  Code: 020
+    /// Semaphore Signal Hp0/1 
     /// </summary>
     [EnumMember(Value = "formsignal_HP01")]
+    [Description("Hp0/1")]
     [FileName("magicon_a_020_01.svg")]
     SemaphoreSignalHp01,
 
-    [EnumMember(Value = "urc_formsignal_HP01")]
-    [FileName("magicon_a_020_01.svg")]
-    UrcSemaphoreSignalHp01,
-
-    [EnumMember(Value = "profi_formsignal_HP01")]
-    [FileName("magicon_a_020_01.svg")]
-    ProfiSemaphoreSignalHp01,
-
     /// <summary>
-    /// Semaphore Signal HP0/2  Code: 021
+    /// Semaphore Signal Hp0/2 
     /// </summary>
     [EnumMember(Value = "formsignal_HP02")]
+    [Description("Hp0/2")]
     [FileName("magicon_a_021_01.svg")]
     SemaphoreSignalHp02,
 
+
     /// <summary>
-    /// Semaphore Signal HP0/1/2  Code: 022
+    /// Semaphore Signal Hp0/1/2 
     /// </summary>
     [EnumMember(Value = "formsignal_HP012")]
+    [Description("Hp0/1/2")]
     [FileName("magicon_a_022_01.svg")]
     SemaphoreSignalHp012,
 
-    [EnumMember(Value = "urc_formsignal_HP012")]
-    [FileName("magicon_a_022_01.svg")]
-    UrcSemaphoreSignalHp012,
-
-    [EnumMember(Value = "profi_formsignal_HP012")]
-    [FileName("magicon_a_022_01.svg")]
-    ProfiSemaphoreSignalHp021,
-
     /// <summary>
-    /// Semaphore Signal HP0/1/2 + SH0/1  Code: 023
+    /// Semaphore Signal Hp0/1/2 + Sh0/1  
     /// </summary>
     [EnumMember(Value = "formsignal_HP012_SH01")]
+    [Description("Hp0/1/2+Sh0/1")]
     [FileName("magicon_a_023_01.svg")]
     SemaphoreSignalHp012Sh01,
 
-    [EnumMember(Value = "urc_formsignal_HP012_SH01")]
-    [FileName("magicon_a_023_01.svg")]
-    UrcSemaphoreSignalHp012Sh01,
-
     /// <summary>
-    /// Semaphore Signal HSH0/1  Code: 024
+    /// Semaphore Signal Sh0/1 
     /// </summary>
     [EnumMember(Value = "formsignal_SH01")]
+    [Description("Sh0/1")]
     [FileName("magicon_a_024_01.svg")]
     SemaphoreSignalSh01,
 
-    [EnumMember(Value = "urc_formsignal_SH01")]
-    [FileName("magicon_a_024_01.svg")]
-    UrcSemaphoreSignalSh01,
+    [EnumMember(Value = "profi_formsignal_HP01")]
+    [Description("Hp0/1 Scale")]
+    [FileName("magicon_a_020_01.svg")]
+    ProfiSemaphoreSignalHp01,
+
+    [EnumMember(Value = "profi_formsignal_HP012")]
+    [Description("Hp0/1/2 Scale")]
+    [FileName("magicon_a_022_01.svg")]
+    ProfiSemaphoreSignalHp021,
 
     [EnumMember(Value = "profi_formsignal_SH01")]
+    [Description("Sh0/1 Scale")]
     [FileName("magicon_a_024_01.svg")]
     ProfiSemaphoreSignalSh01,
 
@@ -305,31 +298,17 @@ public enum ArticleType
     /// Profi vorsignal HP01
     /// </summary>
     [EnumMember(Value = "profi_vorsignal_HP01")]
-    [Description("Prof vorsignal HP01")]
+    [Description("Vr0/1 Scale")]
     [FileName("magicon_a_044_01.svg")]
-    ProfiVorsignalHP01,
+    ProfiSemaphoreSignalVr01,
 
     // <summary>
     /// Profi vorsignal HP012
     /// </summary>
     [EnumMember(Value = "profi_vorsignal_HP012")]
-    [Description("Prof vorsignal HP012")]
+    [Description("Vr0/1/2 Scale")]
     [FileName("magicon_a_045_02.svg")]
-    ProfiVorsignalHP012,
-
-    /// <summary>
-    /// Semaphore Signal VR0/1  
-    /// </summary>
-    [EnumMember(Value = "urc_formsignal_VR01")]
-    [FileName("magicon_a_044_01.svg")]
-    UrcSemaphoreSignalVr01,
-
-    /// <summary>
-    /// Semaphore Signal VR0/1/2 
-    /// </summary>
-    [EnumMember(Value = "urc_formsignal_VR012")]
-    [FileName("magicon_a_045_01.svg")]
-    UrcSemaphoreSignalVr012,
+    ProfiSemaphoreSignalVr012,
 
     /// <summary>
     /// Wait  
@@ -337,7 +316,38 @@ public enum ArticleType
     [EnumMember(Value = "wartesignal")]
     [Description("Ra11")]
     [FileName("magicon_a_064_01.svg")]
-    Wait,
+    ProfiSemaphoreSignalWait,
+
+
+    //[EnumMember(Value = "urc_formsignal_HP01")]
+    //[FileName("magicon_a_020_01.svg")]
+    //UrcSemaphoreSignalHp01,
+
+    //[EnumMember(Value = "urc_formsignal_HP012")]
+    //[FileName("magicon_a_022_01.svg")]
+    //UrcSemaphoreSignalHp012,
+
+    //[EnumMember(Value = "urc_formsignal_HP012_SH01")]
+    //[FileName("magicon_a_023_01.svg")]
+    //UrcSemaphoreSignalHp012Sh01,
+
+    //[EnumMember(Value = "urc_formsignal_SH01")]
+    //[FileName("magicon_a_024_01.svg")]
+    //UrcSemaphoreSignalSh01,
+
+    ///// <summary>
+    ///// Semaphore Signal VR0/1  
+    ///// </summary>
+    //[EnumMember(Value = "urc_formsignal_VR01")]
+    //[FileName("magicon_a_044_01.svg")]
+    //UrcSemaphoreSignalVr01,
+
+    ///// <summary>
+    ///// Semaphore Signal VR0/1/2 
+    ///// </summary>
+    //[EnumMember(Value = "urc_formsignal_VR012")]
+    //[FileName("magicon_a_045_01.svg")]
+    //UrcSemaphoreSignalVr012,
 
     #endregion
 

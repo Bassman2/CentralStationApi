@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Windows.Media;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace CentralStationDemo.ViewModel;
 
@@ -14,14 +16,12 @@ public partial class ArticleViewModel : ObservableObject
         Id = article.Id;
         Name = article.Name;
         Type = article.Type;
+        TypeName = typeof(ArticleType).GetField(article.Type.ToString())?.GetCustomAttribute<DescriptionAttribute>()?.Description;
         Position = article.Position;
         SwitchingTime = article.SwitchingTime;
         Odd = article.Odd;
         DecoderType = article.DecoderType;
         IconUri = article.IconUri;
-
-        //using var file = File.OpenRead("Images/magicon_a_005_01.svg");
-        //image = SvgConverter.ConvertSvg(file);
     }
 
     [ObservableProperty]
@@ -32,6 +32,9 @@ public partial class ArticleViewModel : ObservableObject
 
     [ObservableProperty]
     private ArticleType type;
+
+    [ObservableProperty]
+    private string? typeName;
 
     [ObservableProperty]
     private uint position;
@@ -48,6 +51,4 @@ public partial class ArticleViewModel : ObservableObject
     [ObservableProperty]
     private Uri? iconUri;
 
-    //[ObservableProperty]
-    //private ImageSource image;
 }
