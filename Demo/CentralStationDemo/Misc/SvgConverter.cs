@@ -7,7 +7,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Xps.Packaging;
 using System.Xml.Linq;
 
-namespace CentralStationDemo;
+namespace CentralStationDemo.Misc;
 
 public static class SvgConverter
 {
@@ -44,7 +44,7 @@ public static class SvgConverter
         using (DrawingContext drawingContext = drawingVisual.RenderOpen())
         {
             var root = doc.Root!;
-            viewBoxRect = GetRectAttribute(root, "viewBox");
+            viewBoxRect = root.GetRectAttribute("viewBox");
 
             // background for testing
             //drawingContext.DrawGeometry(new SolidColorBrush(Colors.Blue), new Pen(new SolidColorBrush(Colors.Yellow), 3), new RectangleGeometry(viewBoxRect));
@@ -53,7 +53,7 @@ public static class SvgConverter
         }
         RenderTargetBitmap bitmap = new((int)viewBoxRect.Width, (int)viewBoxRect.Height, 96, 96, PixelFormats.Default);
         bitmap.Render(drawingVisual);
-        return (ImageSource)bitmap;
+        return bitmap;
     }
 
     private static Rect GetRectAttribute(this XElement element, string name)

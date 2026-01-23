@@ -11,7 +11,9 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private const string routesFileName = "fahrstrassen.cs2";
     private const string tracksFileName = "gleisbild.cs2";
 
-    private readonly CentralStation cs; 
+    private readonly CentralStation cs;
+
+    public string Host => host;
 
     public MainViewModel()
     {
