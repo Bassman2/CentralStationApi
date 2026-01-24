@@ -33,23 +33,10 @@ public class Device
         }
     }
 
-    //public Uri? IconUri
-    //{
-    //    get
-    //    {
+    internal bool IsNeedData { get; set; } = true;
 
-    //        var memberInfo = typeof(DeviceType).GetMember(DeviceType.ToString()).FirstOrDefault();
-    //        if (memberInfo != null)
-    //        {
-    //            var attr = memberInfo.GetCustomAttributes(typeof(FileNameAttribute), false)
-    //                                 .OfType<FileNameAttribute>()
-    //                                 .FirstOrDefault();
-    //            if (attr != null)
-    //            {
-    //                return new Uri($"http://{CentralStationBasic.Host}/{attr.FileName}");
-    //            }
-    //        }
-    //        return null; // new Uri($"http://{CentralStationBasic.Host}/images/gui/dashboard_cs3.png");
-    //    }
-    //}
+    internal bool IsReady { get; set; } = false;
+
+    public byte Index { get; set; }
+    public byte NumOfPackages { get; set; }
 }

@@ -1,4 +1,6 @@
-﻿namespace CentralStationDemo.ViewModel;
+﻿using CentralStationWebApi;
+
+namespace CentralStationDemo.ViewModel;
 
 public partial class DeviceViewModel : ObservableObject
 {
@@ -25,6 +27,9 @@ public partial class DeviceViewModel : ObservableObject
         SwVersion = $"{device.MajorVersion}.{device.MinorVersion}";
         Type = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
         IconUri = device.IconUri;
+
+        Index = device.Index;
+        NumOfPackages = device.NumOfPackages;
     }
 
 

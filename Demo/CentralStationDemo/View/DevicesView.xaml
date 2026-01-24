@@ -68,8 +68,8 @@
                         <TextBlock Grid.Row="5" Text="{Binding ArticleNumber, StringFormat=Article: {0}}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="6" Text="{Binding SerialNumber}" HorizontalAlignment="Center"/>
 
-                        <TextBlock Grid.Row="7" Text="{Binding Index}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="8" Text="{Binding NumOfPackages}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="7" Text="{Binding Index, StringFormat=Index: {0}}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="8" Text="{Binding NumOfPackages, StringFormat=Packages: {0}}" HorizontalAlignment="Center"/>
 
                         <TextBlock Grid.Row="9" Text="{Binding NumOfMeasuredValues, StringFormat=# Measures: {0}}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="10" Text="{Binding NumOfConfigurationChannels, StringFormat=# Channels {0}}" HorizontalAlignment="Center"/>

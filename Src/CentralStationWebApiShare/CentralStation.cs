@@ -1,4 +1,6 @@
-﻿namespace CentralStationWebApi;
+﻿using CentralStationWebApi.Internal;
+
+namespace CentralStationWebApi;
 
 public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
@@ -461,17 +463,76 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Devices
 
+    private AutoResetEvent devicesEvent = new(false);
     private Dictionary<uint, Device>? devices = null;
+    private DataCollector? dataCollector = null;
+    private bool isDataCollectorRunning = false;
+    private bool isCollecting = false;
 
     private void HandleDevices(CANMessage msg)
     {
+        if (devices == null) return;
+
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
             if (devices != null && !devices.ContainsKey(msg.Device))
             {
+                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"SoftwareVersion {msg.Device:X8}");
+
                 var device = new Device(msg);
                 devices.Add(device.DeviceId, device);
+            }
+            return;
+        }
+        if (msg.Command == Command.StatusData && msg.IsResponse)
+        {
+            switch (msg.DataLength)
+            {
+            case 5:
+                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
+                break;
+            case 6:
+                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
+                if (devices != null && devices.TryGetValue(msg.Device, out var device))
+                {
+                    device.IsNeedData = false;
+                    device.Index = msg.GetDataByte(4);
+                    device.NumOfPackages = msg.GetDataByte(5);
+                    device.IsReady = true;
+                    isCollecting = false;
+                }
+                //controllerCollector.Add(msg.Device, msg.GetDataByte(4), controllerDataCollector);
+                break;
+            case 8:
+                ushort packageIndex = (byte)(msg.Hash & 0xff);
+                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"HandleStatusData Length 8 HashIndex {packageIndex}");
+                if (packageIndex == 1)
+                {
+                    controllerDataCollector = new();
+                }
+                //controllerDataCollector.AddData(msg.GetData());
+                break;
+            default:
+                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
+            }
+        }
 
+        if (devices is not null)
+        {
+            var device = devices.Values.Where(d => d.IsNeedData).FirstOrDefault();
+            if (!isCollecting && device != null)
+            {
+                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"RequestStatusData {device.DeviceId:X8} {0}");
+                device.IsNeedData = false;
+                isCollecting = true;
+                RequestStatusData(device.DeviceId, 0);
+            }
+
+            if (devices.Values.All(d => !d.IsReady))
+            {
+                // ready
+                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"Ready devicesEvent fire");
+                devicesEvent.Set();
             }
         }
     }
@@ -480,13 +541,22 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         return await Task.Run(() =>
         {
-            devices = [];
+            
+            Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"RequestParticipants");
+            devices = []; 
             RequestParticipants();
+            Thread.Sleep(2000);
+            bool success = devicesEvent.WaitOne();
+            Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"devicesEvent fired");
 
-            Thread.Sleep(1000);
-            var res = devices.Values.ToList();
-            devices = [];
-            return res;
+            if (success)
+            {
+                var res = devices.Values.ToList();
+                devices = null;
+                return res; 
+            }
+            devices = null;
+            return null;
         });
     }
 
