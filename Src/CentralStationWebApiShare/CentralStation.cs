@@ -34,8 +34,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         HandleLocomotive(msg);
         HandleStatus(msg);
         HandleStreams(msg);
-        HandleController(msg);
+        //HandleController(msg);
         //HandleStatusData(msg);
+        HandleDevices(msg);
     }
 
     private readonly Dictionary<ushort, CSFileStream> fileDictionary = [];
@@ -449,12 +450,45 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //private StatusDataDevice? curStatusData;
     //private ushort nextStatusDataPackage = 1;
 
-   
+
 
     //private void HandleStatusData(CANMessage msg)
     //{
-       
+
     //}
+
+    #endregion
+
+    #region Devices
+
+    private Dictionary<uint, Device>? devices = null;
+
+    private void HandleDevices(CANMessage msg)
+    {
+        if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
+        {
+            if (devices != null && !devices.ContainsKey(msg.Device))
+            {
+                var device = new Device(msg);
+                devices.Add(device.DeviceId, device);
+
+            }
+        }
+    }
+
+    public async Task<List<Device>?> GetDevicesAsync()
+    {
+        return await Task.Run(() =>
+        {
+            devices = [];
+            RequestParticipants();
+
+            Thread.Sleep(1000);
+            var res = devices.Values.ToList();
+            devices = [];
+            return res;
+        });
+    }
 
     #endregion
 }

@@ -7,18 +7,18 @@
         xmlns:vm="clr-namespace:CentralStationDemo.ViewModel" 
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
-        Height="1200" Width="1800">
+        Height="1400" Width="1800">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_Exit" Command="{Binding ExitCommand}"/>
             </MenuItem>
-            <MenuItem Header="_Request">
+            <MenuItem Header="_Update">
                 <MenuItem Header="Locomotioves" Command="{Binding RequestLocomotiovesCommand}"/>
                 <MenuItem Header="Articles" Command="{Binding RequestArticlesCommand}"/>
                 <MenuItem Header="Routes" Command="{Binding RequestRoutesCommand}"/>
                 <MenuItem Header="Tracks" Command="{Binding RequestTracksCommand}"/>
-                <MenuItem Header="Controllers" Command="{Binding RequestControlUnitsCommand}"/>
+                <MenuItem Header="Devices" Command="{Binding UpdateDevicesCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Command="{Binding AboutCommand}"/>
@@ -27,6 +27,9 @@
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
                 <TextBlock Text="{Binding SystemStatus}" />
+            </StatusBarItem>
+            <StatusBarItem>
+                <Slider Value="{Binding ZoomValue}" Minimum="0.5" Maximum="2.0" TickFrequency="0.05" Width="200" />
             </StatusBarItem>
         </StatusBar>
         <Grid>
@@ -53,8 +56,8 @@
                     <TabItem Header="Tracks">
                         <local:TracksView/>
                     </TabItem>
-                    <TabItem Header="Controllers">
-                        <local:ControllersView/>
+                    <TabItem Header="Devices">
+                        <local:DevicesView/>
                     </TabItem>
                 </TabControl>
                 <Button Grid.Row="1" Content="STOP" Command="{Binding StopCommand}" Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}}" Margin="3" FontWeight="ExtraBold" FontSize="24"/>

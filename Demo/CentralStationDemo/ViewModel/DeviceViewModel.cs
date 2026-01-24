@@ -1,25 +1,32 @@
 ﻿namespace CentralStationDemo.ViewModel;
 
-public partial class ControllerViewModel : ObservableObject
+public partial class DeviceViewModel : ObservableObject
 {
-    public ControllerViewModel(Controller controller)
-    {
-        DeviceId = controller.DeviceId;
-        SwVersion = $"{controller.MajorVersion}.{controller.MinorVersion}";
-        Type = Enum.IsDefined<DeviceType>(controller.DeviceType) ? controller.DeviceType.ToString() : ((ushort)controller.DeviceType).ToString("X4");
-        IconUri = controller.IconUri;
+    //public DeviceViewModel(Controller controller)
+    //{
+    //    DeviceId = controller.DeviceId;
+    //    SwVersion = $"{controller.MajorVersion}.{controller.MinorVersion}";
+    //    Type = Enum.IsDefined<DeviceType>(controller.DeviceType) ? controller.DeviceType.ToString() : ((ushort)controller.DeviceType).ToString("X4");
+    //    IconUri = controller.IconUri;
 
-        //DeviceId = statusData.DeviceId;
-        Index = controller.Index;
-        NumOfPackages = controller.NumOfPackages;
-        NumOfMeasuredValues = controller.NumOfMeasuredValues;
-        NumOfConfigurationChannels = controller.NumOfConfigurationChannels;
-        SerialNumber = controller.SerialNumber;
-        ArticleNumber = controller.ArticleNumber ?? String.Empty;
-        DeviceName = controller.DeviceName;
+    //    //DeviceId = statusData.DeviceId;
+    //    Index = controller.Index;
+    //    NumOfPackages = controller.NumOfPackages;
+    //    NumOfMeasuredValues = controller.NumOfMeasuredValues;
+    //    NumOfConfigurationChannels = controller.NumOfConfigurationChannels;
+    //    SerialNumber = controller.SerialNumber;
+    //    ArticleNumber = controller.ArticleNumber ?? String.Empty;
+    //    DeviceName = controller.DeviceName;
+    //}
+
+    public DeviceViewModel(Device device)
+    {
+        DeviceId = device.DeviceId;
+        SwVersion = $"{device.MajorVersion}.{device.MinorVersion}";
+        Type = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
+        IconUri = device.IconUri;
     }
 
-   
 
     //public void UpdateStatusData(StatusDataDevice statusData)
     //{

@@ -116,9 +116,9 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         case "Tracks":
             TrackPages = cs.Tracks?.Pages?.ToViewModelList<TrackPageViewModel>();
             break;
-        case "Controllers":
-            Controllers = cs.Controllers?.ToViewModelList<ControllerViewModel>();
-            break;
+        //case "Controllers":
+        //    Controllers = cs.Controllers?.ToViewModelList<DeviceViewModel>();
+        //    break;
         }
     }
 
@@ -130,6 +130,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             stream.CopyTo(file);
         }
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    [ObservableProperty]
+    private double zoomValue = 1.0;
+
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -250,29 +256,37 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     #endregion
 
-    #region Controllers
+    #region Devices
 
     [ObservableProperty]
-    private List<ControllerViewModel>? controllers;
+    private List<DeviceViewModel>? devices;
 
     [RelayCommand]
-    private void OnRequestControlUnits()
+    private void OnUpdateDevices()
     {
-        //cs.RequestParticipants();
-        cs.StartControllerCollection();
+        Task.Run((Func<Task?>)(async () =>
+        {
+            var devices = await cs.GetDevicesAsync();
+
+            if (devices != null)
+            {
+                var vms = devices.Select(d => new DeviceViewModel(d)).ToList();
+                App.Current.Dispatcher.Invoke(() => Devices = vms);
+            }
+        }));
     }
 
     [RelayCommand]
     private void OnSortControllers(string propertyName)
     {
-        CollectionViewSource.GetDefaultView(Controllers).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
+        CollectionViewSource.GetDefaultView(Devices).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
     }
 
 
     //private readonly AutoResetEvent statusDataEvent = new(false);
 
     //[ObservableProperty]
-    //private List<ControllerViewModel> controlUnits = [];
+    //private List<DeviceViewModel> controlUnits = [];
 
     //[RelayCommand]
     //private void OnRequestControlUnits()
@@ -282,13 +296,13 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     //private readonly Lock lockItem = new();
     ////private uint reqDeviceId = 0;
-    //private ControllerViewModel? GetControlUnit(uint deviceId) => ControlUnits?.FirstOrDefault(d => d.DeviceId == deviceId);
+    //private DeviceViewModel? GetControlUnit(uint deviceId) => ControlUnits?.FirstOrDefault(d => d.DeviceId == deviceId);
 
 
     //private void UpdateControlUnits()
     //{
     //    // store for parallel changes
-    //    ControllerViewModel[] controlUnits = [.. ControlUnits.Where(c => !c.HasDetails).Reverse()];
+    //    DeviceViewModel[] controlUnits = [.. ControlUnits.Where(c => !c.HasDetails).Reverse()];
 
     //    Task.Run(() =>
     //    {

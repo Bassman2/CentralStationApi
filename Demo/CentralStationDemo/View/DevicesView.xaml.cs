@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace CentralStationDemo.View;
 
 /// <summary>
-/// Interaction logic for ControllersView.xaml
+/// Interaction logic for DevicesView.xaml
 /// </summary>
-public partial class ControllersView : UserControl
+public partial class DevicesView : UserControl
 {
-    public ControllersView()
+    public DevicesView()
     {
         InitializeComponent();
     }

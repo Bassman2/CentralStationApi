@@ -53,20 +53,22 @@ public partial class Article
         get
         {
 
-            var memberInfo = typeof(ArticleType).GetMember(Type.ToString()).FirstOrDefault();
-            if (memberInfo != null)
-            {
-                var attr = memberInfo.GetCustomAttributes(typeof(FileNameAttribute), false)
-                                     .OfType<FileNameAttribute>()
-                                     .FirstOrDefault();
-                if (attr != null)
-                {
-                    return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/{attr.FileName}");
-                }
-            }
-            return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/magicon_a_000_00.svg"); 
+            //var memberInfo = typeof(ArticleType).GetMember(Type.ToString()).FirstOrDefault();
+            //if (memberInfo != null)
+            //{
+            //    var attr = memberInfo.GetCustomAttributes(typeof(FileNameAttribute), false)
+            //                         .OfType<FileNameAttribute>()
+            //                         .FirstOrDefault();
+            //    if (attr != null)
+            //    {
+            //        return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/{attr.FileName}");
+            //    }
+            //}
+            //return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/magicon_a_000_00.svg"); 
+            string? fileName = FileNameAttribute.GetFilename(Type);
+            return fileName is null ? null : new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/{fileName}");
 
-            
+
         }
     }
 

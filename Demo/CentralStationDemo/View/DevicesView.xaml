@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CentralStationDemo.View.ControllersView"
+﻿<UserControl x:Class="CentralStationDemo.View.DevicesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,7 +8,7 @@
              d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <ListView ItemsSource="{Binding Controllers}" Margin="3">
+    <ListView ItemsSource="{Binding Devices}" Margin="3">
         <ListView.ItemsPanel>
             <ItemsPanelTemplate>
                 <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal" VerticalAlignment="Top"/>
@@ -57,9 +57,9 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <!--<Image Grid.Row="0" Source="{Binding Icon}" Width="100" Height="80" Stretch="Uniform"/>-->
-                        <Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="100" Height="80" Stretch="Uniform"/>
+                        <Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="100" Height="100" Stretch="Uniform" ToolTip="{Binding IconUri}"/>
 
-                        
+
                         <TextBlock Grid.Row="1" Text="{Binding Type}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="2" Text="{Binding DeviceId, StringFormat=X4}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="3" Text="{Binding SwVersion}" HorizontalAlignment="Center"/>
