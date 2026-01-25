@@ -36,7 +36,8 @@ public partial class LocomotiveViewModel : ObservableObject
         Velocity = loco.Velocity;
         Direction = loco.Direction;
 
-
+        Functions = [.. loco.Functions!.Select(f => new FunctionViewModel(this, f)).
+            Concat(     loco.Functions2?.Select(f => new FunctionViewModel(this, f)) ?? [])];
         //// http://cs3/app/assets/lok/NS%20186%20012-8.png
 
         //if (!string.IsNullOrEmpty(IconName))
@@ -173,18 +174,20 @@ public partial class LocomotiveViewModel : ObservableObject
     [ObservableProperty]
     private Direction direction;
 
-
     [ObservableProperty]
-    private Uri? function00Uri = null;
+    private List<FunctionViewModel> functions;
 
-    [ObservableProperty]
-    private Uri? function01Uri = null;
+    //[ObservableProperty]
+    //private Uri? function00Uri = null;
 
-    [ObservableProperty]
-    private Uri? function02Uri = null;
+    //[ObservableProperty]
+    //private Uri? function01Uri = null;
 
-    [ObservableProperty]
-    private Uri? function03Uri = null;
+    //[ObservableProperty]
+    //private Uri? function02Uri = null;
+
+    //[ObservableProperty]
+    //private Uri? function03Uri = null;
 
 
 

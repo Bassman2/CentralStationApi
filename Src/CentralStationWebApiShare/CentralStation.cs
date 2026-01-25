@@ -466,7 +466,12 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private enum DevicesState
     {
         None = 0,
+
+        /// <summary>
+        /// Waiting for SoftwareVersion messages
+        /// </summary>
         SoftwareVersion = 1,
+        StatusData = 2,
     }
 
     private AutoResetEvent devicesEvent = new(false);
@@ -477,9 +482,11 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private bool isDataCollectorRunning = false;
     private bool isCollecting = false;
 
+    private const int softwareVersionTimeout = 3000; 
+
     private void HandleDevices(CANMessage msg)
     {
-        if (devices == null) return;
+        if (devicesState == DevicesState.None) return;
 
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
@@ -525,24 +532,35 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             }
         }
 
-        if (devices is not null)
-        {
-            var device = devices.Values.Where(d => d.IsNeedData).FirstOrDefault();
-            if (!isCollecting && device != null)
-            {
-                DebugDevices($"RequestStatusData {device.DeviceId:X8} {0}");
-                device.IsNeedData = false;
-                isCollecting = true;
-                RequestStatusData(device.DeviceId, 0);
-            }
+        
 
-            if (devices.Values.All(d => !d.IsReady))
-            {
-                // ready
-                DebugDevices($"Ready devicesEvent fire");
-                devicesEvent.Set();
-            }
-        }
+        //TriggerStatusData();
+    }
+
+    private void TriggerStatusData()
+    {
+        DebugDevices($"TriggerStatusData");
+        devicesState = DevicesState.StatusData;
+
+        devicesEvent.Set();
+        //if (devices is not null)
+        //{
+        //    var device = devices.Values.Where(d => d.IsNeedData).FirstOrDefault();
+        //    if (!isCollecting && device != null)
+        //    {
+        //        DebugDevices($"RequestStatusData {device.DeviceId:X8} {0}");
+        //        device.IsNeedData = false;
+        //        isCollecting = true;
+        //        RequestStatusData(device.DeviceId, 0);
+        //    }
+
+        //    if (devices.Values.All(d => !d.IsReady))
+        //    {
+        //        // ready
+        //        DebugDevices($"Ready devicesEvent fire");
+        //        devicesEvent.Set();
+        //    }
+        //}
     }
 
     public async Task<List<Device>?> GetDevicesAsync()
@@ -551,10 +569,15 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         {
 
             DebugDevices($"RequestParticipants");
+            devicesEvent.Reset();
             devices = [];
             devicesState = DevicesState.SoftwareVersion;
             RequestParticipants();
-            Thread.Sleep(2000);
+
+            DebugDevices($"Start");
+            Task.Delay(softwareVersionTimeout).ContinueWith(_ => TriggerStatusData());
+            DebugDevices($"End");
+
             bool success = devicesEvent.WaitOne();
             DebugDevices($"devicesEvent fired");
 
