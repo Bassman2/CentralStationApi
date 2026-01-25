@@ -463,8 +463,16 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Devices
 
+    private enum DevicesState
+    {
+        None = 0,
+        SoftwareVersion = 1,
+    }
+
     private AutoResetEvent devicesEvent = new(false);
     private Dictionary<uint, Device>? devices = null;
+    private DevicesState devicesState = DevicesState.None; 
+
     private DataCollector? dataCollector = null;
     private bool isDataCollectorRunning = false;
     private bool isCollecting = false;
@@ -477,7 +485,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         {
             if (devices != null && !devices.ContainsKey(msg.Device))
             {
-                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"SoftwareVersion {msg.Device:X8}");
+                DebugDevices($"SoftwareVersion {msg.Device:X8}");
 
                 var device = new Device(msg);
                 devices.Add(device.DeviceId, device);
@@ -489,10 +497,10 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             switch (msg.DataLength)
             {
             case 5:
-                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
+                DebugDevices($"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
                 break;
             case 6:
-                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
+                DebugDevices( $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
                 if (devices != null && devices.TryGetValue(msg.Device, out var device))
                 {
                     device.IsNeedData = false;
@@ -505,7 +513,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                 break;
             case 8:
                 ushort packageIndex = (byte)(msg.Hash & 0xff);
-                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"HandleStatusData Length 8 HashIndex {packageIndex}");
+                DebugDevices($"HandleStatusData Length 8 HashIndex {packageIndex}");
                 if (packageIndex == 1)
                 {
                     controllerDataCollector = new();
@@ -522,7 +530,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             var device = devices.Values.Where(d => d.IsNeedData).FirstOrDefault();
             if (!isCollecting && device != null)
             {
-                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"RequestStatusData {device.DeviceId:X8} {0}");
+                DebugDevices($"RequestStatusData {device.DeviceId:X8} {0}");
                 device.IsNeedData = false;
                 isCollecting = true;
                 RequestStatusData(device.DeviceId, 0);
@@ -531,7 +539,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             if (devices.Values.All(d => !d.IsReady))
             {
                 // ready
-                Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"Ready devicesEvent fire");
+                DebugDevices($"Ready devicesEvent fire");
                 devicesEvent.Set();
             }
         }
@@ -541,13 +549,14 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         return await Task.Run(() =>
         {
-            
-            Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"RequestParticipants");
-            devices = []; 
+
+            DebugDevices($"RequestParticipants");
+            devices = [];
+            devicesState = DevicesState.SoftwareVersion;
             RequestParticipants();
             Thread.Sleep(2000);
             bool success = devicesEvent.WaitOne();
-            Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"devicesEvent fired");
+            DebugDevices($"devicesEvent fired");
 
             if (success)
             {
@@ -559,6 +568,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             return null;
         });
     }
+
+    [Conditional("DEBUG")]
+    private static void DebugDevices(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
 
     #endregion
 }

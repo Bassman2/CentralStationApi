@@ -174,6 +174,20 @@ public partial class LocomotiveViewModel : ObservableObject
     private Direction direction;
 
 
+    [ObservableProperty]
+    private Uri? function00Uri = null;
+
+    [ObservableProperty]
+    private Uri? function01Uri = null;
+
+    [ObservableProperty]
+    private Uri? function02Uri = null;
+
+    [ObservableProperty]
+    private Uri? function03Uri = null;
+
+
+
     #endregion
 
     #region control
@@ -193,6 +207,12 @@ public partial class LocomotiveViewModel : ObservableObject
     private void OnDirection()
     { 
         cs.SetLocomotiveDirection(Uid, DirectionChange.Toggle);
+    }
+
+    [RelayCommand]
+    private void OnFunction(string functionNum)
+    {
+
     }
 
     #endregion

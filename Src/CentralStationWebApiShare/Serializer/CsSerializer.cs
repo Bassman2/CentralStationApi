@@ -91,28 +91,38 @@ public static class CsSerializer
 
     private static string TraceStack(ICsSerialize[] stack) => string.Join(", ", stack.Select(i => i?.GetType().Name ?? "null"));
     
-    public static uint ToUInt(string value)
-    {
-        return value.StartsWith("0x") ? Convert.ToUInt32(value, 16) : uint.Parse(value);
-    }
-
     public static int ToInt(string value)
     {
         return value.StartsWith("0x") ? Convert.ToInt32(value, 16) : int.Parse(value);
     }
 
+    public static uint ToUInt(string value)
+    {
+        return value.StartsWith("0x") ? Convert.ToUInt32(value, 16) : uint.Parse(value);
+    }
+
+    public static short ToShort(string value)
+    {
+        return value.StartsWith("0x") ? Convert.ToInt16(value, 16) : short.Parse(value);
+    }
+
+    public static ushort ToUShort(string value)
+    {
+        return value.StartsWith("0x") ? Convert.ToUInt16(value, 16) : ushort.Parse(value);
+    }
+
     public static uint[] ToUIntArray(string value)
     {
-        return value.Split(' ', StringSplitOptions.TrimEntries).Select(i => ToUInt(i)).ToArray(); 
+        return [.. value.Split(' ', StringSplitOptions.TrimEntries).Select(i => ToUInt(i))]; 
     }
 
     public static int[] ToIntArray(string value)
     {
-        return value.Split(' ', StringSplitOptions.TrimEntries).Select(i => ToInt(i)).ToArray();
+        return [.. value.Split(' ', StringSplitOptions.TrimEntries).Select(i => ToInt(i))];
     }
 
     public static bool ToBool(string value)
     {
-        return ToInt(value) == 0 ? false : true;
+        return ToInt(value) != 0;
     }
 }

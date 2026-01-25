@@ -145,6 +145,16 @@ namespace CsSerializerGenerator
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToUInt(value);");
                     sb.AppendLine("            break;");
                     break;
+                case "short":
+                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"            {prop.Name} = CsSerializer.ToShort(value);");
+                    sb.AppendLine("            break;");
+                    break;
+                case "ushort":
+                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"            {prop.Name} = CsSerializer.ToUShort(value);");
+                    sb.AppendLine("            break;");
+                    break;
                 case "List<int>":
                     sb.AppendLine($"        case {arg.Value}:");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToIntArray(value);");
@@ -172,12 +182,15 @@ namespace CsSerializerGenerator
                     break;
 
                 default:
-                    sb.AppendLine($"// {prop.Name} - {prop.Type.Name} - {prop.Type.FullName} - {prop.Type.TypeKind} not defined");
                     if (prop.Type.IsEnum)
                     {
                         sb.AppendLine($"        case {arg.Value}:");
                         sb.AppendLine($"            {prop.Name} = {prop.Type.Name}_Converter.Deserialize(value);");
                         sb.AppendLine("            break;");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"// {prop.Name} - {prop.Type.Name} - {prop.Type.FullName} - {prop.Type.TypeKind} not defined");
                     }
                     break;
                 }                   
