@@ -21,7 +21,7 @@ public partial class Locomotive
     [CsProperty("icon")]
     public string? IconName { get; private set; }
 
-    public Uri? IconUri => IconName != null ? new Uri($"http://{CentralStationBasic.Host}/app/assets/lok/{IconName}.png") : null;
+    public Uri? IconUri => IconName != null ? new Uri(CentralStation.LocoUri, $"{IconName}.png") : null;
 
     [CsProperty("typ")]
     public DecoderType Type { get; private set; }

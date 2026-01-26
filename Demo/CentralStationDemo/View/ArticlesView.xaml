@@ -52,8 +52,8 @@
                             
                         </Grid.RowDefinitions>
                         <Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="100" Height="100" Stretch="Uniform" ToolTip="{Binding IconUri}"/>
-                        <TextBlock Grid.Row="1" Text="{Binding Type}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="2" Text="{Binding TypeName}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Text="{Binding ArticleType}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Text="{Binding ArticleTypeName}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="3" Text="{Binding Name}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="4" Text="{Binding Id, StringFormat=Id: {0:X4}}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="5" Text="{Binding Position, StringFormat=Position: {0:X4}}" HorizontalAlignment="Center"/>

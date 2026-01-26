@@ -22,6 +22,10 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
     //private readonly int retry = 3;
 
+    internal static Uri GuiUri => new($"http://{Host}/images/gui/");
+    internal static Uri MagUri => new($"http://{Host}/app/assets/mag/");
+    internal static Uri LocoUri => new($"http://{Host}/app/assets/lok/");
+
     public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
     {
         statusDataEventQueue = new (tuple => RequestStatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
@@ -478,11 +482,11 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private Dictionary<uint, Device>? devices = null;
     private DevicesState devicesState = DevicesState.None; 
 
-    private DataCollector? dataCollector = null;
+    private DataCollector? deviceDataCollector = null;
     private bool isDataCollectorRunning = false;
     private bool isCollecting = false;
 
-    private const int softwareVersionTimeout = 3000; 
+    private const int softwareVersionTimeout = 500; 
 
     private void HandleDevices(CANMessage msg)
     {
@@ -507,25 +511,22 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                 DebugDevices($"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
                 break;
             case 6:
-                DebugDevices( $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
+                DebugDevices($"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
                 if (devices != null && devices.TryGetValue(msg.Device, out var device))
                 {
-                    device.IsNeedData = false;
-                    device.Index = msg.GetDataByte(4);
-                    device.NumOfPackages = msg.GetDataByte(5);
-                    device.IsReady = true;
-                    isCollecting = false;
+                    int index = msg.GetDataByte(4);
+                    int packages = msg.GetDataByte(5);
+                    device.AddData(index, deviceDataCollector!);
                 }
-                //controllerCollector.Add(msg.Device, msg.GetDataByte(4), controllerDataCollector);
                 break;
             case 8:
                 ushort packageIndex = (byte)(msg.Hash & 0xff);
                 DebugDevices($"HandleStatusData Length 8 HashIndex {packageIndex}");
                 if (packageIndex == 1)
                 {
-                    controllerDataCollector = new();
+                    deviceDataCollector = new();
                 }
-                //controllerDataCollector.AddData(msg.GetData());
+                deviceDataCollector?.AddData(msg.GetData());
                 break;
             default:
                 throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");

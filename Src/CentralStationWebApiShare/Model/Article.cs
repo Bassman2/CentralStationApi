@@ -19,7 +19,9 @@ public partial class Article
     /// Type of article
     /// </summary>
     [CsProperty("typ")]
-    public ArticleType Type { get; private set; }
+    public ArticleType ArticleType { get; private set; }
+
+    public string ArticleTypeName => ArticleType.GetDescription();
 
     /// <summary>
     /// Current position
@@ -48,29 +50,5 @@ public partial class Article
     [CsProperty("decoder")]
     public string? Decoder { get; private set; }
 
-    public Uri? IconUri
-    {
-        get
-        {
-
-            //var memberInfo = typeof(ArticleType).GetMember(Type.ToString()).FirstOrDefault();
-            //if (memberInfo != null)
-            //{
-            //    var attr = memberInfo.GetCustomAttributes(typeof(FileNameAttribute), false)
-            //                         .OfType<FileNameAttribute>()
-            //                         .FirstOrDefault();
-            //    if (attr != null)
-            //    {
-            //        return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/{attr.FileName}");
-            //    }
-            //}
-            //return new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/magicon_a_000_00.svg"); 
-            string? fileName = FileNameAttribute.GetFilename(Type);
-            return fileName is null ? null : new Uri($"http://{CentralStationBasic.Host}/app/assets/mag/{fileName}");
-
-
-        }
-    }
-
-
-}
+    public Uri? IconUri => ArticleType.GetFileNamePath(CentralStation.MagUri);
+  }

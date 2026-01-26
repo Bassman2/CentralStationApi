@@ -15,8 +15,9 @@ public partial class ArticleViewModel : ObservableObject
 
         Id = article.Id;
         Name = article.Name;
-        Type = article.Type;
-        TypeName = typeof(ArticleType).GetField(article.Type.ToString())?.GetCustomAttribute<DescriptionAttribute>()?.Description;
+        ArticleType = article.ArticleType;
+        ArticleTypeName = article.ArticleTypeName; 
+        //ArticleTypeName = typeof(ArticleType).GetField(article.ArticleType.ToString())?.GetCustomAttribute<DescriptionAttribute>()?.Description;
         Position = article.Position;
         SwitchingTime = article.SwitchingTime;
         Odd = article.Odd;
@@ -31,10 +32,10 @@ public partial class ArticleViewModel : ObservableObject
     private string? name;
 
     [ObservableProperty]
-    private ArticleType type;
+    private ArticleType articleType;
 
     [ObservableProperty]
-    private string? typeName;
+    private string? articleTypeName;
 
     [ObservableProperty]
     private uint position;

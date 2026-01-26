@@ -1,6 +1,4 @@
-﻿using CentralStationWebApi;
-
-namespace CentralStationDemo.ViewModel;
+﻿namespace CentralStationDemo.ViewModel;
 
 public partial class DeviceViewModel : ObservableObject
 {
@@ -24,12 +22,10 @@ public partial class DeviceViewModel : ObservableObject
     public DeviceViewModel(Device device)
     {
         DeviceId = device.DeviceId;
-        SwVersion = $"{device.MajorVersion}.{device.MinorVersion}";
-        Type = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
+        Version = new System.Version(device.MajorVersion, device.MinorVersion);
+        DeviceType = device.DeviceType;
+        DeviceTypeName = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
         IconUri = device.IconUri;
-
-        Index = device.Index;
-        NumOfPackages = device.NumOfPackages;
     }
 
 
@@ -48,23 +44,26 @@ public partial class DeviceViewModel : ObservableObject
 
     public bool HasDetails = false;
 
-    [ObservableProperty]
-    private Uri? iconUri;
+    #region SoftwareVersion
 
     [ObservableProperty]
     private uint deviceId;
 
     [ObservableProperty]
-    private string swVersion;
+    private System.Version version;
     
     [ObservableProperty]
-    private string type;
+    private DeviceType deviceType;
 
     [ObservableProperty]
-    private byte index;
+    private string deviceTypeName;
 
     [ObservableProperty]
-    private byte numOfPackages;
+    private Uri? iconUri;
+
+    #endregion
+
+    #region DeviceDescription
 
     [ObservableProperty]
     private byte numOfMeasuredValues;
@@ -80,4 +79,6 @@ public partial class DeviceViewModel : ObservableObject
 
     [ObservableProperty]
     private string deviceName = string.Empty;
+
+    #endregion
 }
