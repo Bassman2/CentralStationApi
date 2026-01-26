@@ -314,7 +314,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     //                {
     //                    Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index 0");
 
-    //                    cs.RequestStatusData(controlUnit.DeviceId, 0);
+    //                    cs.StatusData(controlUnit.DeviceId, 0);
     //                    if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
     //                    {
     //                        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout {controlUnit.DeviceId:X8}");
@@ -324,7 +324,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     //                    {
     //                        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index {index}");
 
-    //                        cs.RequestStatusData(controlUnit.DeviceId, index);
+    //                        cs.StatusData(controlUnit.DeviceId, index);
     //                        if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
     //                        {
     //                            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout Index {index} Device {controlUnit.DeviceId:X8}");
@@ -334,7 +334,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     //                //for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
     //                //{
-    //                //    cs.RequestStatusData(device, index);
+    //                //    cs.StatusData(device, index);
     //                //    statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
     //                //}
     //            }

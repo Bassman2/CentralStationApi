@@ -2,6 +2,15 @@
 
 public class Device
 {
+    internal enum DeviceState 
+    {
+        SoftwareVersion = -1,
+        Ready
+    }
+
+    internal DeviceState State = DeviceState.SoftwareVersion;
+
+
     internal Device(CANMessage msg)
     {
         DeviceId = msg.Device;
@@ -10,6 +19,11 @@ public class Device
         DeviceType = (DeviceType)msg.GetDataUShort(6);
         DeviceTypeName = DeviceType.GetDescription();
         IconUri = DeviceType.GetFileNamePath(CentralStation.GuiUri); 
+
+        if (DeviceType == DeviceType.GUI || DeviceType == DeviceType.GFP3)
+        {
+            State = DeviceState.Ready;
+        }
     }
 
     //internal Device(uint id, DeviceType deviceType)
@@ -36,7 +50,10 @@ public class Device
         else
         {
         }
+        State = DeviceState.Ready;
     }
+
+
 
     // from SoftwareVersion
     public uint DeviceId { get; internal set; }

@@ -315,13 +315,13 @@ public partial class CentralStationBasic : IDisposable
 
     #region 6 Other Commands / Sonstige Befehle
 
-    public void RequestParticipants()
+    public void SoftwareVersion()
     {
         var message = new CANMessage(Priority.Proirity1, Command.SoftwareVersion, hash);
         SendMessage(message);
     }
 
-    public void RequestStatusData(uint device, byte index)
+    public void StatusData(uint device, byte index)
     {
         var message = new CANMessage(Priority.Proirity1, Command.StatusData, hash).
             AddUInt32(device).
@@ -376,6 +376,17 @@ public partial class CentralStationBasic : IDisposable
             AddString("mfxbver");
         SendMessage(message);
     }
+
+    //Filename: gb2ver
+    public void RequestConfigDataBb2verPage(int page)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(page, 1, nameof(page));
+        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash).
+            AddString("gb2ver");
+        SendMessage(message);
+    }
+
+    
 
     #endregion
 

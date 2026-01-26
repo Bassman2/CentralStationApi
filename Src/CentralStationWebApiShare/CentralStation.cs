@@ -1,4 +1,5 @@
 ﻿using CentralStationWebApi.Internal;
+using System;
 
 namespace CentralStationWebApi;
 
@@ -28,7 +29,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
     {
-        statusDataEventQueue = new (tuple => RequestStatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
+        statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
 
         trackCollectorThread = new CollectorThread(TrackCollectorWorkerLoop, timeout);
         contrCollectorThread = new CollectorThread(ContrCollectorWorkerLoop, timeout);
@@ -352,7 +353,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
         // start collecting track data
         isControllerCollectorRunning = true;
-        RequestParticipants();
+        SoftwareVersion();
 
         // wait on all Command.SoftwareVersion messages to be handled
         Task.Run(() => { Thread.Sleep(5000); contrCollectorThread.Next(); });
@@ -412,7 +413,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         if (controllerCollector.ShouldRequest(out var controller))
         {
             Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"Controller Reqest Device: {controller.deviceId:X8} Page: {controller.index}");
-            RequestStatusData(controller.deviceId, (byte)controller.index);
+            StatusData(controller.deviceId, (byte)controller.index);
         }
     }
 
@@ -476,6 +477,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         /// </summary>
         SoftwareVersion = 1,
         StatusData = 2,
+        Ready = 3
     }
 
     private AutoResetEvent devicesEvent = new(false);
@@ -496,9 +498,8 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         {
             if (devices != null && !devices.ContainsKey(msg.Device))
             {
-                DebugDevices($"SoftwareVersion {msg.Device:X8}");
-
                 var device = new Device(msg);
+                DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.MajorVersion}.{device.MinorVersion} {device.DeviceType}");
                 devices.Add(device.DeviceId, device);
             }
             return;
@@ -517,6 +518,8 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                     int index = msg.GetDataByte(4);
                     int packages = msg.GetDataByte(5);
                     device.AddData(index, deviceDataCollector!);
+
+                    TriggerStatusData();
                 }
                 break;
             case 8:
@@ -540,44 +543,39 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private void TriggerStatusData()
     {
-        DebugDevices($"TriggerStatusData");
+        DebugDevices($"TriggerStatusData++");
+
         devicesState = DevicesState.StatusData;
 
-        devicesEvent.Set();
-        //if (devices is not null)
-        //{
-        //    var device = devices.Values.Where(d => d.IsNeedData).FirstOrDefault();
-        //    if (!isCollecting && device != null)
-        //    {
-        //        DebugDevices($"RequestStatusData {device.DeviceId:X8} {0}");
-        //        device.IsNeedData = false;
-        //        isCollecting = true;
-        //        RequestStatusData(device.DeviceId, 0);
-        //    }
-
-        //    if (devices.Values.All(d => !d.IsReady))
-        //    {
-        //        // ready
-        //        DebugDevices($"Ready devicesEvent fire");
-        //        devicesEvent.Set();
-        //    }
-        //}
+        var device = devices!.Values.FirstOrDefault(d => d!.State != Device.DeviceState.Ready, null);
+        if (device == null)
+        {
+            // ready set event to leave GetDevicesAsync
+            DebugDevices($"TriggerStatusData Ready");
+            devicesState = DevicesState.Ready;
+            devicesEvent.Set();
+        }
+        else
+        {
+            DebugDevices($"TriggerStatusData StatusData {device.DeviceId:X8} {0}");
+            StatusData(device.DeviceId, 0);
+        }
+                  
+        DebugDevices($"TriggerStatusData--");
     }
 
     public async Task<List<Device>?> GetDevicesAsync()
     {
         return await Task.Run(() =>
         {
-
-            DebugDevices($"RequestParticipants");
+            DebugDevices($"GetDevicesAsync++");
+         
             devicesEvent.Reset();
             devices = [];
             devicesState = DevicesState.SoftwareVersion;
-            RequestParticipants();
+            SoftwareVersion();
 
-            DebugDevices($"Start");
             Task.Delay(softwareVersionTimeout).ContinueWith(_ => TriggerStatusData());
-            DebugDevices($"End");
 
             bool success = devicesEvent.WaitOne();
             DebugDevices($"devicesEvent fired");
@@ -586,9 +584,11 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             {
                 var res = devices.Values.ToList();
                 devices = null;
+                DebugDevices($"GetDevicesAsync--");
                 return res; 
             }
             devices = null;
+            DebugDevices($"GetDevicesAsync-- null");
             return null;
         });
     }

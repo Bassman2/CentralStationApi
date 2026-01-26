@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CANMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CSFileStream.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Device.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\RouteItemType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\TrackProtocol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileNameAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\AttributeExtentions.cs" />
