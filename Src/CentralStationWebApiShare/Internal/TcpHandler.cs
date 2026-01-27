@@ -15,6 +15,7 @@ internal class TcpHandler : IProtocolHandler, IDisposable
     public TcpHandler()
     {
         client = new TcpClient();
+        client.ReceiveTimeout = 5 * 60 * 1000;
     }
 
     public void Connect(string host)

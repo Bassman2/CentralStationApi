@@ -1,5 +1,6 @@
 ﻿using CentralStationWebApi.Internal;
 using System;
+using System.Reflection;
 
 namespace CentralStationWebApi;
 
@@ -18,7 +19,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
 
     private readonly CollectorThread trackCollectorThread;
-    private readonly CollectorThread contrCollectorThread;
+    //private readonly CollectorThread contrCollectorThread;
 
     private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
     //private readonly int retry = 3;
@@ -32,7 +33,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
 
         trackCollectorThread = new CollectorThread(TrackCollectorWorkerLoop, timeout);
-        contrCollectorThread = new CollectorThread(ContrCollectorWorkerLoop, timeout);
+        //contrCollectorThread = new CollectorThread(ContrCollectorWorkerLoop, timeout);
     }
         
 
@@ -44,6 +45,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         //HandleController(msg);
         //HandleStatusData(msg);
         HandleDevices(msg);
+        HandleDeviceInfo(msg);
     }
 
     private readonly Dictionary<ushort, CSFileStream> fileDictionary = [];
@@ -344,32 +346,32 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Controllers
 
-    public void StartControllerCollection()
-    {
-        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, "Controller Request Start");
-        
-        // clear all existing data
-        controllerCollector.Clear();
+    //public void StartControllerCollection()
+    //{
+    //    Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, "Controller Request Start");
 
-        // start collecting track data
-        isControllerCollectorRunning = true;
-        SoftwareVersion();
+    //    // clear all existing data
+    //    controllerCollector.Clear();
 
-        // wait on all Command.SoftwareVersion messages to be handled
-        Task.Run(() => { Thread.Sleep(5000); contrCollectorThread.Next(); });
-    }
+    //    // start collecting track data
+    //    isControllerCollectorRunning = true;
+    //    SoftwareVersion();
 
-    public IEnumerable<Controller>? Controllers { get; private set; } = null;
+    //    // wait on all Command.SoftwareVersion messages to be handled
+    //    Task.Run(() => { Thread.Sleep(5000); contrCollectorThread.Next(); });
+    //}
 
-    private void SetController(IEnumerable<Controller> controllers)
-    {
-        //if (!controllersDictionary.TryGetValue(controller.DeviceId, out Controller? value) && !controller.Equals(value))
-        {
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
-            Controllers = controllers;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
-        }
-    }
+    //public IEnumerable<Controller>? Controllers { get; private set; } = null;
+
+    //private void SetController(IEnumerable<Controller> controllers)
+    //{
+    //    //if (!controllersDictionary.TryGetValue(controller.DeviceId, out Controller? value) && !controller.Equals(value))
+    //    {
+    //        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
+    //        Controllers = controllers;
+    //        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
+    //    }
+    //}
 
 
 
@@ -394,63 +396,63 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //    }
     //}
 
-    private bool isControllerCollectorRunning = false;
-    private readonly ControllerCollector controllerCollector = new();
-    private DataCollector controllerDataCollector = new();
+    //private bool isControllerCollectorRunning = false;
+    //private readonly ControllerCollector controllerCollector = new();
+    //private DataCollector controllerDataCollector = new();
 
     //private readonly Dictionary<uint, Controller> controllersDictionary = [];
 
-    private void ContrCollectorWorkerLoop()
-    {
-        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, "  Controller Loop");
+    //private void ContrCollectorWorkerLoop()
+    //{
+    //    Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, "  Controller Loop");
 
-        if (!isControllerCollectorRunning)
-        {
-            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"  Controller not running");
-            return;
-        }
+    //    if (!isControllerCollectorRunning)
+    //    {
+    //        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"  Controller not running");
+    //        return;
+    //    }
 
-        if (controllerCollector.ShouldRequest(out var controller))
-        {
-            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"Controller Reqest Device: {controller.deviceId:X8} Page: {controller.index}");
-            StatusData(controller.deviceId, (byte)controller.index);
-        }
-    }
+    //    if (controllerCollector.ShouldRequest(out var controller))
+    //    {
+    //        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"Controller Reqest Device: {controller.deviceId:X8} Page: {controller.index}");
+    //        StatusData(controller.deviceId, (byte)controller.index);
+    //    }
+    //}
 
-    private void HandleController(CANMessage msg)
-    {
-        if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
-        {
-            var controller = new Controller(msg, Host!);
-            controllerCollector.Add(controller);
+    //private void HandleController(CANMessage msg)
+    //{
+    //    if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
+    //    {
+    //        var controller = new Controller(msg, Host!);
+    //        controllerCollector.Add(controller);
 
-            // contrCollectorThread.Next() on timer 
-        }
-        if (msg.Command == Command.StatusData) // && msg.IsResponse)
-        {
-            switch (msg.DataLength)
-            {
-            case 5:
-                Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
-                break;
-            case 6:
-                Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
-                controllerCollector.Add(msg.Device, msg.GetDataByte(4), controllerDataCollector);
-                break;
-            case 8:
-                ushort packageIndex = (byte)(msg.Hash & 0xff);
-                Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 8 HashIndex {packageIndex}");
-                if (packageIndex == 1)
-                {
-                    controllerDataCollector = new();
-                }
-                controllerDataCollector.AddData(msg.GetData());
-                break;
-            default:
-                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
-            }
-        }
-    }
+    //        // contrCollectorThread.Next() on timer 
+    //    }
+    //    if (msg.Command == Command.StatusData) // && msg.IsResponse)
+    //    {
+    //        switch (msg.DataLength)
+    //        {
+    //        case 5:
+    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
+    //            break;
+    //        case 6:
+    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
+    //            controllerCollector.Add(msg.Device, msg.GetDataByte(4), controllerDataCollector);
+    //            break;
+    //        case 8:
+    //            ushort packageIndex = (byte)(msg.Hash & 0xff);
+    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 8 HashIndex {packageIndex}");
+    //            if (packageIndex == 1)
+    //            {
+    //                controllerDataCollector = new();
+    //            }
+    //            controllerDataCollector.AddData(msg.GetData());
+    //            break;
+    //        default:
+    //            throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
+    //        }
+    //    }
+    //}
 
     //private Dictionary<uint, StatusDataDevice> statusData = [];
     //public List<StatusDataDevice> StatusData = [];
@@ -468,32 +470,14 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Devices
 
-    private enum DevicesState
-    {
-        None = 0,
 
-        /// <summary>
-        /// Waiting for SoftwareVersion messages
-        /// </summary>
-        SoftwareVersion = 1,
-        StatusData = 2,
-        Ready = 3
-    }
-
-    private AutoResetEvent devicesEvent = new(false);
+    private const int devicesTimeout = 500;
     private Dictionary<uint, Device>? devices = null;
-    private DevicesState devicesState = DevicesState.None; 
 
-    private DataCollector? deviceDataCollector = null;
-    private bool isDataCollectorRunning = false;
-    private bool isCollecting = false;
-
-    private const int softwareVersionTimeout = 500; 
+    //    private AutoResetEvent devicesEvent = new(false);
 
     private void HandleDevices(CANMessage msg)
     {
-        if (devicesState == DevicesState.None) return;
-
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
             if (devices != null && !devices.ContainsKey(msg.Device))
@@ -502,8 +486,38 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                 DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.MajorVersion}.{device.MinorVersion} {device.DeviceType}");
                 devices.Add(device.DeviceId, device);
             }
-            return;
         }
+    }
+
+    public async Task<List<Device>?> GetDevicesAsync()
+    {
+        return await Task.Run(async () =>
+        {
+            DebugDevices($"GetDevicesAsync++");
+         
+            devices = [];
+            SoftwareVersion();
+            await Task.Delay(devicesTimeout);
+
+            var res = devices.Values.ToList();
+            devices = null;
+            DebugDevices($"GetDevicesAsync--");
+            return res; 
+        });
+    }
+
+    #endregion
+
+    #region DeviceInfo
+
+    private const int deviceInfoTimeout = 500;
+
+    private readonly AutoResetEvent deviceInfoEvent = new(false);
+    private DeviceInfo? deviceInfo = null;
+    private DataCollector? deviceDataCollector = null;
+
+    private void HandleDeviceInfo(CANMessage msg)
+    {
         if (msg.Command == Command.StatusData && msg.IsResponse)
         {
             switch (msg.DataLength)
@@ -513,14 +527,10 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                 break;
             case 6:
                 DebugDevices($"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
-                if (devices != null && devices.TryGetValue(msg.Device, out var device))
-                {
-                    int index = msg.GetDataByte(4);
-                    int packages = msg.GetDataByte(5);
-                    device.AddData(index, deviceDataCollector!);
-
-                    TriggerStatusData();
-                }
+                int index = msg.GetDataByte(4);
+                int packages = msg.GetDataByte(5);
+                deviceInfo = new (deviceDataCollector!);
+                deviceInfoEvent.Set();
                 break;
             case 8:
                 ushort packageIndex = (byte)(msg.Hash & 0xff);
@@ -535,61 +545,24 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                 throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
             }
         }
-
-        
-
-        //TriggerStatusData();
     }
 
-    private void TriggerStatusData()
-    {
-        DebugDevices($"TriggerStatusData++");
 
-        devicesState = DevicesState.StatusData;
-
-        var device = devices!.Values.FirstOrDefault(d => d!.State != Device.DeviceState.Ready, null);
-        if (device == null)
-        {
-            // ready set event to leave GetDevicesAsync
-            DebugDevices($"TriggerStatusData Ready");
-            devicesState = DevicesState.Ready;
-            devicesEvent.Set();
-        }
-        else
-        {
-            DebugDevices($"TriggerStatusData StatusData {device.DeviceId:X8} {0}");
-            StatusData(device.DeviceId, 0);
-        }
-                  
-        DebugDevices($"TriggerStatusData--");
-    }
-
-    public async Task<List<Device>?> GetDevicesAsync()
+    public async Task<DeviceInfo?> GetDeviceInfoAsync(uint deviceId)
     {
         return await Task.Run(() =>
         {
-            DebugDevices($"GetDevicesAsync++");
-         
-            devicesEvent.Reset();
-            devices = [];
-            devicesState = DevicesState.SoftwareVersion;
-            SoftwareVersion();
+            DebugDevices($"GetDeviceInfoAsync++");
 
-            Task.Delay(softwareVersionTimeout).ContinueWith(_ => TriggerStatusData());
+            deviceInfoEvent.Reset();
+            StatusData(deviceId, 0);
+            bool success = deviceInfoEvent.WaitOne(deviceInfoTimeout);
+            DebugDevices($"deviceInfoEvent fired {success}");
 
-            bool success = devicesEvent.WaitOne();
-            DebugDevices($"devicesEvent fired");
-
-            if (success)
-            {
-                var res = devices.Values.ToList();
-                devices = null;
-                DebugDevices($"GetDevicesAsync--");
-                return res; 
-            }
-            devices = null;
-            DebugDevices($"GetDevicesAsync-- null");
-            return null;
+            var res = deviceInfo;
+            deviceInfo = null;
+            DebugDevices($"GetDeviceInfoAsync--");
+            return res;
         });
     }
 

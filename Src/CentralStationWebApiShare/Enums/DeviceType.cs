@@ -75,6 +75,14 @@ public enum DeviceType : ushort
     MS2_4 = 0x0034,
 
     /// <summary>
+    /// Mobil Station WLAN
+    /// 60653 SW-Version 
+    /// </summary>
+    [Description("Mobile Station WLAN")]
+    [FileName("dashboard_ms2.png")]
+    MS_WLAN = 0x0035,
+
+    /// <summary>
     /// S88 Link
     /// SRSEII (non Märklin produkt)
     /// </summary>

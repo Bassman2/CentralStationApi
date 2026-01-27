@@ -17,6 +17,8 @@ public class CSFileStream(CSFileStreamMode mode, string fileKey, uint length, us
         "magstat" => "magnetartikel.sr2",
         "gbsstat" => "gleisbild.sr2",
         "fsstat" => "fahrstrassen.sr2",
+        "langver" => "langver.cs2",
+        "ldbver" => "ldbver.cs2",
         _ => fileKey.StartsWith("gbs-") ? $"gleisbild-{int.Parse(fileKey.Split('-')[1])}.cs2" : throw new InvalidDataException($"Unknown file key {fileKey}")
     };
 
