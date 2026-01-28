@@ -511,10 +511,15 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     #region DeviceInfo
 
     private const int deviceInfoTimeout = 500;
-
     private readonly AutoResetEvent deviceInfoEvent = new(false);
     private DeviceInfo? deviceInfo = null;
+
+    private const int deviceMeasurementTimeout = 500;
+    private readonly AutoResetEvent deviceMeasurementEvent = new(false);
+    private DeviceMeasurement? deviceMeasurement = null;
+
     private DataCollector? deviceDataCollector = null;
+    private readonly Lock deviceLock = new Lock();
 
     private void HandleDeviceInfo(CANMessage msg)
     {
@@ -529,8 +534,16 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                 DebugDevices($"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
                 int index = msg.GetDataByte(4);
                 int packages = msg.GetDataByte(5);
-                deviceInfo = new (deviceDataCollector!);
-                deviceInfoEvent.Set();
+                if (index == 0)
+                {
+                    deviceInfo = new(deviceDataCollector!);
+                    deviceInfoEvent.Set();
+                }
+                else
+                {
+                    deviceMeasurement = new(deviceDataCollector!);
+                    deviceMeasurementEvent.Set();
+                }
                 break;
             case 8:
                 ushort packageIndex = (byte)(msg.Hash & 0xff);
@@ -547,24 +560,54 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         }
     }
 
-
     public async Task<DeviceInfo?> GetDeviceInfoAsync(uint deviceId)
     {
+        ArgumentOutOfRangeException.ThrowIfZero(deviceId, nameof(deviceId));
+
         return await Task.Run(() =>
         {
-            DebugDevices($"GetDeviceInfoAsync++");
+            lock (deviceLock)
+            {
+                DebugDevices($"GetDeviceInfoAsync++");
 
-            deviceInfoEvent.Reset();
-            StatusData(deviceId, 0);
-            bool success = deviceInfoEvent.WaitOne(deviceInfoTimeout);
-            DebugDevices($"deviceInfoEvent fired {success}");
+                deviceInfoEvent.Reset();
+                StatusData(deviceId, 0);
+                bool success = deviceInfoEvent.WaitOne(deviceInfoTimeout);
+                DebugDevices($"deviceInfoEvent fired {success}");
 
-            var res = deviceInfo;
-            deviceInfo = null;
-            DebugDevices($"GetDeviceInfoAsync--");
-            return res;
+                var res = deviceInfo;
+                deviceInfo = null;
+                DebugDevices($"GetDeviceInfoAsync--");
+                return res;
+            }
         });
     }
+
+    public async Task<DeviceMeasurement?> GetDeviceMeasurementAsync(uint deviceId, byte index)
+    {
+        ArgumentOutOfRangeException.ThrowIfZero(deviceId, nameof(deviceId));
+        ArgumentOutOfRangeException.ThrowIfZero(index, nameof(index));
+
+        return await Task.Run(() =>
+        {
+            lock (deviceLock)
+            {
+                DebugDevices($"GetDeviceMeasurementAsync++");
+
+                deviceMeasurementEvent.Reset();
+                StatusData(deviceId, index);
+                bool success = deviceMeasurementEvent.WaitOne(deviceMeasurementTimeout);
+                DebugDevices($"deviceMeasurementEvent fired {success}");
+
+                var res = deviceMeasurement;
+                deviceMeasurement = null;
+                DebugDevices($"GetDeviceMeasurementAsync--");
+                return res;
+            }
+        });
+    }
+
+
 
     [Conditional("DEBUG")]
     private static void DebugDevices(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");

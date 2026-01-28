@@ -280,7 +280,20 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
                 }
             }
 
-            
+            foreach (var device in Devices ?? [])
+            {
+                for (byte index = 1; index < 10; index++)
+                {
+                    //var deviceMeasurement = await cs.GetDeviceMeasurementAsync(device.DeviceId, index);
+                    var deviceMeasurement = new DeviceMeasurement() { Name = $"Measurement {index}" };
+                    if (deviceMeasurement != null)
+                    {
+                        device.AddDeviceMeasurement(deviceMeasurement, index);
+                    }
+                }
+            }
+
+
         }));
     }
 

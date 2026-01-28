@@ -1,24 +1,9 @@
-﻿namespace CentralStationDemo.ViewModel;
+﻿using CentralStationWebApi;
+
+namespace CentralStationDemo.ViewModel;
 
 public partial class DeviceViewModel : ObservableObject
 {
-    //public DeviceViewModel(Controller controller)
-    //{
-    //    DeviceId = controller.DeviceId;
-    //    SwVersion = $"{controller.MajorVersion}.{controller.MinorVersion}";
-    //    Type = Enum.IsDefined<DeviceType>(controller.DeviceType) ? controller.DeviceType.ToString() : ((ushort)controller.DeviceType).ToString("X4");
-    //    IconUri = controller.IconUri;
-
-    //    //DeviceId = statusData.DeviceId;
-    //    Index = controller.Index;
-    //    NumOfPackages = controller.NumOfPackages;
-    //    NumOfMeasuredValues = controller.NumOfMeasuredValues;
-    //    NumOfConfigurationChannels = controller.NumOfConfigurationChannels;
-    //    SerialNumber = controller.SerialNumber;
-    //    ArticleNumber = controller.ArticleNumber ?? String.Empty;
-    //    DeviceName = controller.DeviceName;
-    //}
-
     public DeviceViewModel(Device device)
     {
         DeviceId = device.DeviceId;
@@ -26,6 +11,10 @@ public partial class DeviceViewModel : ObservableObject
         DeviceType = device.DeviceType;
         DeviceTypeName = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
         IconUri = device.IconUri;
+
+        Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test A" }));
+        Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test B" }));
+        Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test C" }));
     }
 
     public void AddDeviceInfo(DeviceInfo deviceInfo)
@@ -37,19 +26,10 @@ public partial class DeviceViewModel : ObservableObject
         DeviceName = deviceInfo.DeviceName;
     }
 
-
-    //public void UpdateStatusData(StatusDataDevice statusData)
-    //{
-    //    //DeviceId = statusData.DeviceId;
-    //    Index = statusData.Index;
-    //    NumOfPackages = statusData.NumOfPackages;
-    //    NumOfMeasuredValues = statusData.NumOfMeasuredValues;
-    //    NumOfConfigurationChannels = statusData.NumOfConfigurationChannels;
-    //    SerialNumber = statusData.SerialNumber;
-    //    ArticleNumber = statusData.ArticleNumber ?? String.Empty;
-    //    DeviceName = statusData.DeviceName;
-    //    HasDetails = true;
-    //}
+    public void AddDeviceMeasurement(DeviceMeasurement deviceMeasurement, byte index)
+    {
+        Measurements.Insert(index - 1, new DeviceMeasurementViewModel(deviceMeasurement));
+    }
 
     public bool HasDetails = false;
 
@@ -90,4 +70,7 @@ public partial class DeviceViewModel : ObservableObject
     private string deviceName = string.Empty;
 
     #endregion
+
+    [ObservableProperty]
+    private ObservableCollection<DeviceMeasurementViewModel> measurements = [];
 }
