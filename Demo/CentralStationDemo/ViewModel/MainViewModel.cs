@@ -268,11 +268,19 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             var devices = await cs.GetDevicesAsync();
 
-            if (devices != null)
+            var vms = devices?.Select(d => new DeviceViewModel(d)).ToList();
+            App.Current.Dispatcher.Invoke(() => Devices = vms);
+
+            foreach (var device in Devices ?? [])
             {
-                var vms = devices.Select(d => new DeviceViewModel(d)).ToList();
-                App.Current.Dispatcher.Invoke(() => Devices = vms);
+                var deviceInfo = await cs.GetDeviceInfoAsync(device.DeviceId);
+                if (deviceInfo != null)
+                {
+                    device.AddDeviceInfo(deviceInfo);
+                }
             }
+
+            
         }));
     }
 

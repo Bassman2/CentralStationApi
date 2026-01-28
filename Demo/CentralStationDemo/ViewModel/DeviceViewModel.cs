@@ -22,10 +22,19 @@ public partial class DeviceViewModel : ObservableObject
     public DeviceViewModel(Device device)
     {
         DeviceId = device.DeviceId;
-        Version = new System.Version(device.MajorVersion, device.MinorVersion);
+        Version = device.Version;
         DeviceType = device.DeviceType;
         DeviceTypeName = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
         IconUri = device.IconUri;
+    }
+
+    public void AddDeviceInfo(DeviceInfo deviceInfo)
+    {
+        NumOfMeasuredValues = deviceInfo.NumOfMeasuredValues;
+        NumOfConfigurationChannels = deviceInfo.NumOfConfigurationChannels;
+        SerialNumber = deviceInfo.SerialNumber;
+        ArticleNumber = deviceInfo.ArticleNumber;
+        DeviceName = deviceInfo.DeviceName;
     }
 
 

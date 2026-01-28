@@ -58,16 +58,16 @@
                         </Grid.RowDefinitions>
                         <Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="100" Height="100" Stretch="Uniform" ToolTip="{Binding IconUri}"/>
 
-                        <TextBlock Grid.Row="1" Text="{Binding DeviceId, StringFormat=X4}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Text="{Binding DeviceId, StringFormat=UID: {0:x4}}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="2" Text="{Binding DeviceType}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="3" Text="{Binding DeviceTypeName}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="4" Text="{Binding Version}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Text="{Binding Version, StringFormat=Ver.: {0}}" HorizontalAlignment="Center"/>
 
                         <TextBlock Grid.Row="5" Text="{Binding NumOfMeasuredValues, StringFormat=# Measures: {0}}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="6" Text="{Binding NumOfConfigurationChannels, StringFormat=# Channels {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="7" Text="{Binding SerialNumber}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="7" Text="{Binding SerialNumber, StringFormat=S/N: {0}}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Row="8" Text="{Binding ArticleNumber, StringFormat=Article: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="9" Text="{Binding DeviceName}" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Row="9" Text="{Binding DeviceName, StringFormat=Name: {0}}" HorizontalAlignment="Center"/>
                         
 
 

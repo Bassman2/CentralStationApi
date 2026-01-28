@@ -483,7 +483,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             if (devices != null && !devices.ContainsKey(msg.Device))
             {
                 var device = new Device(msg);
-                DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.MajorVersion}.{device.MinorVersion} {device.DeviceType}");
+                DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.Version} {device.DeviceType}");
                 devices.Add(device.DeviceId, device);
             }
         }
