@@ -12,9 +12,7 @@ public partial class DeviceViewModel : ObservableObject
         DeviceTypeName = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
         IconUri = device.IconUri;
 
-        Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test A" }));
-        Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test B" }));
-        Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test C" }));
+        //Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test A" }));
     }
 
     public void AddDeviceInfo(DeviceInfo deviceInfo)
@@ -28,7 +26,8 @@ public partial class DeviceViewModel : ObservableObject
 
     public void AddDeviceMeasurement(DeviceMeasurement deviceMeasurement, byte index)
     {
-        Measurements.Insert(index - 1, new DeviceMeasurementViewModel(deviceMeasurement));
+        //Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test A" }));
+        Measurements.Add(new DeviceMeasurementViewModel(deviceMeasurement));
     }
 
     public bool HasDetails = false;

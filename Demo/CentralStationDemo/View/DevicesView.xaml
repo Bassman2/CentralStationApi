@@ -30,7 +30,7 @@
         </ListView.ContextMenu>
         <ItemsControl.ItemTemplate>
             <DataTemplate>
-                <StackPanel Width="160">
+                <StackPanel Width="160" VerticalAlignment="Top">
                     <Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="160" Height="160" Stretch="Uniform" ToolTip="{Binding IconUri}"/>
 
                     <TextBlock Text="{Binding DeviceId, StringFormat=UID: {0:x4}}" HorizontalAlignment="Center"/>
@@ -44,7 +44,6 @@
                     <TextBlock Text="{Binding ArticleNumber, StringFormat=Article: {0}}" HorizontalAlignment="Center"/>
                     <TextBlock Text="{Binding DeviceName, StringFormat=Name: {0}}" HorizontalAlignment="Center"/>
 
-
                     <ItemsControl  ItemsSource="{Binding Measurements}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -53,69 +52,19 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel>
+                                <StackPanel VerticalAlignment="Top">
                                     <TextBlock Text="Measurement" HorizontalAlignment="Center"/>
                                     <TextBlock Text="{Binding Name, StringFormat=Name: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Start, StringFormat=Start: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding End, StringFormat=End: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Unit, StringFormat=Unit: {0}}" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <TextBlock VerticalAlignment="Stretch"/>
                 </StackPanel>
-                <!--
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="110"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        
-                        <RowDefinition Height="Auto"/>
-                        
-                    </Grid.RowDefinitions>
-                    
-                    <Grid Grid.Row="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="80"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="20"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="100" Height="100" Stretch="Uniform" ToolTip="{Binding IconUri}"/>
-
-                        <TextBlock Grid.Row="1" Text="{Binding DeviceId, StringFormat=UID: {0:x4}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="2" Text="{Binding DeviceType}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="3" Text="{Binding DeviceTypeName}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="4" Text="{Binding Version, StringFormat=Ver.: {0}}" HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="5" Text="{Binding NumOfMeasuredValues, StringFormat=# Measures: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="6" Text="{Binding NumOfConfigurationChannels, StringFormat=# Channels {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="7" Text="{Binding SerialNumber, StringFormat=S/N: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="8" Text="{Binding ArticleNumber, StringFormat=Article: {0}}" HorizontalAlignment="Center"/>
-                        <TextBlock Grid.Row="9" Text="{Binding DeviceName, StringFormat=Name: {0}}" HorizontalAlignment="Center"/>
-
-                        <ListView Grid.Row="10" ItemsSource="{Binding Measurements}">
-                            <ListView.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal" VerticalAlignment="Top"/>
-                                </ItemsPanelTemplate>
-                            </ListView.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ListView>
-                                               
-                    </Grid>
-                </Grid>
-                -->
             </DataTemplate>
         </ItemsControl.ItemTemplate>
     </ListView>

@@ -14,13 +14,26 @@ internal class TcpHandler : IProtocolHandler, IDisposable
 
     public TcpHandler()
     {
-        client = new TcpClient();
+        client = new();
+        //Socket socket = client.Client;
         client.ReceiveTimeout = 5 * 60 * 1000;
     }
 
     public void Connect(string host)
     {
-        client.Connect(host, TCPPort);
+        while (!client.Connected)
+        {
+            try
+            {
+                client.Connect(host, TCPPort);
+            }
+            catch { }
+        }
+        //if (!client.ConnectAsync(host, TCPPort).Wait(new TimeSpan(0, 5, 0)))
+        //{
+        //    throw new SocketException(10060, "Connect timeout");
+        //}
+
         stream = client.GetStream();
 
         sender = Dns.GetHostEntry(host).HostName.Split('.')[0];

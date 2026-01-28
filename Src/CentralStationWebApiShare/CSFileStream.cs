@@ -9,6 +9,16 @@ public class CSFileStream(CSFileStreamMode mode, string fileKey, uint length, us
     public string FileKey => fileKey;
     public string FileName => fileKey switch
     {
+        // MS2
+        "lokinfo" => "lokinfo.cs2",
+        "loknamen" => "loknamen.cs2",
+        "maginfo" => "maginfo.cs2",
+        "lokdb" => "lokdb.cs2",
+        "lang" => "lang.cs2",
+        "ldbver" => "ldbver.cs2",
+        "langver" => "langver.cs2",
+
+        // CS2
         "loks" => "lokomotive.cs2",
         "mags" => "magnetartikel.cs2",
         "gbs" => "gleisbild.cs2",
@@ -17,8 +27,13 @@ public class CSFileStream(CSFileStreamMode mode, string fileKey, uint length, us
         "magstat" => "magnetartikel.sr2",
         "gbsstat" => "gleisbild.sr2",
         "fsstat" => "fahrstrassen.sr2",
-        "langver" => "langver.cs2",
-        "ldbver" => "ldbver.cs2",
+        
+        // new
+        "mfxver" => "mfxver.cs2",
+        "mfxbver" => "mfxbver.cs2",
+        "ms2ver" => "ms2ver.cs2",
+        "ms2xver" => "ms2xver.cs",
+        "ms2yver" => "ms2yver.cs",
         _ => fileKey.StartsWith("gbs-") ? $"gleisbild-{int.Parse(fileKey.Split('-')[1])}.cs2" : throw new InvalidDataException($"Unknown file key {fileKey}")
     };
 
