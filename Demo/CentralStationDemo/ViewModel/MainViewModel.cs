@@ -37,55 +37,55 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         //http://cs3/app/assets/mag/magicon_a_005_01.svg
 
         // load locomotive data 
-        if (File.Exists(locomotivesFileName))
-        {
-            using var file = File.OpenRead(locomotivesFileName);
-            var locomotives = CsSerializer.Deserialize<LocomotiveData>(file);
-            Locomotives = locomotives.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-        }
+        //if (File.Exists(locomotivesFileName))
+        //{
+        //    using var file = File.OpenRead(locomotivesFileName);
+        //    var locomotives = CsSerializer.Deserialize<LocomotiveData>(file);
+        //    Locomotives = locomotives.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        //}
 
         // load articles data 
-        if (File.Exists(articlesFileName))
-        {
-            using var file = File.OpenRead(articlesFileName);
-            var articles = CsSerializer.Deserialize<ArticleData>(file);
-            Articles = articles.Articles?.ToViewModelList<ArticleViewModel>(cs);
-        }
+        //if (File.Exists(articlesFileName))
+        //{
+        //    using var file = File.OpenRead(articlesFileName);
+        //    var articles = CsSerializer.Deserialize<ArticleData>(file);
+        //    Articles = articles.Articles?.ToViewModelList<ArticleViewModel>(cs);
+        //}
 
         // load routes data 
-        if (File.Exists(routesFileName))
-        {
-            using var file = File.OpenRead(routesFileName);
-            var routes = CsSerializer.Deserialize<RouteData>(file);
-            Routes = routes.Routes?.ToViewModelList<RouteViewModel>();
-        }
+        //if (File.Exists(routesFileName))
+        //{
+        //    using var file = File.OpenRead(routesFileName);
+        //    var routes = CsSerializer.Deserialize<RouteData>(file);
+        //    Routes = routes.Routes?.ToViewModelList<RouteViewModel>();
+        //}
 
-        // load tracks data 
-        if (File.Exists(tracksFileName))
-        {
-            using (var file = File.OpenRead(tracksFileName))
-            {
-                var tracks = CsSerializer.Deserialize<TrackData>(file);
-                TrackData = tracks;
-            }
-            TrackPages = [];
-            foreach (var page in TrackData?.Pages ?? [])
-            {
-                string pageFileName = $"gleisbild-{page.Id}.cs2";
-                if (File.Exists(pageFileName))
-                {
-                    using var file2 = File.OpenRead(pageFileName);
-                    var trackPage = CsSerializer.Deserialize<TrackPageData>(file2);
-                    TrackPages.Add(new TrackPageViewModel(page, trackPage));
-                }
-                else
-                {
-                    TrackPages.Add(new TrackPageViewModel(page, null));
-                }
-            }
+        //// load tracks data 
+        //if (File.Exists(tracksFileName))
+        //{
+        //    using (var file = File.OpenRead(tracksFileName))
+        //    {
+        //        var tracks = CsSerializer.Deserialize<TrackData>(file);
+        //        TrackData = tracks;
+        //    }
+        //    TrackPages = [];
+        //    foreach (var page in TrackData?.Pages ?? [])
+        //    {
+        //        string pageFileName = $"gleisbild-{page.Id}.cs2";
+        //        if (File.Exists(pageFileName))
+        //        {
+        //            using var file2 = File.OpenRead(pageFileName);
+        //            var trackPage = CsSerializer.Deserialize<TrackPageData>(file2);
+        //            TrackPages.Add(new TrackPageViewModel(page, trackPage));
+        //        }
+        //        else
+        //        {
+        //            TrackPages.Add(new TrackPageViewModel(page, null));
+        //        }
+        //    }
 
 
-        }
+        //}
 
 
 
@@ -104,18 +104,18 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         case "Status":
             Status = cs.Status;
             break;
-        case "Locomotives":
-            Locomotives = cs.Locomotives?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-            break;
-        case "Articles":
-            Articles = cs.Articles?.Articles?.ToViewModelList<ArticleViewModel>(cs);
-            break;
-        case "Routes":
-            Routes = cs.Routes?.Routes?.ToViewModelList<RouteViewModel>();
-            break;
-        case "Tracks":
-            TrackPages = cs.Tracks?.Pages?.ToViewModelList<TrackPageViewModel>();
-            break;
+        //case "Locomotives":
+        //    Locomotives = cs.Locomotives?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        //    break;
+        //case "Articles":
+        //    Articles = cs.Articles?.Articles?.ToViewModelList<ArticleViewModel>(cs);
+        //    break;
+        //case "Routes":
+        //    Routes = cs.Routes?.Routes?.ToViewModelList<RouteViewModel>();
+        //    break;
+        //case "Tracks":
+        //    TrackPages = cs.Tracks?.Pages?.ToViewModelList<TrackPageViewModel>();
+        //    break;
         //case "Controllers":
         //    Controllers = cs.Controllers?.ToViewModelList<DeviceViewModel>();
         //    break;
@@ -166,9 +166,20 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private List<LocomotiveViewModel>? locomotives;
 
     [RelayCommand]
-    private void OnRequestLocomotioves()
+    private void OnUpdateLocomotioves()
     {
-        cs.RequestConfigDataLocomotives();
+        Task.Run(async () =>
+        {
+            Stream? stream = await cs.GetConfigDataAsync("loks");
+            if (stream is not null)
+            {
+                using var file = File.OpenRead(locomotivesFileName);
+                file.CopyTo(stream);
+                var locomotiveData = CsSerializer.Deserialize<LocomotiveData>(stream);
+
+                Locomotives = locomotiveData.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            }
+        });
     }
 
     [RelayCommand]
@@ -215,9 +226,20 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private List<ArticleViewModel>? articles;
 
     [RelayCommand]
-    private void OnRequestArticles()
+    private void OnUpdateArticles()
     {
-        cs.RequestConfigDataMagneticItems();
+        Task.Run(async () =>
+        {
+            Stream? stream = await cs.GetConfigDataAsync("mags");
+            if (stream is not null)
+            {
+                using var file = File.OpenRead(articlesFileName);
+                file.CopyTo(stream);
+                var articleData = CsSerializer.Deserialize<ArticleData>(stream);
+
+                Articles = articleData.Articles?.ToViewModelList<ArticleViewModel>(cs);
+            }
+        });
     }
 
 
@@ -229,9 +251,20 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private List<RouteViewModel>? routes;
 
     [RelayCommand]
-    private void OnRequestRoutes()
+    private void OnUpdateRoutes()
     {
-        cs.RequestConfigDataRailwayRoute();
+        Task.Run(async () =>
+        {
+            Stream? stream = await cs.GetConfigDataAsync("fs");
+            if (stream is not null)
+            {
+                using var file = File.OpenRead(routesFileName);
+                file.CopyTo(stream);
+                var routeData = CsSerializer.Deserialize<RouteData>(stream);
+
+                Routes = routeData.Routes?.ToViewModelList<RouteViewModel>();
+            }
+        });
     }
 
 
@@ -248,10 +281,10 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     [RelayCommand]
     private void OnRequestTracks()
     {
-        cs.StartTrackCollector();
-        //cs.RequestConfigDataTrackDiagram();
-        //cs.RequestConfigDataTrackDiagramPage(1);
-        //cs.RequestConfigDataTrackDiagramPage(2);
+        //cs.StartTrackCollector();
+        //cs.ConfigDataTrackDiagram();
+        //cs.ConfigDataTrackDiagramPage(1);
+        //cs.ConfigDataTrackDiagramPage(2);
     }
 
     #endregion

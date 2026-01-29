@@ -18,7 +18,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
 
-    private readonly CollectorThread trackCollectorThread;
+    //private readonly CollectorThread trackCollectorThread;
     //private readonly CollectorThread contrCollectorThread;
 
     private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
@@ -32,7 +32,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
 
-        trackCollectorThread = new CollectorThread(TrackCollectorWorkerLoop, timeout);
+        //trackCollectorThread = new CollectorThread(TrackCollectorWorkerLoop, timeout);
         //contrCollectorThread = new CollectorThread(ContrCollectorWorkerLoop, timeout);
     }
         
@@ -41,81 +41,83 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         HandleLocomotive(msg);
         HandleStatus(msg);
-        HandleStreams(msg);
+        //HandleStreams(msg);
+
+        HandleConfigData(msg);
         //HandleController(msg);
         //HandleStatusData(msg);
         HandleDevices(msg);
         HandleDeviceInfo(msg);
     }
 
-    private readonly Dictionary<ushort, CSFileStream> fileDictionary = [];
-    private string fileKey = "empty";
+    //private readonly Dictionary<ushort, CSFileStream> fileDictionary = [];
+    //private string fileKey = "empty";
 
-    private void HandleStreams(CANMessage msg)
-    {
+    //private void HandleStreams(CANMessage msg)
+    //{
 
-        if (msg.IsResponse && msg.Command == Command.RequestConfigData)
-        {
-            fileKey = msg.GetDataString().Trim('\0');
-        }
-        if (/*msg.IsResponse && */ msg.Command == Command.ConfigDataStream)
-        {
-            if (msg.DataLength == 6)
-            {
-                // overwrite existing
-                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, fileKey, msg.GetDataUInt(0), msg.GetDataUShort(0));
-            }
-            else if (msg.DataLength == 7)
-            {
-                // overwrite existing
-                fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, fileKey, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
-            }
-            else if (msg.DataLength == 8 && fileDictionary.TryGetValue(msg.Hash, out var fileStream))
-            {
-                fileStream.AddData(msg.GetData());
-                if (fileStream.IsReady())
-                {
-                    //fileReceivedQueue.Add(fileStream);
-                    SetFile(fileStream.GetFileStream(), fileStream.FileKey, fileStream.FileName);
-                    fileDictionary.Remove(msg.Hash);
-                }
-            }
-            else
-            {
-                Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceError, "Invalid ConfigDataStream message length");
-                throw new InvalidOperationException("Invalid ConfigDataStream message length");
-            }
-        }
-    }
+    //    if (msg.IsResponse && msg.Command == Command.ConfigData)
+    //    {
+    //        fileKey = msg.GetDataString().Trim('\0');
+    //    }
+    //    if (/*msg.IsResponse && */ msg.Command == Command.ConfigDataStream)
+    //    {
+    //        if (msg.DataLength == 6)
+    //        {
+    //            // overwrite existing
+    //            fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, fileKey, msg.GetDataUInt(0), msg.GetDataUShort(0));
+    //        }
+    //        else if (msg.DataLength == 7)
+    //        {
+    //            // overwrite existing
+    //            fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, fileKey, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
+    //        }
+    //        else if (msg.DataLength == 8 && fileDictionary.TryGetValue(msg.Hash, out var fileStream))
+    //        {
+    //            fileStream.AddData(msg.GetData());
+    //            if (fileStream.IsReady())
+    //            {
+    //                //fileReceivedQueue.Add(fileStream);
+    //                SetFile(fileStream.GetFileStream(), fileStream.FileKey, fileStream.FileName);
+    //                fileDictionary.Remove(msg.Hash);
+    //            }
+    //        }
+    //        else
+    //        {
+    //            Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceError, "Invalid ConfigDataStream message length");
+    //            throw new InvalidOperationException("Invalid ConfigDataStream message length");
+    //        }
+    //    }
+    //}
 
-    private void SetFile(Stream stream, string filerKey, string fileName)
-    {
-        FileReceived?.Invoke(this, new FileReceivedEventArgs(fileKey, fileName, stream));
+    //private void SetFile(Stream stream, string filerKey, string fileName)
+    //{
+    //    FileReceived?.Invoke(this, new FileReceivedEventArgs(fileKey, fileName, stream));
 
-        Tracer.TraceStream(stream, fileName);
+    //    Tracer.TraceStream(stream, fileName);
 
-        stream.Position = 0;
-        var reader = new StreamReader(stream);
-        string? line = reader.ReadLine();
-        switch (line)
-        {
-        case "[lokomotive]":
-            SetLocomotives(CsSerializer.Deserialize<LocomotiveData>(stream));
-            break;
-        case "[magnetartikel]":
-            SetArticles(CsSerializer.Deserialize<ArticleData>(stream));
-            break;
-        case "[fahrstrassen]":
-            SetRoutes(CsSerializer.Deserialize<RouteData>(stream));
-            break;
-        case "[gleisbild]":
-            SetTrackData(CsSerializer.Deserialize<TrackData>(stream));
-            break;
-        case "[gleisbildseite]":
-            SetTrackPageData(CsSerializer.Deserialize<TrackPageData>(stream));
-            break;
-        }
-    }
+    //    stream.Position = 0;
+    //    var reader = new StreamReader(stream);
+    //    string? line = reader.ReadLine();
+    //    switch (line)
+    //    {
+    //    case "[lokomotive]":
+    //        SetLocomotives(CsSerializer.Deserialize<LocomotiveData>(stream));
+    //        break;
+    //    case "[magnetartikel]":
+    //        SetArticles(CsSerializer.Deserialize<ArticleData>(stream));
+    //        break;
+    //    case "[fahrstrassen]":
+    //        SetRoutes(CsSerializer.Deserialize<RouteData>(stream));
+    //        break;
+    //    case "[gleisbild]":
+    //        SetTrackData(CsSerializer.Deserialize<TrackData>(stream));
+    //        break;
+    //    case "[gleisbildseite]":
+    //        SetTrackPageData(CsSerializer.Deserialize<TrackPageData>(stream));
+    //        break;
+    //    }
+    //}
 
     #region Status
 
@@ -146,6 +148,81 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             }
         }
     }
+
+    #endregion
+
+    #region ConfigData
+
+    private const int configDataTimeout = 2000;
+    private readonly Lock configDataLock = new();
+    private readonly AutoResetEvent configDataEvent = new(false);
+    private string? configDataFileName = null;
+    private CSFileStream? configDataFileStream = null;
+
+    private void HandleConfigData(CANMessage msg)
+    {
+        if (msg.Command == Command.ConfigData && msg.IsResponse)
+        {
+            configDataFileName = msg.GetDataString().Trim('\0');
+        }
+        // hash compare: the message is for us 
+        if (msg.Command == Command.ConfigDataStream && !msg.IsResponse && msg.Hash == hash)
+        {
+            if (msg.DataLength == 6)
+            {
+                configDataFileStream = new CSFileStream(CSFileStreamMode.Request, configDataFileName!, msg.GetDataUInt(0), msg.GetDataUShort(4));
+            }
+            else if (msg.DataLength == 7)
+            {
+                configDataFileStream = new CSFileStream(CSFileStreamMode.Broadcast, configDataFileName!, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
+            }
+            else if (msg.DataLength == 8 )
+            {
+                configDataFileStream!.AddData(msg.GetData());
+                if (configDataFileStream.IsReady())
+                {
+                    configDataEvent.Set();
+                    //fileReceivedQueue.Add(fileStream);
+                    //SetFile(configDataFileStream.GetFileStream(), configDataFileStream.FileKey, configDataFileStream.FileName);
+                }
+            }
+            else
+            {
+                Debug.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} ERROR: Invalid ConfigDataStream message length");
+            }
+        }
+    }
+
+    public async Task<Stream?> GetConfigDataAsync(string filename)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(filename, nameof(filename));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(filename.Length, 8, nameof(filename));
+
+        return await Task.Run(() =>
+        {
+            lock (configDataLock)
+            {
+                DebugConfigData($"GetConfigDataAsync++");
+
+                ConfigData(filename);
+
+                bool success = configDataEvent.WaitOne(configDataTimeout);
+                if (success)
+                {
+                    var mem = new MemoryStream();
+                    configDataFileStream?.GetFileStream().CopyTo(mem);
+                    DebugConfigData($"GetConfigDataAsync--");
+                    return mem;
+                }
+                DebugConfigData($"GetConfigDataAsync-- NULL");
+                return null; 
+            }
+        });
+    }
+
+    [Conditional("DEBUG")]
+    private static void DebugConfigData(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
+
 
     #endregion
 
@@ -182,78 +259,78 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         }
     }
 
-    public LocomotiveData? Locomotives;
+    //public LocomotiveData? Locomotives;
 
-    private void SetLocomotives(LocomotiveData locomotives)
-    {
-        DeviceCache.AddLocomotiveDevices(locomotives);
-        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Locomotives)));
-        Locomotives = locomotives;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locomotives)));
-    }
+    //private void SetLocomotives(LocomotiveData locomotives)
+    //{
+    //    DeviceCache.AddLocomotiveDevices(locomotives);
+    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Locomotives)));
+    //    Locomotives = locomotives;
+    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locomotives)));
+    //}
 
     #endregion
 
     #region Articles
 
-    public ArticleData? Articles;
+    //public ArticleData? Articles;
 
-    private void SetArticles(ArticleData articles)
-    {
-        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Articles)));
-        Articles = articles;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Articles)));
-    }
+    //private void SetArticles(ArticleData articles)
+    //{
+    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Articles)));
+    //    Articles = articles;
+    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Articles)));
+    //}
 
 
     #endregion
 
     #region Routes
 
-    public RouteData? Routes;
+    //public RouteData? Routes;
 
-    private void SetRoutes(RouteData routes)
-    {
-        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Routes)));
-        Routes = routes;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Routes)));
-    }
+    //private void SetRoutes(RouteData routes)
+    //{
+    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Routes)));
+    //    Routes = routes;
+    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Routes)));
+    //}
 
 
     #endregion
 
     #region Tracks
 
-    public void StartTrackCollector()
-    {
-        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request Start");
-        // clear all existing data
-        trackCollector.Clear();
-
-        // TODO
-
-        // start collecting track data
-        isTrackCollectorRunning = true;
-        trackCollectorThread.Next();
-    }
-
-    public TrackData? Tracks;
-
-    //private void SetTracks(TrackData tracks)
+    //public void StartTrackCollector()
     //{
-    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Tracks)));
-    //    Tracks = tracks;
-    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
+    //    Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request Start");
+    //    // clear all existing data
+    //    trackCollector.Clear();
+
+    //    // TODO
+
+    //    // start collecting track data
+    //    isTrackCollectorRunning = true;
+    //    trackCollectorThread.Next();
     //}
 
-    public TrackPageData? TrackPages;
+    //public TrackData? Tracks;
 
-    //private void SetTrackPages(TrackPageData trackPages)
-    //{
-    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackPages)));
-    //    TrackPages = trackPages;
-    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackPages)));
-    //}
+    ////private void SetTracks(TrackData tracks)
+    ////{
+    ////    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Tracks)));
+    ////    Tracks = tracks;
+    ////    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
+    ////}
+
+    //public TrackPageData? TrackPages;
+
+    ////private void SetTrackPages(TrackPageData trackPages)
+    ////{
+    ////    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackPages)));
+    ////    TrackPages = trackPages;
+    ////    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackPages)));
+    ////}
 
     
 
@@ -271,75 +348,75 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //    this.timeout = timeout;
     //    thread = new Thread(WorkLoop) { Name = "EventQueueThread", IsBackground = true };
 
-    private bool isTrackCollectorRunning = false;
-    //private readonly DataCollector<TrackData> trackDataCollector = new();
-    private readonly TrackCollector trackCollector = new();
+    //private bool isTrackCollectorRunning = false;
+    ////private readonly DataCollector<TrackData> trackDataCollector = new();
+    //private readonly TrackCollector trackCollector = new();
 
   
 
-    private void TrackCollectorWorkerLoop() 
-    {
-        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "  Track Loop");
+    //private void TrackCollectorWorkerLoop() 
+    //{
+    //    Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "  Track Loop");
 
-        if (!isTrackCollectorRunning)
-        {
-            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
-            return;
-        }
+    //    if (!isTrackCollectorRunning)
+    //    {
+    //        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
+    //        return;
+    //    }
 
-        if (trackCollector.ShouldRequest(out var page))
-        {
-            if (page == 0)
-            {
-                Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request");
-                RequestConfigDataTrackDiagram();
-            } 
-            else 
-            {
-                Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Reqest Page: {page}");
-                RequestConfigDataTrackDiagramPage((int)page);
-            }
-        }
-        else
-        {
-            // check if finished 
-            if (trackCollector.IsFinished)
-            {
-                Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Request finished");
-                isTrackCollectorRunning = false;
-            }
-            else
-            {
-                Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Nothing");
-            }
-        }
-    }
+    //    if (trackCollector.ShouldRequest(out var page))
+    //    {
+    //        if (page == 0)
+    //        {
+    //            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request");
+    //            ConfigDataTrackDiagram();
+    //        } 
+    //        else 
+    //        {
+    //            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Reqest Page: {page}");
+    //            ConfigDataTrackDiagramPage((int)page);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        // check if finished 
+    //        if (trackCollector.IsFinished)
+    //        {
+    //            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Request finished");
+    //            isTrackCollectorRunning = false;
+    //        }
+    //        else
+    //        {
+    //            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Nothing");
+    //        }
+    //    }
+    //}
 
-    private void SetTrackData(TrackData trackData)
-    {
-        if (!isTrackCollectorRunning)
-        {
-            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
-            return;
-        }
+    //private void SetTrackData(TrackData trackData)
+    //{
+    //    if (!isTrackCollectorRunning)
+    //    {
+    //        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
+    //        return;
+    //    }
 
-        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Response");
-        trackCollector.Add(trackData);
-        trackCollectorThread.Next();
-    }
+    //    Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Response");
+    //    trackCollector.Add(trackData);
+    //    trackCollectorThread.Next();
+    //}
 
-    private void SetTrackPageData(TrackPageData trackPageData)
-    {
-        if (!isTrackCollectorRunning)
-        {
-            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
-            return;
-        }
+    //private void SetTrackPageData(TrackPageData trackPageData)
+    //{
+    //    if (!isTrackCollectorRunning)
+    //    {
+    //        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
+    //        return;
+    //    }
 
-        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Response Page {trackPageData.Page}");
-        trackCollector.Add(trackPageData);
-        trackCollectorThread.Next();
-    }
+    //    Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Response Page {trackPageData.Page}");
+    //    trackCollector.Add(trackPageData);
+    //    trackCollectorThread.Next();
+    //}
 
 
     #endregion

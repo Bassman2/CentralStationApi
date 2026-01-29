@@ -14,10 +14,10 @@
                 <MenuItem Header="_Exit" Command="{Binding ExitCommand}"/>
             </MenuItem>
             <MenuItem Header="_Update">
-                <MenuItem Header="Locomotioves" Command="{Binding RequestLocomotiovesCommand}"/>
-                <MenuItem Header="Articles" Command="{Binding RequestArticlesCommand}"/>
-                <MenuItem Header="Routes" Command="{Binding RequestRoutesCommand}"/>
-                <MenuItem Header="Tracks" Command="{Binding RequestTracksCommand}"/>
+                <MenuItem Header="Locomotioves" Command="{Binding UpdateLocomotiovesCommand}"/>
+                <MenuItem Header="Articles" Command="{Binding UpdateArticlesCommand}"/>
+                <MenuItem Header="Routes" Command="{Binding UpdateRoutesCommand}"/>
+                <MenuItem Header="Tracks" Command="{Binding UpdateTracksCommand}"/>
                 <MenuItem Header="Devices" Command="{Binding UpdateDevicesCommand}"/>
             </MenuItem>
             <MenuItem Header="_Help">

@@ -1,5 +1,72 @@
 ﻿namespace CentralStationWebApi;
 
+/*
+  
+Startup:
+ldbver
+mfxver   no resp
+ffffffff no resp
+ldbver
+mfxver
+ffffffff
+mfxver
+
+mfxbver
+ffffffff
+mfxver
+
+mfxbver
+ffffffff
+mfxbver
+
+ms2ver
+ffffffff
+mfxbver
+
+ms2ver
+ffffffff
+
+ms2ver
+ms2xver
+ffffffff
+ms2ver
+
+ms2xver
+ffffffff
+ms2xver
+
+ms2yver
+ffffffff
+ms2xver
+
+ms2yver
+ffffffff
+ms2yver
+
+gb2ver
+ffffffff
+ms2yver
+
+gb2ver
+ffffffff
+gb2ver
+
+gb2ver
+
+lldv
+
+lokinfo
+110 116-
+1 DB
+
+
+
+lokinfo
+110 116-
+1 DB
+1 DB   <-
+*/
+
 public class CSFileStream(CSFileStreamMode mode, string fileKey, uint length, ushort cRC, byte reserved = 0)
 {
     private readonly MemoryStream mem = new(4 * 1024);
@@ -34,8 +101,16 @@ public class CSFileStream(CSFileStreamMode mode, string fileKey, uint length, us
         "ms2ver" => "ms2ver.cs2",
         "ms2xver" => "ms2xver.cs",
         "ms2yver" => "ms2yver.cs",
-        _ => fileKey.StartsWith("gbs-") ? $"gleisbild-{int.Parse(fileKey.Split('-')[1])}.cs2" : throw new InvalidDataException($"Unknown file key {fileKey}")
+        "gb2ver" => "gb2ver.cs",
+        "1 DB" => "1DB.cs",
+        _ => fileKey.StartsWith("gbs-") ? $"gleisbild-{int.Parse(fileKey.Split('-')[1])}.cs2" : UnknownName(fileKey)
     };
+
+    private string UnknownName(string fileKey)
+    {
+        Debug.WriteLine($"###################### Unknown file '{fileKey}' ###############");
+        return fileKey;
+    }
 
     public uint Length => length;
 

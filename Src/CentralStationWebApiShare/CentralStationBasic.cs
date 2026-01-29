@@ -14,7 +14,7 @@ public partial class CentralStationBasic : IDisposable
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
     private readonly MessageQueue<CANMessage> messageReceivedQueue;
     
-    private readonly uint hash = 0x4711;
+    protected readonly uint hash = 0x4711;
     //private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
     public CentralStationBasic(string host, Protocol protocol = Protocol.UDP)
@@ -333,61 +333,46 @@ public partial class CentralStationBasic : IDisposable
 
     #region 7 GUI Information Transfer
 
-    public void RequestConfigDataLocomotives()
+    public void ConfigData(string filename)
     {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash).
-            AddString("loks");
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(filename, nameof(filename));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(filename.Length, 8, nameof(filename));
+
+        var message = new CANMessage(Priority.Proirity1, Command.ConfigData, hash).
+            AddString(filename);
         SendMessage(message);
     }
 
-    public void RequestConfigDataMagneticItems()
+    public void ConfigData(string filename, string lokname)
     {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash).
-            AddString("mags");
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(filename, nameof(filename));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(8, filename.Length, nameof(filename));
+
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(lokname, nameof(lokname));
+
+        var message = new CANMessage(Priority.Proirity1, Command.ConfigData, hash).
+            AddString(filename);
         SendMessage(message);
-    }
-    public void RequestConfigDataRailwayRoute()
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash).
-            AddString("fs");
+        message = new CANMessage(Priority.Proirity1, Command.ConfigData, hash).
+            AddString(lokname.Substring(0, 8));
+        SendMessage(message);
+        message = new CANMessage(Priority.Proirity1, Command.ConfigData, hash).
+            AddString(lokname.Substring(8, 8));
         SendMessage(message);
     }
 
-    public void RequestConfigDataTrackDiagram()
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash).
-            AddString("gbs");
-        SendMessage(message);
-    }
+    public void ConfigDataLocomotives() => ConfigData("loks");
 
-    public void RequestConfigDataTrackDiagramPage(int page)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThan(page, 1, nameof(page));
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash).
-            AddString($"gbs-{page}");
-        SendMessage(message);
-    }
-
-    //Filename: mfxbver
-    public void RequestConfigDataMfxBVverPage(int page)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThan(page, 1, nameof(page));
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash).
-            AddString("mfxbver");
-        SendMessage(message);
-    }
-
-    //Filename: gb2ver
-    public void RequestConfigDataBb2verPage(int page)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThan(page, 1, nameof(page));
-        var message = new CANMessage(Priority.Proirity1, Command.RequestConfigData, hash).
-            AddString("gb2ver");
-        SendMessage(message);
-    }
-
+    public void ConfigDataMagneticItems() => ConfigData("mags");
+    
+    public void ConfigDataRailwayRoute() => ConfigData("fs");
     
 
+    public void ConfigDataTrackDiagram() => ConfigData("gbs");
+   
+
+    public void ConfigDataTrackDiagramPage(int page) => ConfigData($"gbs-{page}");
+   
     #endregion
 
     #region 9 Automation

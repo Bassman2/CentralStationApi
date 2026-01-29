@@ -270,7 +270,7 @@ public class CANMessage
 
 
                 },
-            Command.RequestConfigData => $"Config Buffer - Filename: {GetDataString()}",
+            Command.ConfigData => $"Config Buffer - Filename: {GetDataString()}",
             Command.ConfigDataStream =>
                 DataLength switch
                 {

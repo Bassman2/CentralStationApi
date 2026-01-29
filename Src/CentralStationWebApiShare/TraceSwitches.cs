@@ -18,4 +18,6 @@ public static class TraceSwitches
 
     public readonly static TraceSwitch DevicesSwitch = new("DevicesSwitch", "DevicesSwitch", "Info");
 
+    public readonly static TraceSwitch ConfigDataSwitch = new("ConfigDataSwitch", "ConfigDataSwitch", "Info");
+
 }
