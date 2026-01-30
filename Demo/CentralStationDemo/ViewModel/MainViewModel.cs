@@ -12,10 +12,16 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private readonly static string appFilesPath = Path.Combine(appDataPath, "Files");
     private readonly static string appCachePath = Path.Combine(appDataPath, "Cache");
 
-    private readonly static string locomotivesFileName = "Lokomotive.cs2";
+    private readonly static string locomotivesFileName = "lokomotive.cs2";
     private readonly static string articlesFileName = "magnetartikel.cs2";
     private readonly static string routesFileName = "fahrstrassen.cs2";
     private readonly static string tracksFileName = "gleisbild.cs2";
+
+    private readonly static string locomotivesStateFileName = "lokomotive.sr2";
+    private readonly static string articlesStateFileName = "magnetartikel.sr2";
+    private readonly static string routesStateFileName = "fahrstrassen.sr2";
+    private readonly static string tracksStateFileName = "gleisbild.sr2";
+
 
     private readonly CentralStation cs;
 
@@ -152,6 +158,21 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     }
 
     [RelayCommand]
+    private void OnUpdateLocomotiovesState()
+    {
+        Task.Run(async () =>
+        {
+            using var stream = await cs.GetConfigDataAsync("lokstat");
+            if (stream is not null)
+            {
+                StoreFile(locomotivesStateFileName, stream);
+                //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+                //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            }
+        });
+    }
+
+    [RelayCommand]
     private void OnSortLocomotives(string propertyName)
     {
         CollectionViewSource.GetDefaultView(Locomotives).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
@@ -198,6 +219,21 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         });
     }
 
+    [RelayCommand]
+    private void OnUpdateArticlesState()
+    {
+        Task.Run(async () =>
+        {
+            using var stream = await cs.GetConfigDataAsync("magstat");
+            if (stream is not null)
+            {
+                StoreFile(articlesStateFileName, stream);
+                //var data = CsSerializer.Deserialize<ArticleData>(stream);
+                //Articles = data.Articles?.ToViewModelList<ArticleViewModel>(cs);
+            }
+        });
+    }
+
     #endregion
 
     #region Routes
@@ -216,6 +252,21 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
                 StoreFile(routesFileName, stream);
                 var data = CsSerializer.Deserialize<RouteData>(stream);
                 Routes = data.Routes?.ToViewModelList<RouteViewModel>();
+            }
+        });
+    }
+
+    [RelayCommand]
+    private void OnUpdateRoutesState()
+    {
+        Task.Run(async () =>
+        {
+            using var stream = await cs.GetConfigDataAsync("fsstat");
+            if (stream is not null)
+            {
+                StoreFile(routesStateFileName, stream);
+                //var data = CsSerializer.Deserialize<RouteData>(stream);
+                //Routes = data.Routes?.ToViewModelList<RouteViewModel>();
             }
         });
     }
@@ -252,6 +303,32 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
                         App.Current.Dispatcher.Invoke(() => TrackPages.Add(new TrackPageViewModel(page, data)));
                     }
                 }
+            }
+        });
+    }
+
+    [RelayCommand]
+    private void OnUpdateTracksState()
+    {
+        Task.Run(async () =>
+        {
+            using var stream = await cs.GetConfigDataAsync("gbsstat");
+            if (stream is not null)
+            {
+                StoreFile(tracksStateFileName, stream);
+                //TrackData = CsSerializer.Deserialize<TrackData>(stream);
+                //TrackPages = [];
+                //foreach (var page in TrackData.Pages ?? [])
+                //{
+
+                //    using var pageStream = await cs.GetConfigDataAsync($"gbs-{page.Id}");
+                //    if (pageStream is not null)
+                //    {
+                //        StoreFile($"gleisbild-{page.Id}.cs2", pageStream);
+                //        var data = CsSerializer.Deserialize<TrackPageData>(stream);
+                //        App.Current.Dispatcher.Invoke(() => TrackPages.Add(new TrackPageViewModel(page, data)));
+                //    }
+                //}
             }
         });
     }
