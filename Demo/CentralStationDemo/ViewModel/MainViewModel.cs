@@ -1,15 +1,21 @@
 ﻿using CentralStationWebApi.Serializer;
 using System.IO;
+using System.Reflection;
 
 namespace CentralStationDemo.ViewModel;
 
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
     private const string host = "CS3";
-    private const string locomotivesFileName = "Lokomotive.cs2";
-    private const string articlesFileName = "magnetartikel.cs2";
-    private const string routesFileName = "fahrstrassen.cs2";
-    private const string tracksFileName = "gleisbild.cs2";
+   
+    private readonly static string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyTitleAttribute>()!.Title);
+    private readonly static string appFilesPath = Path.Combine(appDataPath, "Files");
+    private readonly static string appCachePath = Path.Combine(appDataPath, "Cache");
+
+    private readonly static string locomotivesFileName = "Lokomotive.cs2";
+    private readonly static string articlesFileName = "magnetartikel.cs2";
+    private readonly static string routesFileName = "fahrstrassen.cs2";
+    private readonly static string tracksFileName = "gleisbild.cs2";
 
     private readonly CentralStation cs;
 
@@ -34,67 +40,47 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     protected override void OnStartup()
     {
-        //http://cs3/app/assets/mag/magicon_a_005_01.svg
+        Directory.CreateDirectory(appFilesPath);
+        Directory.CreateDirectory(appCachePath);
 
         // load locomotive data 
-        //if (File.Exists(locomotivesFileName))
-        //{
-        //    using var file = File.OpenRead(locomotivesFileName);
-        //    var locomotives = CsSerializer.Deserialize<LocomotiveData>(file);
-        //    Locomotives = locomotives.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-        //}
-
+        Locomotives = LoadFile<LocomotiveData>(locomotivesFileName)?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        
         // load articles data 
-        //if (File.Exists(articlesFileName))
-        //{
-        //    using var file = File.OpenRead(articlesFileName);
-        //    var articles = CsSerializer.Deserialize<ArticleData>(file);
-        //    Articles = articles.Articles?.ToViewModelList<ArticleViewModel>(cs);
-        //}
-
+        Articles = LoadFile<ArticleData>(articlesFileName)?.Articles?.ToViewModelList<ArticleViewModel>(cs);
+        
         // load routes data 
-        //if (File.Exists(routesFileName))
-        //{
-        //    using var file = File.OpenRead(routesFileName);
-        //    var routes = CsSerializer.Deserialize<RouteData>(file);
-        //    Routes = routes.Routes?.ToViewModelList<RouteViewModel>();
-        //}
+        Routes = LoadFile<RouteData>(routesFileName)?.Routes?.ToViewModelList<RouteViewModel>();
+        
+        // load tracks data 
+        TrackData = LoadFile<TrackData>(tracksFileName);
+        TrackPages = [];
+        foreach (var page in TrackData?.Pages ?? [])
+        {
+            string pageFilePath = Path.Combine(appFilesPath, $"gleisbild-{page.Id}.cs2");
 
-        //// load tracks data 
-        //if (File.Exists(tracksFileName))
-        //{
-        //    using (var file = File.OpenRead(tracksFileName))
-        //    {
-        //        var tracks = CsSerializer.Deserialize<TrackData>(file);
-        //        TrackData = tracks;
-        //    }
-        //    TrackPages = [];
-        //    foreach (var page in TrackData?.Pages ?? [])
-        //    {
-        //        string pageFileName = $"gleisbild-{page.Id}.cs2";
-        //        if (File.Exists(pageFileName))
-        //        {
-        //            using var file2 = File.OpenRead(pageFileName);
-        //            var trackPage = CsSerializer.Deserialize<TrackPageData>(file2);
-        //            TrackPages.Add(new TrackPageViewModel(page, trackPage));
-        //        }
-        //        else
-        //        {
-        //            TrackPages.Add(new TrackPageViewModel(page, null));
-        //        }
-        //    }
-
-
-        //}
-
-
-
-        //string name = "magicon_a_005_01";
-        //var uri = new Uri($"http://{host}/app/assets/mag/{name}.svg");
-        //return new BitmapImage(uri);
-
+            var trackPage = LoadFile<TrackPageData>(pageFilePath);
+            TrackPages.Add(new TrackPageViewModel(page, trackPage));
+        }
     }
 
+    private static T? LoadFile<T>(string fileName) where T : ICsSerialize, new()
+    {
+        string filePath = Path.Combine(appFilesPath, fileName);
+        if (File.Exists(filePath))
+        {
+            using var file = File.OpenRead(filePath);
+            return CsSerializer.Deserialize<T>(file);
+        }
+        return default;
+    }
+
+    private static void StoreFile(string fileName, Stream stream)
+    {
+        string filePath = Path.Combine(appFilesPath, fileName);
+        using var file = File.Create(filePath);
+        stream.CopyTo(file);
+    }
 
 
     private void OnCsPropertyChanged(string? propertyName)
@@ -104,21 +90,6 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         case "Status":
             Status = cs.Status;
             break;
-        //case "Locomotives":
-        //    Locomotives = cs.Locomotives?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-        //    break;
-        //case "Articles":
-        //    Articles = cs.Articles?.Articles?.ToViewModelList<ArticleViewModel>(cs);
-        //    break;
-        //case "Routes":
-        //    Routes = cs.Routes?.Routes?.ToViewModelList<RouteViewModel>();
-        //    break;
-        //case "Tracks":
-        //    TrackPages = cs.Tracks?.Pages?.ToViewModelList<TrackPageViewModel>();
-        //    break;
-        //case "Controllers":
-        //    Controllers = cs.Controllers?.ToViewModelList<DeviceViewModel>();
-        //    break;
         }
     }
 
@@ -170,14 +141,12 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     {
         Task.Run(async () =>
         {
-            Stream? stream = await cs.GetConfigDataAsync("loks");
+            using var stream = await cs.GetConfigDataAsync("loks");
             if (stream is not null)
             {
-                using var file = File.OpenRead(locomotivesFileName);
-                file.CopyTo(stream);
-                var locomotiveData = CsSerializer.Deserialize<LocomotiveData>(stream);
-
-                Locomotives = locomotiveData.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+                StoreFile(locomotivesFileName, stream);
+                var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+                Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
             }
         });
     }
@@ -187,17 +156,6 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     {
         CollectionViewSource.GetDefaultView(Locomotives).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
     }
-
-    //private void UpdateLocomotive(CANMessage message)
-    //{
-    //    if (message.Command == Command.LocoVelocity ||
-    //        message.Command == Command.LocoDirection ||
-    //        message.Command == Command.LocoFunction)
-    //    {
-    //        var locomotiveViewModel = Locomotives?.FirstOrDefault(l => l.Uid == message.Device);
-    //        locomotiveViewModel?.UpdateLocomotive(message);
-    //    }
-    //}
 
     private void OnLocomotiveHalt(uint locomotiveId)
     {
@@ -230,18 +188,15 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     {
         Task.Run(async () =>
         {
-            Stream? stream = await cs.GetConfigDataAsync("mags");
+            using var stream = await cs.GetConfigDataAsync("mags");
             if (stream is not null)
             {
-                using var file = File.OpenRead(articlesFileName);
-                file.CopyTo(stream);
-                var articleData = CsSerializer.Deserialize<ArticleData>(stream);
-
-                Articles = articleData.Articles?.ToViewModelList<ArticleViewModel>(cs);
+                StoreFile(articlesFileName, stream);
+                var data = CsSerializer.Deserialize<ArticleData>(stream);
+                Articles = data.Articles?.ToViewModelList<ArticleViewModel>(cs);
             }
         });
     }
-
 
     #endregion
 
@@ -255,18 +210,15 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     {
         Task.Run(async () =>
         {
-            Stream? stream = await cs.GetConfigDataAsync("fs");
+            using var stream = await cs.GetConfigDataAsync("fs");
             if (stream is not null)
             {
-                using var file = File.OpenRead(routesFileName);
-                file.CopyTo(stream);
-                var routeData = CsSerializer.Deserialize<RouteData>(stream);
-
-                Routes = routeData.Routes?.ToViewModelList<RouteViewModel>();
+                StoreFile(routesFileName, stream);
+                var data = CsSerializer.Deserialize<RouteData>(stream);
+                Routes = data.Routes?.ToViewModelList<RouteViewModel>();
             }
         });
     }
-
 
     #endregion
 
@@ -276,15 +228,32 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private TrackData? trackData;
 
     [ObservableProperty]
-    private List<TrackPageViewModel>? trackPages;
+    private ObservableCollection<TrackPageViewModel>? trackPages;
 
     [RelayCommand]
-    private void OnRequestTracks()
+    private void OnUpdateTracks()
     {
-        //cs.StartTrackCollector();
-        //cs.ConfigDataTrackDiagram();
-        //cs.ConfigDataTrackDiagramPage(1);
-        //cs.ConfigDataTrackDiagramPage(2);
+        Task.Run(async () =>
+        {
+            using var stream = await cs.GetConfigDataAsync("gbs");
+            if (stream is not null)
+            {
+                StoreFile(tracksFileName, stream);
+                TrackData = CsSerializer.Deserialize<TrackData>(stream);
+                TrackPages = [];
+                foreach (var page in TrackData.Pages ?? [])
+                {
+
+                    using var pageStream = await cs.GetConfigDataAsync($"gbs-{page.Id}");
+                    if (pageStream is not null)
+                    {
+                        StoreFile($"gleisbild-{page.Id}.cs2", pageStream);
+                        var data = CsSerializer.Deserialize<TrackPageData>(stream);
+                        App.Current.Dispatcher.Invoke(() => TrackPages.Add(new TrackPageViewModel(page, data)));
+                    }
+                }
+            }
+        });
     }
 
     #endregion
@@ -336,81 +305,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         CollectionViewSource.GetDefaultView(Devices).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
     }
 
-
-    //private readonly AutoResetEvent statusDataEvent = new(false);
-
-    //[ObservableProperty]
-    //private List<DeviceViewModel> controlUnits = [];
-
-    //[RelayCommand]
-    //private void OnRequestControlUnits()
-    //{
-    //    cs.RequestParticipants();
-    //}
-
-    //private readonly Lock lockItem = new();
-    ////private uint reqDeviceId = 0;
-    //private DeviceViewModel? GetControlUnit(uint deviceId) => ControlUnits?.FirstOrDefault(d => d.DeviceId == deviceId);
-
-
-    //private void UpdateControlUnits()
-    //{
-    //    // store for parallel changes
-    //    DeviceViewModel[] controlUnits = [.. ControlUnits.Where(c => !c.HasDetails).Reverse()];
-
-    //    Task.Run(() =>
-    //    {
-    //        lock (lockItem)
-    //        {
-    //            foreach (var controlUnit in controlUnits)
-    //            {
-    //                if (controlUnit.HasDetails == false)
-    //                {
-    //                    Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index 0");
-
-    //                    cs.StatusData(controlUnit.DeviceId, 0);
-    //                    if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
-    //                    {
-    //                        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout {controlUnit.DeviceId:X8}");
-    //                    }
-
-    //                    for (byte index = 1; index <= controlUnit.NumOfMeasuredValues; index++)
-    //                    {
-    //                        Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Request {controlUnit.DeviceId:X8} Index {index}");
-
-    //                        cs.StatusData(controlUnit.DeviceId, index);
-    //                        if (!statusDataEvent.WaitOne(new TimeSpan(0, 0, 10)))
-    //                        {
-    //                            Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnits Timeout Index {index} Device {controlUnit.DeviceId:X8}");
-    //                        }
-    //                    }
-    //                }
-
-    //                //for (byte index = 1; index <= StatusData.First(d => d.DeviceId == device).NumOfMeasuredValues + 10; index++)
-    //                //{
-    //                //    cs.StatusData(device, index);
-    //                //    statusDataEvent.WaitOne(new TimeSpan(0, 0, 10));
-    //                //}
-    //            }
-    //        }
-    //    });
-    //}
-
-    //private void UpdateControlUnitDetails(IEnumerable<StatusDataDevice> statusDataDevices)
-    //{
-    //    foreach (var device in statusDataDevices)
-    //    {
-    //        //var cu = Controllers?.FirstOrDefault(d => d.DeviceId == device.DeviceId);
-    //        GetControlUnit(device.DeviceId)?.UpdateStatusData(device);
-    //    }
-
-    //    Debug.WriteLineIf(AppTraceSwitches.DevicesSwitch.TraceInfo, $"UpdateControlUnitDetails Set Event");
-    //    statusDataEvent.Set();
-    //}
-
-
     #endregion
-
 
     #region Messages
 

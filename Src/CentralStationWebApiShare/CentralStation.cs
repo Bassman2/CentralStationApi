@@ -157,7 +157,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly Lock configDataLock = new();
     private readonly AutoResetEvent configDataEvent = new(false);
     private string? configDataFileName = null;
-    private CSFileStream? configDataFileStream = null;
+    private FileCollector? configDataFileCollector = null;
 
     private void HandleConfigData(CANMessage msg)
     {
@@ -170,20 +170,20 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         {
             if (msg.DataLength == 6)
             {
-                configDataFileStream = new CSFileStream(CSFileStreamMode.Request, configDataFileName!, msg.GetDataUInt(0), msg.GetDataUShort(4));
+                configDataFileCollector = new FileCollector(CSFileStreamMode.Request, configDataFileName!, msg.GetDataUInt(0), msg.GetDataUShort(4));
             }
             else if (msg.DataLength == 7)
             {
-                configDataFileStream = new CSFileStream(CSFileStreamMode.Broadcast, configDataFileName!, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
+                configDataFileCollector = new FileCollector(CSFileStreamMode.Broadcast, configDataFileName!, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
             }
             else if (msg.DataLength == 8 )
             {
-                configDataFileStream!.AddData(msg.GetData());
-                if (configDataFileStream.IsReady())
+                configDataFileCollector!.AddData(msg.GetData());
+                if (configDataFileCollector.IsReady())
                 {
                     configDataEvent.Set();
                     //fileReceivedQueue.Add(fileStream);
-                    //SetFile(configDataFileStream.GetFileStream(), configDataFileStream.FileKey, configDataFileStream.FileName);
+                    //SetFile(configDataFileCollector.GetFileStream(), configDataFileCollector.FileKey, configDataFileCollector.FileName);
                 }
             }
             else
@@ -210,8 +210,10 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                 if (success)
                 {
                     var mem = new MemoryStream();
-                    configDataFileStream?.GetFileStream().CopyTo(mem);
+                    //configDataFileCollector?.GetFileStream().CopyTo(mem);
+                    configDataFileCollector?.CopyTo(mem);
                     DebugConfigData($"GetConfigDataAsync--");
+                    mem.Position = 0;
                     return mem;
                 }
                 DebugConfigData($"GetConfigDataAsync-- NULL");

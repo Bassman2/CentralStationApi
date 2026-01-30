@@ -2,7 +2,7 @@
 
 internal class DataCollector
 {
-    private readonly MemoryStream mem = new(4 * 1024);
+    protected readonly MemoryStream mem = new(4 * 1024);
 
     //public long Position
     //{         

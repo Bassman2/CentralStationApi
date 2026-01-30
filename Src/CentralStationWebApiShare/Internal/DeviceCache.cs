@@ -6,7 +6,7 @@ internal static class DeviceCache
     {
         { 0x00000000, "All" },
         { 0xFFFFFFFF, "Broadcast" }
-    };  
+    };
 
     public static void AddDevice(uint id, ushort deviceType)
     {
@@ -24,7 +24,7 @@ internal static class DeviceCache
         }
     }
 
-    public static string DeviceName(uint id)     
+    public static string DeviceName(uint id)
     {
         return deviceNames.TryGetValue(id, out string? name) ? name : id.ToString("X8");
     }

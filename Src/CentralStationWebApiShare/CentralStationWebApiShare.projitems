@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Device.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DeviceInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DeviceMeasurement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\FileCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\RouteItemType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\TrackProtocol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileNameAttribute.cs" />
