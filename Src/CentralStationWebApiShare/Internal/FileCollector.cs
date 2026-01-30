@@ -41,8 +41,7 @@ internal class FileCollector(CSFileStreamMode mode, string fileName, uint length
             }
             else
             {
-                mem.Position = 4;
-                mem.SetLength(Length - 4);
+                mem.Position = 0;
                 mem.CopyTo(stream);
             }
 

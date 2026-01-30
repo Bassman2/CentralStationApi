@@ -22,6 +22,11 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private readonly static string routesStateFileName = "fahrstrassen.sr2";
     private readonly static string tracksStateFileName = "gleisbild.sr2";
 
+    private readonly static string locomotivesDBFileName = "lokomotive.db";
+    private readonly static string locomotivesDBVersionFileName = "lokomotive-db-version.txt";
+    private readonly static string languageFileName = "language.bin";
+
+
 
     private readonly CentralStation cs;
 
@@ -143,7 +148,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private List<LocomotiveViewModel>? locomotives;
 
     [RelayCommand]
-    private void OnUpdateLocomotioves()
+    private void OnUpdateLocomotives()
     {
         Task.Run(async () =>
         {
@@ -158,7 +163,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     }
 
     [RelayCommand]
-    private void OnUpdateLocomotiovesState()
+    private void OnUpdateLocomotivesState()
     {
         Task.Run(async () =>
         {
@@ -166,6 +171,51 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             if (stream is not null)
             {
                 StoreFile(locomotivesStateFileName, stream);
+                //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+                //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            }
+        });
+    }
+
+    [RelayCommand]
+    private void OnUpdateLocomotivesDB()
+    {
+        Task.Run(async () =>
+        {
+            using var stream = await cs.GetConfigDataAsync("lokdb");
+            if (stream is not null)
+            {
+                StoreFile(locomotivesDBFileName, stream);
+                //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+                //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            }
+        });
+    }
+
+    [RelayCommand]
+    private void OnUpdateLocomotivesDBVersion()
+    {
+        Task.Run(async () =>
+        {
+            using var stream = await cs.GetConfigDataAsync("ldbver");
+            if (stream is not null)
+            {
+                StoreFile(locomotivesDBVersionFileName, stream);
+                //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+                //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            }
+        });
+    }
+
+    [RelayCommand]
+    private void OnUpdateLanguage()
+    {
+        Task.Run(async () =>
+        {
+            using var stream = await cs.GetConfigDataAsync("lang");
+            if (stream is not null)
+            {
+                StoreFile(languageFileName, stream);
                 //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
                 //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
             }

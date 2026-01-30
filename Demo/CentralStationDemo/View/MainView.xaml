@@ -14,15 +14,19 @@
                 <MenuItem Header="_Exit" Command="{Binding ExitCommand}"/>
             </MenuItem>
             <MenuItem Header="_Update">
-                <MenuItem Header="Locomotioves" Command="{Binding UpdateLocomotiovesCommand}"/>
+                <MenuItem Header="Locomotives" Command="{Binding UpdateLocomotivesCommand}"/>
                 <MenuItem Header="Articles" Command="{Binding UpdateArticlesCommand}"/>
                 <MenuItem Header="Routes" Command="{Binding UpdateRoutesCommand}"/>
                 <MenuItem Header="Tracks" Command="{Binding UpdateTracksCommand}"/>
                 <Separator/>
-                <MenuItem Header="Locomotioves State" Command="{Binding UpdateLocomotiovesStateCommand}"/>
+                <MenuItem Header="Locomotives State" Command="{Binding UpdateLocomotivesStateCommand}"/>
                 <MenuItem Header="Articles State" Command="{Binding UpdateArticlesStateCommand}"/>
                 <MenuItem Header="Routes State" Command="{Binding UpdateRoutesStateCommand}"/>
                 <MenuItem Header="Tracks State" Command="{Binding UpdateTracksStateCommand}"/>
+                <Separator/>
+                <MenuItem Header="Locomotives DB" Command="{Binding UpdateLocomotivesDBCommand}"/>
+                <MenuItem Header="Locomotives DB Version" Command="{Binding UpdateLocomotivesDBVersionCommand}"/>
+                <MenuItem Header="Language" Command="{Binding UpdateLanguageCommand}"/>
                 <Separator/>
                 <MenuItem Header="Devices" Command="{Binding UpdateDevicesCommand}"/>
             </MenuItem>
