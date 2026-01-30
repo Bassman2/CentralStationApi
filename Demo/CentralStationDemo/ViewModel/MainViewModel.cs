@@ -98,7 +98,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     {
         switch (propertyName)
         {
-        case "Status":
+        case "SystemStatus":
             Status = cs.Status;
             break;
         }
@@ -142,84 +142,80 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     #endregion
 
+    #region System Status
+
+
+    [RelayCommand]
+    private async Task OnUpdateSystemStatus()
+    {
+        await cs.GetSystemStatusAsync(0, 0);
+    }
+
+    #endregion
+
     #region Locomotives
 
     [ObservableProperty]
     private List<LocomotiveViewModel>? locomotives;
 
     [RelayCommand]
-    private void OnUpdateLocomotives()
+    private async Task OnUpdateLocomotives()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("loks");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("loks");
-            if (stream is not null)
-            {
-                StoreFile(locomotivesFileName, stream);
-                var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-                Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-            }
-        });
+            StoreFile(locomotivesFileName, stream);
+            var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+            Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        }
     }
 
     [RelayCommand]
-    private void OnUpdateLocomotivesState()
+    private async Task OnUpdateLocomotivesState()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("lokstat");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("lokstat");
-            if (stream is not null)
-            {
-                StoreFile(locomotivesStateFileName, stream);
-                //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-                //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-            }
-        });
+            StoreFile(locomotivesStateFileName, stream);
+            //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        }
     }
 
     [RelayCommand]
-    private void OnUpdateLocomotivesDB()
+    private async Task OnUpdateLocomotivesDB()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("lokdb");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("lokdb");
-            if (stream is not null)
-            {
-                StoreFile(locomotivesDBFileName, stream);
-                //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-                //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-            }
-        });
+            StoreFile(locomotivesDBFileName, stream);
+            //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        }
     }
 
     [RelayCommand]
-    private void OnUpdateLocomotivesDBVersion()
+    private async Task OnUpdateLocomotivesDBVersion()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("ldbver");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("ldbver");
-            if (stream is not null)
-            {
-                StoreFile(locomotivesDBVersionFileName, stream);
-                //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-                //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-            }
-        });
+            StoreFile(locomotivesDBVersionFileName, stream);
+            //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        }
     }
 
     [RelayCommand]
-    private void OnUpdateLanguage()
+    private async Task OnUpdateLanguage()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("lang");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("lang");
-            if (stream is not null)
-            {
-                StoreFile(languageFileName, stream);
-                //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-                //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-            }
-        });
+            StoreFile(languageFileName, stream);
+            //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
+            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        }
     }
 
     [RelayCommand]
@@ -255,33 +251,27 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private List<ArticleViewModel>? articles;
 
     [RelayCommand]
-    private void OnUpdateArticles()
+    private async Task OnUpdateArticles()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("mags");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("mags");
-            if (stream is not null)
-            {
-                StoreFile(articlesFileName, stream);
-                var data = CsSerializer.Deserialize<ArticleData>(stream);
-                Articles = data.Articles?.ToViewModelList<ArticleViewModel>(cs);
-            }
-        });
+            StoreFile(articlesFileName, stream);
+            var data = CsSerializer.Deserialize<ArticleData>(stream);
+            Articles = data.Articles?.ToViewModelList<ArticleViewModel>(cs);
+        }
     }
 
     [RelayCommand]
-    private void OnUpdateArticlesState()
+    private async Task OnUpdateArticlesState()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("magstat");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("magstat");
-            if (stream is not null)
-            {
-                StoreFile(articlesStateFileName, stream);
-                //var data = CsSerializer.Deserialize<ArticleData>(stream);
-                //Articles = data.Articles?.ToViewModelList<ArticleViewModel>(cs);
-            }
-        });
+            StoreFile(articlesStateFileName, stream);
+            //var data = CsSerializer.Deserialize<ArticleData>(stream);
+            //Articles = data.Articles?.ToViewModelList<ArticleViewModel>(cs);
+        }
     }
 
     #endregion
@@ -292,33 +282,27 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private List<RouteViewModel>? routes;
 
     [RelayCommand]
-    private void OnUpdateRoutes()
+    private async Task OnUpdateRoutes()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("fs");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("fs");
-            if (stream is not null)
-            {
-                StoreFile(routesFileName, stream);
-                var data = CsSerializer.Deserialize<RouteData>(stream);
-                Routes = data.Routes?.ToViewModelList<RouteViewModel>();
-            }
-        });
+            StoreFile(routesFileName, stream);
+            var data = CsSerializer.Deserialize<RouteData>(stream);
+            Routes = data.Routes?.ToViewModelList<RouteViewModel>();
+        }
     }
 
     [RelayCommand]
-    private void OnUpdateRoutesState()
+    private async Task OnUpdateRoutesState()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("fsstat");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("fsstat");
-            if (stream is not null)
-            {
-                StoreFile(routesStateFileName, stream);
-                //var data = CsSerializer.Deserialize<RouteData>(stream);
-                //Routes = data.Routes?.ToViewModelList<RouteViewModel>();
-            }
-        });
+            StoreFile(routesStateFileName, stream);
+            //var data = CsSerializer.Deserialize<RouteData>(stream);
+            //Routes = data.Routes?.ToViewModelList<RouteViewModel>();
+        }
     }
 
     #endregion
@@ -332,55 +316,50 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private ObservableCollection<TrackPageViewModel>? trackPages;
 
     [RelayCommand]
-    private void OnUpdateTracks()
+    private async Task OnUpdateTracks()
     {
-        Task.Run(async () =>
+        using var stream = await cs.GetConfigDataAsync("gbs");
+        if (stream is not null)
         {
-            using var stream = await cs.GetConfigDataAsync("gbs");
-            if (stream is not null)
+            StoreFile(tracksFileName, stream);
+            TrackData = CsSerializer.Deserialize<TrackData>(stream);
+            TrackPages = [];
+            foreach (var page in TrackData.Pages ?? [])
             {
-                StoreFile(tracksFileName, stream);
-                TrackData = CsSerializer.Deserialize<TrackData>(stream);
-                TrackPages = [];
-                foreach (var page in TrackData.Pages ?? [])
-                {
 
-                    using var pageStream = await cs.GetConfigDataAsync($"gbs-{page.Id}");
-                    if (pageStream is not null)
-                    {
-                        StoreFile($"gleisbild-{page.Id}.cs2", pageStream);
-                        var data = CsSerializer.Deserialize<TrackPageData>(stream);
-                        App.Current.Dispatcher.Invoke(() => TrackPages.Add(new TrackPageViewModel(page, data)));
-                    }
+                using var pageStream = await cs.GetConfigDataAsync($"gbs-{page.Id}");
+                if (pageStream is not null)
+                {
+                    StoreFile($"gleisbild-{page.Id}.cs2", pageStream);
+                    var data = CsSerializer.Deserialize<TrackPageData>(stream);
+                    App.Current.Dispatcher.Invoke(() => TrackPages.Add(new TrackPageViewModel(page, data)));
                 }
             }
-        });
+        }
     }
 
     [RelayCommand]
-    private void OnUpdateTracksState()
+    private async Task OnUpdateTracksState()
     {
-        Task.Run(async () =>
-        {
-            using var stream = await cs.GetConfigDataAsync("gbsstat");
-            if (stream is not null)
-            {
-                StoreFile(tracksStateFileName, stream);
-                //TrackData = CsSerializer.Deserialize<TrackData>(stream);
-                //TrackPages = [];
-                //foreach (var page in TrackData.Pages ?? [])
-                //{
 
-                //    using var pageStream = await cs.GetConfigDataAsync($"gbs-{page.Id}");
-                //    if (pageStream is not null)
-                //    {
-                //        StoreFile($"gleisbild-{page.Id}.cs2", pageStream);
-                //        var data = CsSerializer.Deserialize<TrackPageData>(stream);
-                //        App.Current.Dispatcher.Invoke(() => TrackPages.Add(new TrackPageViewModel(page, data)));
-                //    }
-                //}
-            }
-        });
+        using var stream = await cs.GetConfigDataAsync("gbsstat");
+        if (stream is not null)
+        {
+            StoreFile(tracksStateFileName, stream);
+            //TrackData = CsSerializer.Deserialize<TrackData>(stream);
+            //TrackPages = [];
+            //foreach (var page in TrackData.Pages ?? [])
+            //{
+
+            //    using var pageStream = await cs.GetConfigDataAsync($"gbs-{page.Id}");
+            //    if (pageStream is not null)
+            //    {
+            //        StoreFile($"gleisbild-{page.Id}.cs2", pageStream);
+            //        var data = CsSerializer.Deserialize<TrackPageData>(stream);
+            //        App.Current.Dispatcher.Invoke(() => TrackPages.Add(new TrackPageViewModel(page, data)));
+            //    }
+            //}
+        }
     }
 
     #endregion
@@ -391,39 +370,34 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private List<DeviceViewModel>? devices;
 
     [RelayCommand]
-    private void OnUpdateDevices()
+    private async Task OnUpdateDevices()
     {
-        Task.Run((Func<Task?>)(async () =>
+        var devices = await cs.GetDevicesAsync();
+
+        var vms = devices?.Select(d => new DeviceViewModel(d)).ToList();
+        App.Current.Dispatcher.Invoke(() => Devices = vms);
+
+        foreach (var device in Devices ?? [])
         {
-            var devices = await cs.GetDevicesAsync();
-
-            var vms = devices?.Select(d => new DeviceViewModel(d)).ToList();
-            App.Current.Dispatcher.Invoke(() => Devices = vms);
-
-            foreach (var device in Devices ?? [])
+            var deviceInfo = await cs.GetDeviceInfoAsync(device.DeviceId);
+            if (deviceInfo != null)
             {
-                var deviceInfo = await cs.GetDeviceInfoAsync(device.DeviceId);
-                if (deviceInfo != null)
+                device.AddDeviceInfo(deviceInfo);
+            }
+        }
+
+        foreach (var device in Devices ?? [])
+        {
+            for (byte index = 1; index < 6; index++)
+            {
+                var deviceMeasurement = await cs.GetDeviceMeasurementAsync(device.DeviceId, index);
+                //var deviceMeasurement = new DeviceMeasurement() { Name = $"Measurement {index}" };
+                if (deviceMeasurement != null)
                 {
-                    device.AddDeviceInfo(deviceInfo);
+                    App.Current.Dispatcher.Invoke(() => device.AddDeviceMeasurement(deviceMeasurement, index));
                 }
             }
-
-            foreach (var device in Devices ?? [])
-            {
-                for (byte index = 1; index < 6; index++)
-                {
-                    var deviceMeasurement = await cs.GetDeviceMeasurementAsync(device.DeviceId, index);
-                    //var deviceMeasurement = new DeviceMeasurement() { Name = $"Measurement {index}" };
-                    if (deviceMeasurement != null)
-                    {
-                        App.Current.Dispatcher.Invoke(() => device.AddDeviceMeasurement(deviceMeasurement, index));
-                    }
-                }
-            }
-
-
-        }));
+        }
     }
 
     [RelayCommand]

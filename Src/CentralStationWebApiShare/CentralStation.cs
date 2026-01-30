@@ -39,6 +39,8 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     protected override void ReceiveHandler(CANMessage msg)
     {
+        HandleSystemStatus(msg);
+
         HandleLocomotive(msg);
         HandleStatus(msg);
         //HandleStreams(msg);
@@ -147,6 +149,46 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
             }
         }
+    }
+
+    #endregion
+
+    #region SystemStatus
+
+    private const int systemStatusTimeout = 500;
+    private readonly Lock systemStatusLock = new();
+    private readonly AutoResetEvent systemStatusEvent = new(false);
+    private ushort? systemStatusValue = null;
+
+    private void HandleSystemStatus(CANMessage msg)
+    {
+        if (msg.Command == Command.SystemCommand && msg.SubCommand == SubCommand.Status && msg.IsResponse)
+        {
+            switch (msg.DataLength)
+            {
+            case 7:
+                systemStatusValue = msg.GetDataByte(6);
+                break;
+            case 8:
+                systemStatusValue = msg.GetDataUShort(6);
+                break;
+            default:
+                throw new InvalidDataException();
+            }
+        }
+    }
+    public async Task<ushort?> GetSystemStatusAsync(uint device, byte channel, ushort? value = null)
+    {
+        return await Task.Run(() =>
+        {
+            lock (systemStatusLock)
+            {
+                systemStatusValue = null;
+                SystemStatus(device, channel, value);
+                systemStatusEvent.WaitOne(systemStatusTimeout);
+                return systemStatusValue;
+            }
+        });
     }
 
     #endregion
