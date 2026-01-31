@@ -18,8 +18,10 @@ public partial class App : Application
         (
             new ServiceCollection()
                 //.AddSingleton<IBusinessLogic, BusinessLogic>()
-                //.AddSingleton<DialogService, DialogService>()
+
                 .AddSingleton<MainViewModel>()
+                .AddSingleton<TrackFormatProcessorViewModel>()
+
                 //.AddScoped<UsersViewModel>()
                 //.AddScoped<GroupsViewModel>()
                 //.AddScoped<MembersViewModel>()

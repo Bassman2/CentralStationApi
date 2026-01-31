@@ -70,6 +70,15 @@
                     <TabItem Header="Devices">
                         <local:DevicesView/>
                     </TabItem>
+                    <TabItem Header="TFP/GFP" DataContext="{Binding TrackFormatProcessor}">
+                        <!--  IsSelected="{Binding IsSelected}">-->
+                        <TabItem.Style>
+                            <Style TargetType="TabItem">
+                                <Setter Property="IsSelected" Value="{Binding IsSelected, Converter={StaticResource DebugConverter}}"/>
+                            </Style>
+                        </TabItem.Style>
+                        <local:TrackFormatProcessorView/>
+                    </TabItem>
                 </TabControl>
                 <Button Grid.Row="1" Content="STOP" Command="{Binding StopCommand}" Background="{Binding Status, Converter={StaticResource StatusToBrushConverter}}" Margin="3" FontWeight="ExtraBold" FontSize="24"/>
             </Grid>

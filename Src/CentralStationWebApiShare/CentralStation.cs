@@ -166,9 +166,15 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         {
             switch (msg.DataLength)
             {
-            case 7:
+            // no result
+            case 6: 
+                systemStatusValue = null;
+                break;
+            // bool result
+            case 7: 
                 systemStatusValue = msg.GetDataByte(6);
                 break;
+            // ushort value result
             case 8:
                 systemStatusValue = msg.GetDataUShort(6);
                 break;

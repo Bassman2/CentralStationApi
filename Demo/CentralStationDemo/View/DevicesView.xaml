@@ -53,7 +53,21 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel VerticalAlignment="Top">
-                                    <TextBlock Text="Measurement" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="=====================" HorizontalAlignment="Center"/>
+
+                                    <TextBlock Text="{Binding Channel, StringFormat=Channel: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ValuePower, StringFormat=ValuePower: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ColorRange1, StringFormat=ColorRange1: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ColorRange2, StringFormat=ColorRange2: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ColorRange3, StringFormat=ColorRange3: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ColorRange4, StringFormat=ColorRange4: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ZeroPoint, StringFormat=ZeroPoint: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding EndRange1, StringFormat=EndRange1: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding EndRange2, StringFormat=EndRange2: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding EndRange3, StringFormat=EndRange3: {0}}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding EndRange4, StringFormat=EndRange4: {0}}" HorizontalAlignment="Center"/>
+
+
                                     <TextBlock Text="{Binding Name, StringFormat=Name: {0}}" HorizontalAlignment="Center"/>
                                     <TextBlock Text="{Binding Start, StringFormat=Start: {0}}" HorizontalAlignment="Center"/>
                                     <TextBlock Text="{Binding End, StringFormat=End: {0}}" HorizontalAlignment="Center"/>

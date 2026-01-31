@@ -6,7 +6,7 @@ public partial class DeviceMeasurementViewModel(DeviceMeasurement deviceMeasurem
     private byte channel = deviceMeasurement.Channel;
 
     [ObservableProperty]
-    private byte valuePower = deviceMeasurement.ValuePower;
+    private sbyte valuePower = deviceMeasurement.ValuePower;
 
     [ObservableProperty]
     private byte colorRange1 = deviceMeasurement.ColorRange1;
@@ -21,19 +21,19 @@ public partial class DeviceMeasurementViewModel(DeviceMeasurement deviceMeasurem
     private byte colorRange4 = deviceMeasurement.ColorRange4;
 
     [ObservableProperty]
-    private byte zeroPoint = deviceMeasurement.ZeroPoint;
+    private ushort zeroPoint = deviceMeasurement.ZeroPoint;
 
     [ObservableProperty]
-    private byte endRange1 = deviceMeasurement.EndRange1;
+    private ushort endRange1 = deviceMeasurement.EndRange1;
 
     [ObservableProperty]
-    private byte endRange2 = deviceMeasurement.EndRange2;
+    private ushort endRange2 = deviceMeasurement.EndRange2;
 
     [ObservableProperty]
-    private byte endRange3 = deviceMeasurement.EndRange3;
+    private ushort endRange3 = deviceMeasurement.EndRange3;
 
     [ObservableProperty]
-    private byte endRange4 = deviceMeasurement.EndRange4;
+    private ushort endRange4 = deviceMeasurement.EndRange4;
 
     [ObservableProperty]
     private string name = deviceMeasurement.Name;

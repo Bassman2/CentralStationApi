@@ -47,6 +47,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
     }
 
+    public CentralStation CentralStation => cs;
+
     public void Dispose() => cs.Dispose();
 
     protected override void OnStartup()
@@ -148,8 +150,23 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     [RelayCommand]
     private async Task OnUpdateSystemStatus()
     {
-        await cs.GetSystemStatusAsync(0, 0);
+        var devices = await cs.GetDevicesAsync();
+        var gfpDevice = devices?.FirstOrDefault(d => d.DeviceType == DeviceType.GFP || d.DeviceType == DeviceType.GFP3);
+        if (gfpDevice == null)
+        {
+            MessageBox.Show("No GFP found");
+            return;
+        }
+
+        for (byte i = 0; i < 100; i++)
+        {
+            var res = await cs.GetSystemStatusAsync(gfpDevice.DeviceId, i);
+            Debug.WriteLine($"SystemStatus {i}: {res}");
+        }
     }
+
+    
+    public TrackFormatProcessorViewModel TrackFormatProcessor => new(this); 
 
     #endregion
 

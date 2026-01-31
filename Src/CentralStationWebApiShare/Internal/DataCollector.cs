@@ -20,6 +20,16 @@ internal class DataCollector
         mem.Write(data, offset, count);
     }
 
+    public sbyte ReadSByte()
+    {
+        int value = mem.ReadByte();
+        if (value == -1)
+        {
+            throw new EndOfStreamException("No more data available to read a byte.");
+        }
+        return (sbyte)value;
+    }
+
     public byte ReadByte()
     {
         int value = mem.ReadByte();
