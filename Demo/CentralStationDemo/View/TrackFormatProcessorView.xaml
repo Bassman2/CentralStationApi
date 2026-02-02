@@ -8,6 +8,28 @@
              d:DataContext="{d:DesignInstance Type=vm:TrackFormatProcessorViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <ListView ItemsSource="{Binding Measurements}" Margin="30" BorderThickness="0">
+        <ListView.ItemsPanel>
+            <ItemsPanelTemplate>
+                <VirtualizingStackPanel IsItemsHost="True" Orientation="Vertical" VerticalAlignment="Top"/>
+            </ItemsPanelTemplate>
+        </ListView.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="60"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding Label}" Margin="2"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Value}" Margin="2"/>
+                    <TextBlock Grid.Column="2" Text="{Binding Unit}" Margin="2"/>
+                </Grid>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ListView>
+    <!--
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -47,4 +69,5 @@
         <TextBlock Grid.Row="7" Grid.Column="2" Text="{Binding TemperatureUnit}" Margin="2"/>
 
     </Grid>
+    -->
 </UserControl>

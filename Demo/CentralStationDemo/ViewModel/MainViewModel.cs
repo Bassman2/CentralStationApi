@@ -4,6 +4,24 @@ using System.Reflection;
 
 namespace CentralStationDemo.ViewModel;
 
+
+// http://cs3/images/gui/default_lok.svg
+// http://cs3/images/gui/menue_platten.svg
+// http://cs3/images/gui/menue_ereignis.svg
+// http://cs3/images/gui/artikel_wahl_weichen.svg
+// http://cs3/images/gui/dashboard_desktop.png
+// http://cs3/images/gui/dashboard_smartphone.png
+// http://cs3/images/gui/btn_assistent2.svg
+// http://cs3/images/gui/dashboard_info.svg
+
+// http://cs3/images/gui/dashboard_cs1.png
+// http://cs3/images/gui/dashboard_cs2.png
+// http://cs3/images/gui/dashboard_cs3.png
+// http://cs3/images/gui/dashboard_gfp3.png
+// http://cs3/images/gui/dashboard_ms1.png
+// http://cs3/images/gui/dashboard_ms2.png
+// http://cs3/images/gui/dashboard_links88.png
+
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
     private const string host = "CS3";
