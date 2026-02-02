@@ -22,7 +22,7 @@ public class CANMessage
 
     #region Send
 
-    public CANMessage(Priority priority, Command command, uint hash)
+    public CANMessage(Priority priority, Command command, uint hash, bool response = false)
     {
         Sender = local;
         Timestamp = DateTime.Now;
@@ -30,7 +30,7 @@ public class CANMessage
         uint header = 0;
         SetBits(ref header, 25, 4, (uint)priority);
         SetBits(ref header, 17, 8, (uint)command);
-        SetBits(ref header, 16, 1, 0u);
+        SetBits(ref header, 16, 1, response ? 1u : 0u);
         SetBits(ref header, 0, 16, hash);
 
         byte[] data = new byte[sizeof(uint)];
@@ -255,7 +255,7 @@ public class CANMessage
                     _ => "S88 Event unknown data size"
                 },
             Command.SX1Event => "SX1 Event",
-            Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - Device: {Device:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceType: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2}",
+            Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - Device: {Device:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceType: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2} # Hash {CentralStationBasic.DeviceId2Hash(Device, Hash):X2} #",
             Command.UpdateOffer => "Update Offer",
             Command.ReadConfigData => "Read Config Buffer",
             Command.BootloaderCANBound => "Bootloader CAN Bound",

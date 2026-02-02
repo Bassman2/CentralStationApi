@@ -11,10 +11,15 @@ public partial class CentralStationBasic : IDisposable
     public const ushort MinVelocity = 0;
     public const ushort MaxVelocity = 1000;
 
+    public const uint deviceId = 0x6D554711;
+    public readonly static System.Version deviceVersion = new(1, 5);
+    public const uint deviceSerial = 0x2634a;
+    public const string deviceArticle = "54321";
+
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
     private readonly MessageQueue<CANMessage> messageReceivedQueue;
-    
-    protected readonly uint hash = 0x4711;
+
+    protected readonly uint hash = DeviceId2Hash(deviceId, 0); // 0x4711;
     //private readonly MessageQueue<CSFileStream> fileReceivedQueue;
 
     public CentralStationBasic(string host, Protocol protocol = Protocol.UDP)
@@ -77,7 +82,52 @@ public partial class CentralStationBasic : IDisposable
                 Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceInfo, $"Received: {msg}");
                 messageReceivedQueue.Add(msg);
 
-                ReceiveHandler(msg);
+                if (msg.Command == Command.SoftwareVersion && msg.IsResponse == false)
+                {
+                    var message = new CANMessage(Priority.Proirity1, Command.SoftwareVersion, hash, true).
+                                AddUInt32(deviceId).
+                                AddByte((byte)deviceVersion.Major).
+                                AddByte((byte)deviceVersion.Minor).
+                                AddUInt16((ushort)DeviceType.Application);
+                    SendMessage(message);
+                }
+                if (msg.Command == Command.StatusData && msg.IsResponse == false && msg.Device == deviceId && msg.IsResponse == false)
+                {
+                    var message = new CANMessage(Priority.Proirity1, Command.StatusData, 0x0301, true).
+                                AddByte(0).
+                                AddByte(0).
+                                AddByte(0).
+                                AddByte(0).
+                                AddUInt32(deviceSerial);
+                    SendMessage(message);
+
+                    message = new CANMessage(Priority.Proirity1, Command.StatusData, 0x0302, true).
+                               AddString(deviceArticle);
+                    SendMessage(message);
+
+                    message = new CANMessage(Priority.Proirity1, Command.StatusData, 0x0303, true).
+                                AddString("Ralfs So");
+                    SendMessage(message);
+
+                    message = new CANMessage(Priority.Proirity1, Command.StatusData, 0x0304, true).
+                                AddString("ftware V");
+                    SendMessage(message);
+
+                    message = new CANMessage(Priority.Proirity1, Command.StatusData, 0x0305, true).
+                                AddString("ersion"); 
+                    SendMessage(message);
+                    
+                    message = new CANMessage(Priority.Proirity1, Command.StatusData, hash, true).
+                                AddUInt32(deviceId).
+                                AddByte(0).
+                                AddByte(5);
+                    SendMessage(message);
+
+                }
+
+
+
+                    ReceiveHandler(msg);
 
 
                 //HandleAsync(msg);
@@ -388,6 +438,24 @@ public partial class CentralStationBasic : IDisposable
     }
 
     #endregion
+
+    internal static ushort Index2Hash(byte index)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(index, 0x7f, nameof(index));
+
+        return (ushort)(0x0300 | (index & 0x7f));
+    }
+
+    internal static ushort DeviceId2Hash(uint deviceId, ushort org)
+    { 
+        ushort hd = (ushort)((deviceId & 0xffff0000) >> 16);
+        ushort ld = (ushort)( deviceId & 0x0000ffff );
+        ushort ro = (ushort)(hd ^ ld);
+        ushort lx = (ushort)( ro & 0x007f);
+        ushort hx = (ushort)((ro & 0x1f80) << 3);
+        ushort ha = (ushort)(0x0300 | hx | lx);
+        return ha;
+    }
 
     //#region Static
 

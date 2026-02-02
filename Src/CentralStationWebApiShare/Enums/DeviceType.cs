@@ -99,6 +99,8 @@ public enum DeviceType : ushort
     [FileName("dashboard_gfp3.png")]
     GFP3 = 0x0050,
 
+    Application = 0x1000,
+
     /// <summary>
     /// Central Station 2
     /// Software App

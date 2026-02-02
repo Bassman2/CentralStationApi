@@ -105,7 +105,7 @@
                     <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="80"/>
                     <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="140"/>
                     <DataGridTextColumn Header="Direction" Binding="{Binding IsResponse, Converter={StaticResource ResponseToArrowConverter}}" FontWeight="ExtraBold" FontFamily="Arial" Width="70"/>
-                    <DataGridTextColumn Header="Hash" Binding="{Binding Hash}" Width="50"/>
+                    <DataGridTextColumn Header="Hash" Binding="{Binding Hash, StringFormat=x4}" Width="50"/>
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>

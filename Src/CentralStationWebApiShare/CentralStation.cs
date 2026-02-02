@@ -611,7 +611,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             {
                 var device = new Device(msg);
                 DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.Version} {device.DeviceType}");
-                devices.Add(device.DeviceId, device);
+                devices?.Add(device.DeviceId, device);
             }
         }
     }
