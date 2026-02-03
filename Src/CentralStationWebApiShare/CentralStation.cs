@@ -18,9 +18,6 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
 
-    //private readonly CollectorThread trackCollectorThread;
-    //private readonly CollectorThread contrCollectorThread;
-
     private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
     //private readonly int retry = 3;
 
@@ -28,17 +25,20 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     internal static Uri MagUri => new($"http://{Host}/app/assets/mag/");
     internal static Uri LocoUri => new($"http://{Host}/app/assets/lok/");
 
+    public TimeSpan MessageTimeout { get; set; } = new TimeSpan(0, 0, 0, 500);
+    public TimeSpan DataTimeout { get; set; } = new TimeSpan(0, 0, 2);
+
+
     public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
     {
         statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
-
-        //trackCollectorThread = new CollectorThread(TrackCollectorWorkerLoop, timeout);
-        //contrCollectorThread = new CollectorThread(ContrCollectorWorkerLoop, timeout);
     }
         
 
     protected override void ReceiveHandler(CANMessage msg)
     {
+        HandleSystem(msg);
+
         HandleSystemStatus(msg);
 
         HandleLocomotive(msg);
@@ -52,74 +52,138 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         HandleDeviceInfo(msg);
     }
 
-    //private readonly Dictionary<ushort, CSFileStream> fileDictionary = [];
-    //private string fileKey = "empty";
+    #region System 
 
-    //private void HandleStreams(CANMessage msg)
-    //{
+    private readonly Lock systemLock = new();
+    private readonly AutoResetEvent systemEvent = new(false);
+    private CANMessage? systemReqMsg;
+    
 
-    //    if (msg.IsResponse && msg.Command == Command.ConfigData)
-    //    {
-    //        fileKey = msg.GetDataString().Trim('\0');
-    //    }
-    //    if (/*msg.IsResponse && */ msg.Command == Command.ConfigDataStream)
-    //    {
-    //        if (msg.DataLength == 6)
-    //        {
-    //            // overwrite existing
-    //            fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Request, fileKey, msg.GetDataUInt(0), msg.GetDataUShort(0));
-    //        }
-    //        else if (msg.DataLength == 7)
-    //        {
-    //            // overwrite existing
-    //            fileDictionary[msg.Hash] = new CSFileStream(CSFileStreamMode.Broadcast, fileKey, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
-    //        }
-    //        else if (msg.DataLength == 8 && fileDictionary.TryGetValue(msg.Hash, out var fileStream))
-    //        {
-    //            fileStream.AddData(msg.GetData());
-    //            if (fileStream.IsReady())
-    //            {
-    //                //fileReceivedQueue.Add(fileStream);
-    //                SetFile(fileStream.GetFileStream(), fileStream.FileKey, fileStream.FileName);
-    //                fileDictionary.Remove(msg.Hash);
-    //            }
-    //        }
-    //        else
-    //        {
-    //            Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceError, "Invalid ConfigDataStream message length");
-    //            throw new InvalidOperationException("Invalid ConfigDataStream message length");
-    //        }
-    //    }
-    //}
+    private void HandleSystem(CANMessage msg)
+    {
+        if (systemReqMsg is not null && 
+            msg.Command == Command.SystemCommand &&
+            msg.SubCommand == systemReqMsg!.SubCommand && 
+            msg.DeviceId == systemReqMsg!.DeviceId && 
+            msg.IsResponse)
+        {
+            systemEvent.Set();
+        }
+    }
 
-    //private void SetFile(Stream stream, string filerKey, string fileName)
-    //{
-    //    FileReceived?.Invoke(this, new FileReceivedEventArgs(fileKey, fileName, stream));
+    /// <summary>
+    /// Stops the system asynchronously for the specified device.
+    /// </summary>
+    /// <param name="deviceId">The identifier of the device to stop. Defaults to all devices.</param>
+    /// <returns>True if the operation was successful; otherwise, false.</returns>
+    public async Task<bool> SystemStopAsync(uint deviceId = AllDevices)
+        => await SystemCommandAsync(SubCommand.Stop, deviceId);
+    
+    public async Task<bool> SystemGoAsync(uint deviceId = AllDevices)
+        => await SystemCommandAsync(SubCommand.Go, deviceId);
 
-    //    Tracer.TraceStream(stream, fileName);
+    public async Task<bool> SystemHaltAsync(uint deviceId = AllDevices)
+        => await SystemCommandAsync(SubCommand.Halt, deviceId);
 
-    //    stream.Position = 0;
-    //    var reader = new StreamReader(stream);
-    //    string? line = reader.ReadLine();
-    //    switch (line)
-    //    {
-    //    case "[lokomotive]":
-    //        SetLocomotives(CsSerializer.Deserialize<LocomotiveData>(stream));
-    //        break;
-    //    case "[magnetartikel]":
-    //        SetArticles(CsSerializer.Deserialize<ArticleData>(stream));
-    //        break;
-    //    case "[fahrstrassen]":
-    //        SetRoutes(CsSerializer.Deserialize<RouteData>(stream));
-    //        break;
-    //    case "[gleisbild]":
-    //        SetTrackData(CsSerializer.Deserialize<TrackData>(stream));
-    //        break;
-    //    case "[gleisbildseite]":
-    //        SetTrackPageData(CsSerializer.Deserialize<TrackPageData>(stream));
-    //        break;
-    //    }
-    //}
+    public async Task<bool> SystemLocomotiveEmergencyHaltAsync(uint deviceId = AllDevices)
+        => await SystemCommandAsync(SubCommand.LocoHalt, deviceId);
+
+    public async Task<bool> SystemLocomotiveCycleStopAsync(uint deviceId = AllDevices)
+        => await SystemCommandAsync(SubCommand.LocoCycleStop, deviceId);
+
+    public async Task<bool> SystemLocomotiveDataProtocolAsync(uint deviceId = AllDevices, byte protocoll = 0xff)
+        => await SystemCommandAsync(SubCommand.LocoDataProtocol, deviceId, protocoll);
+
+    public async Task<bool> SystemArticleSwitchingTimeAsync(uint deviceId, ushort time = 0xff)
+        => await SystemCommandAsync(SubCommand.SwitchingTime, deviceId, time);
+
+    // SubCommand.FastRead not implemented
+
+    public async Task<bool> SystemTrackProtocolSwitchAsync(uint deviceId, TrackProtocol protocoll)
+        => await SystemCommandAsync(SubCommand.TrackProtocol, deviceId, (byte)protocoll);
+
+    public async Task<bool> SystemMfxNewRegistrationCounterAsync(uint deviceId, TrackProtocol protocoll, ushort newRegistrationCounter)
+        => await SystemCommandAsync(SubCommand.NewRegistrationCounter, deviceId, (byte)protocoll, newRegistrationCounter);
+
+    // SubCommand.Overload not implemented only response from TFP/GFP
+
+    // SubCommand.Status handled in HandleSystemStatus
+
+    public async Task<bool> GetSystemIdentifierAsync(uint device)
+         => await SystemCommandAsync(SubCommand.Identifier, deviceId);
+
+    public async Task<bool> SetSystemIdentifierAsync(uint device, byte identifier)
+        => await SystemCommandAsync(SubCommand.Identifier, deviceId);
+
+    public async Task<bool> SystemResetAsync(uint deviceId, byte resetTarget)
+        => await SystemCommandAsync(SubCommand.TrackProtocol, deviceId);
+
+
+    private async Task<bool> SystemCommandAsync(SubCommand subCommand, uint deviceId)
+    {
+        return await Task.Run(() =>
+        {
+            lock (systemLock)
+            {
+                systemReqMsg = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+                    AddUInt32(deviceId).
+                    AddSubCommand(subCommand);
+                SendMessage(systemReqMsg);
+                return systemEvent.WaitOne(MessageTimeout);
+            }
+        });
+    }
+
+    private async Task<bool> SystemCommandAsync(SubCommand subCommand, uint deviceId, byte para)
+    {
+        return await Task.Run(() =>
+        {
+            lock (systemLock)
+            {
+                systemReqMsg = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+                    AddUInt32(deviceId).
+                    AddSubCommand(subCommand).
+                    AddByte(para);
+                SendMessage(systemReqMsg);
+                return systemEvent.WaitOne(MessageTimeout);
+            }
+        });
+    }
+
+    private async Task<bool> SystemCommandAsync(SubCommand subCommand, uint deviceId, ushort para)
+    {
+        return await Task.Run(() =>
+        {
+            lock (systemLock)
+            {
+                systemReqMsg = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+                    AddUInt32(deviceId).
+                    AddSubCommand(subCommand).
+                    AddUInt16(para);
+                SendMessage(systemReqMsg);
+                return systemEvent.WaitOne(MessageTimeout);
+            }
+        });
+    }
+
+    private async Task<bool> SystemCommandAsync(SubCommand subCommand, uint deviceId, byte para1, ushort para2)
+    {
+        return await Task.Run(() =>
+        {
+            lock (systemLock)
+            {
+                systemReqMsg = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+                    AddUInt32(deviceId).
+                    AddSubCommand(subCommand).
+                    AddByte(para1).
+                    AddUInt16(para2);
+                SendMessage(systemReqMsg);
+                return systemEvent.WaitOne(MessageTimeout);
+            }
+        });
+    }
+
+    #endregion
 
     #region Status
 
@@ -137,7 +201,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private void HandleStatus(CANMessage message)
     {
-        if (message.Command == Command.SystemCommand && message.Device == CentralStationBasic.AllDevices)
+        if (message.Command == Command.SystemCommand && message.DeviceId == CentralStationBasic.AllDevices)
         {
             if (message.SubCommand == SubCommand.Stop)
             {
@@ -285,25 +349,25 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         case Command.SystemCommand:
             if (msg.SubCommand == SubCommand.LocoHalt && msg.IsResponse && msg.DataLength == 5)
             {
-                LocomotiveHalt?.Invoke(this, new LocomotiveEventArgs(msg.Device));
+                LocomotiveHalt?.Invoke(this, new LocomotiveEventArgs(msg.DeviceId));
             }
             break;
         case Command.LocoVelocity:
             if (msg.IsResponse && msg.DataLength == 6)
             {
-                LocomotiveVelocity?.Invoke(this, new LocomotiveVelocityEventArgs(msg.Device, Math.Min(MaxVelocity, msg.GetDataUShort(4))));
+                LocomotiveVelocity?.Invoke(this, new LocomotiveVelocityEventArgs(msg.DeviceId, Math.Min(MaxVelocity, msg.GetDataUShort(4))));
             }
             break;
         case Command.LocoDirection:
             if (msg.IsResponse && msg.DataLength == 5)
             {
-                LocomotiveDirection?.Invoke(this, new LocomotiveDirectionEventArgs(msg.Device, (DirectionChange)msg.GetDataByte(4)));
+                LocomotiveDirection?.Invoke(this, new LocomotiveDirectionEventArgs(msg.DeviceId, (DirectionChange)msg.GetDataByte(4)));
             }
             break;
         case Command.LocoFunction:
             if (msg.IsResponse && (msg.DataLength == 6 || msg.DataLength == 8))
             {
-                LocomotiveFunction?.Invoke(this, new LocomotiveFunctionEventArgs(msg.Device, msg.GetDataByte(4), msg.GetDataByte(5), msg.DataLength == 8 ? msg.GetDataUShort(6) : null));
+                LocomotiveFunction?.Invoke(this, new LocomotiveFunctionEventArgs(msg.DeviceId, msg.GetDataByte(4), msg.GetDataByte(5), msg.DataLength == 8 ? msg.GetDataUShort(6) : null));
             }
             break;
         }
@@ -541,7 +605,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     //    if (controllerCollector.ShouldRequest(out var controller))
     //    {
-    //        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"Controller Reqest Device: {controller.deviceId:X8} Page: {controller.index}");
+    //        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"Controller Reqest DeviceId: {controller.deviceId:X8} Page: {controller.index}");
     //        StatusData(controller.deviceId, (byte)controller.index);
     //    }
     //}
@@ -560,11 +624,11 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //        switch (msg.DataLength)
     //        {
     //        case 5:
-    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
+    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 5 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)}");
     //            break;
     //        case 6:
-    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
-    //            controllerCollector.Add(msg.Device, msg.GetDataByte(4), controllerDataCollector);
+    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 6 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
+    //            controllerCollector.Add(msg.DeviceId, msg.GetDataByte(4), controllerDataCollector);
     //            break;
     //        case 8:
     //            ushort packageIndex = (byte)(msg.Hash & 0xff);
@@ -607,7 +671,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
-            if (devices != null && !devices.ContainsKey(msg.Device))
+            if (devices != null && !devices.ContainsKey(msg.DeviceId))
             {
                 var device = new Device(msg);
                 DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.Version} {device.DeviceType}");
@@ -655,10 +719,10 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             switch (msg.DataLength)
             {
             case 5:
-                DebugDevices($"HandleStatusData Length 5 Device {msg.Device:X8} Index {msg.GetDataByte(4)}");
+                DebugDevices($"HandleStatusData Length 5 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)}");
                 break;
             case 6:
-                DebugDevices($"HandleStatusData Length 6 Device {msg.Device:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
+                DebugDevices($"HandleStatusData Length 6 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
                 int index = msg.GetDataByte(4);
                 int packages = msg.GetDataByte(5);
                 if (index == 0)

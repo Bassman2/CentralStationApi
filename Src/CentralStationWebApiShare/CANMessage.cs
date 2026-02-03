@@ -94,7 +94,7 @@ public class CANMessage
 
     public CANMessage AddSubCommand(SubCommand subCommand)
     {
-        ArgumentOutOfRangeException.ThrowIfNotEqual(DataLength, 4, "Must be after Device");
+        ArgumentOutOfRangeException.ThrowIfNotEqual(DataLength, 4, "Must be after DeviceId");
 
         return AddByte((byte)subCommand);
     }
@@ -112,7 +112,7 @@ public class CANMessage
         // add to DeviceCache
         if (Command == Command.SoftwareVersion && DataLength == 8)
         {
-            DeviceCache.AddDevice(Device, GetDataUShort(6));
+            DeviceCache.AddDevice(DeviceId, GetDataUShort(6));
         }
     }
 
@@ -185,9 +185,9 @@ public class CANMessage
 
     public DirectionChange DirectionChange => (DirectionChange)GetDataByte(4);
 
-    public uint Device => GetDataUInt(0);
+    public uint DeviceId => GetDataUInt(0);
 
-    public string DeviceName => $"\"{DeviceCache.DeviceName(Device)}\"";
+    public string DeviceName => $"\"{DeviceCache.DeviceName(DeviceId)}\"";
 
     #region Description
 
@@ -197,22 +197,22 @@ public class CANMessage
             Command.SystemCommand =>
                 SubCommand switch
                 {
-                    SubCommand.Stop =>                      /* */ $"System Stop - Device: {DeviceName}",
-                    SubCommand.Go =>                        /* */ $"System Go - Device: {DeviceName}",
-                    SubCommand.Halt =>                      /* */ $"System Halt - Device: {DeviceName}",
-                    SubCommand.LocoHalt =>                  /* */ $"System Loco Halt - Device: {DeviceName}",
-                    SubCommand.LocoCycleStop =>             /* */ $"System Loco Cycle Stop - Device: {DeviceName}",
-                    SubCommand.LocoDataProtocol =>          /* */ $"System Loco Buffer Protocol - Device: {DeviceName}",
-                    SubCommand.SwitchingTime =>             /* */ $"System Switching Time - Device: {DeviceName}",
-                    SubCommand.FastRead =>                  /* */ $"System Fast Read - Device: {DeviceName}",
-                    SubCommand.TrackProtocol =>             /* */ $"System Track Protocol - Device: {DeviceName}",
-                    SubCommand.NewRegistrationCounter =>    /* */ $"System New Registration Counter - Device: {DeviceName}",
-                    SubCommand.Overload =>                  /* */ $"System Overload - Device: {DeviceName}",
-                    SubCommand.Status =>                    /* */ $"System Status - Device: {DeviceName} Channel: {GetDataByte(5)}" + (DataLength == 7 ? $" Value: {GetDataByte(6)}" : "") + (DataLength == 8 ? $" Value: {GetDataUShort(6)}" : ""),
-                    SubCommand.Identifier =>                /* */ $"System Identifier - Device: {DeviceName}",
-                    SubCommand.Unknown20 =>                 /* */ $"System Unknown20 - Device: {DeviceName}",
-                    SubCommand.MfxSeek =>                   /* */ $"System Mfx Seek - Device: {DeviceName}",
-                    SubCommand.Reset =>                     /* */ $"System Reset - Device: {DeviceName}",
+                    SubCommand.Stop =>                      /* */ $"System Stop - DeviceId: {DeviceName}",
+                    SubCommand.Go =>                        /* */ $"System Go - DeviceId: {DeviceName}",
+                    SubCommand.Halt =>                      /* */ $"System Halt - DeviceId: {DeviceName}",
+                    SubCommand.LocoHalt =>                  /* */ $"System Loco Halt - DeviceId: {DeviceName}",
+                    SubCommand.LocoCycleStop =>             /* */ $"System Loco Cycle Stop - DeviceId: {DeviceName}",
+                    SubCommand.LocoDataProtocol =>          /* */ $"System Loco Buffer Protocol - DeviceId: {DeviceName}",
+                    SubCommand.SwitchingTime =>             /* */ $"System Switching Time - DeviceId: {DeviceName}",
+                    SubCommand.FastRead =>                  /* */ $"System Fast Read - DeviceId: {DeviceName}",
+                    SubCommand.TrackProtocol =>             /* */ $"System Track Protocol - DeviceId: {DeviceName}",
+                    SubCommand.NewRegistrationCounter =>    /* */ $"System New Registration Counter - DeviceId: {DeviceName}",
+                    SubCommand.Overload =>                  /* */ $"System Overload - DeviceId: {DeviceName}",
+                    SubCommand.Status =>                    /* */ $"System Status - DeviceId: {DeviceName} Channel: {GetDataByte(5)}" + (DataLength == 7 ? $" Value: {GetDataByte(6)}" : "") + (DataLength == 8 ? $" Value: {GetDataUShort(6)}" : ""),
+                    SubCommand.Identifier =>                /* */ $"System Identifier - DeviceId: {DeviceName}",
+                    SubCommand.Unknown20 =>                 /* */ $"System Unknown20 - DeviceId: {DeviceName}",
+                    SubCommand.MfxSeek =>                   /* */ $"System Mfx Seek - DeviceId: {DeviceName}",
+                    SubCommand.Reset =>                     /* */ $"System Reset - DeviceId: {DeviceName}",
                     _ => $"Unknown System Command {buffer[SUBC]:X2}"
                 },
 
@@ -249,13 +249,13 @@ public class CANMessage
             Command.S88Event => 
                 DataLength switch
                 {
-                    4 => $"S88 Event - Device ID: {GetDataUShort(0)} Contact ID: {GetDataUShort(2)}",
-                    5 => $"S88 Event - Device ID: {GetDataUShort(0)} Contact ID: {GetDataUShort(2)} Parameter: {GetDataByte(4)}",
-                    8 => $"S88 Event - Device ID: {GetDataUShort(0)} Contact ID: {GetDataUShort(2)} Old: {GetDataByte(4)} New: {GetDataByte(5)} Time: {GetDataUShort(6)}",
+                    4 => $"S88 Event - DeviceId ID: {GetDataUShort(0)} Contact ID: {GetDataUShort(2)}",
+                    5 => $"S88 Event - DeviceId ID: {GetDataUShort(0)} Contact ID: {GetDataUShort(2)} Parameter: {GetDataByte(4)}",
+                    8 => $"S88 Event - DeviceId ID: {GetDataUShort(0)} Contact ID: {GetDataUShort(2)} Old: {GetDataByte(4)} New: {GetDataByte(5)} Time: {GetDataUShort(6)}",
                     _ => "S88 Event unknown data size"
                 },
             Command.SX1Event => "SX1 Event",
-            Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - Device: {Device:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceType: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2} # Hash {CentralStationBasic.DeviceId2Hash(Device, Hash):X2} #",
+            Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - DeviceId: {DeviceId:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceType: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2} # Hash {CentralStationBasic.DeviceId2Hash(DeviceId, Hash):X2} #",
             Command.UpdateOffer => "Update Offer",
             Command.ReadConfigData => "Read Config Buffer",
             Command.BootloaderCANBound => "Bootloader CAN Bound",
@@ -263,8 +263,8 @@ public class CANMessage
             Command.StatusData =>
                 DataLength switch
                 {
-                    5 => $"Device: {DeviceName} Index: {GetDataByte(4)}",
-                    6 => $"Device: {DeviceName} Index: {GetDataByte(4)} Num: {GetDataByte(5)}",
+                    5 => $"DeviceId: {DeviceName} Index: {GetDataByte(4)}",
+                    6 => $"DeviceId: {DeviceName} Index: {GetDataByte(4)} Num: {GetDataByte(5)}",
                     8 => $"{GetDataString()}",
                     _ => "Unknown Length"
 
@@ -274,8 +274,8 @@ public class CANMessage
             Command.ConfigDataStream =>
                 DataLength switch
                 {
-                    6 => $"Config Buffer Stream - Start Response Length {Device}",
-                    7 => $"Config Buffer Stream - Start Broadcast Length {Device}",
+                    6 => $"Config Buffer Stream - Start Response Length {DeviceId}",
+                    7 => $"Config Buffer Stream - Start Broadcast Length {DeviceId}",
                     8 => "Config Buffer Stream - Buffer",
                     _ => "Config Buffer Stream - Break"
                 },

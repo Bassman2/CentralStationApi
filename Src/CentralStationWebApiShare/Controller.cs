@@ -3,7 +3,7 @@
 public class Controller(CANMessage msg, string host) 
 {
     // from SoftwareVersion
-    public uint DeviceId => msg.Device;
+    public uint DeviceId => msg.DeviceId;
     public byte MajorVersion => msg.GetDataByte(4);
     public byte MinorVersion => msg.GetDataByte(5);
     public DeviceType DeviceType => (DeviceType)msg.GetDataUShort(6);

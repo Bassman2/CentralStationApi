@@ -14,6 +14,14 @@ public enum DeviceType : ushort
     GFP = 0x0000,
 
     /// <summary>
+    /// GFP2 from Centras Station 2
+    /// device type unknown
+    /// </summary>
+    [Description("GFP2")]
+    [FileName("dashboard_gfp3.png")]
+    GFP2 = 0x0001, // ?????????
+
+    /// <summary>
     /// Digital Connector Box / Gleisbox 
     /// 60112 for 1 Gauge 
     /// 60113 for Märklin H0, Trix H0 and Minitrix

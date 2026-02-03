@@ -4,7 +4,7 @@ public class Device
 {
     internal Device(CANMessage msg)
     {
-        DeviceId = msg.Device;
+        DeviceId = msg.DeviceId;
         Version = new System.Version(msg.GetDataByte(4), msg.GetDataByte(5));
         DeviceType = (DeviceType)msg.GetDataUShort(6);
         DeviceTypeName = DeviceType.GetDescription();

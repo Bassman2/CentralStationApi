@@ -51,7 +51,7 @@ public partial class CentralStationBasic : IDisposable
 
     #region Send Message
     
-    private void SendMessage(CANMessage msg)
+    protected void SendMessage(CANMessage msg)
     {
         messageReceivedQueue.Add(msg);
         client.Send(msg);
@@ -91,7 +91,7 @@ public partial class CentralStationBasic : IDisposable
                                 AddUInt16((ushort)DeviceType.Application);
                     SendMessage(message);
                 }
-                if (msg.Command == Command.StatusData && msg.IsResponse == false && msg.Device == deviceId && msg.IsResponse == false)
+                if (msg.Command == Command.StatusData && msg.IsResponse == false && msg.DeviceId == deviceId && msg.IsResponse == false)
                 {
                     var message = new CANMessage(Priority.Proirity1, Command.StatusData, 0x0301, true).
                                 AddByte(0).
@@ -196,7 +196,7 @@ public partial class CentralStationBasic : IDisposable
         SendMessage(message);
     }
 
-    public void SystemArticleSwitchingTimel(uint device, ushort time)
+    public void SystemArticleSwitchingTime(uint device, ushort time)
     {
         var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
             AddUInt32(device).
@@ -232,14 +232,14 @@ public partial class CentralStationBasic : IDisposable
         SendMessage(message);
     }
 
-    public void SystemOverload(uint device, byte channel)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.Overload).
-            AddByte(channel);
-        SendMessage(message);
-    }
+    //public void SystemOverload(uint device, byte channel)
+    //{
+    //    var message = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.Overload).
+    //        AddByte(channel);
+    //    SendMessage(message);
+    //}
 
     public void SystemStatus(uint device, byte channel, ushort? value = null)
     {
