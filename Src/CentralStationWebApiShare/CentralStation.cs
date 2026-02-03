@@ -185,6 +185,50 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #endregion
 
+    #region Administration
+
+    public void GetLocomotiveDirectionAsync(uint locoId)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId);
+        SendMessage(message);
+    }
+
+    public void SetLocomotiveVelocityAsync(uint locoId, ushort velocity)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(velocity, MaxVelocity, nameof(velocity));
+
+        var message = new CANMessage(Priority.Proirity1, Command.LocoVelocity, hash).AddUInt32(locoId).AddUInt16(velocity);
+        SendMessage(message);
+    }
+
+    public void GetLocomotiveFunctionAsync(uint locoId, byte function)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function);
+        SendMessage(message);
+    }
+
+    public void SetLocomotiveDirectionAsync(uint locoId, DirectionChange direction)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte((byte)direction);
+        SendMessage(message);
+    }
+
+    
+
+    public void SetLocomotiveFunctionAsync(uint locoId, byte function, byte value)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function).AddByte(value);
+        SendMessage(message);
+    }
+
+    public void SetLocomotiveFunctionAsync(uint locoId, byte function, byte value, ushort functionValue)
+    {
+        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function).AddByte(value).AddUInt16(functionValue);
+        SendMessage(message);
+    }
+
+    #endregion
+
     #region Status
 
     public SystemStatus Status { get; private set; } = CentralStationWebApi.SystemStatus.Default;
