@@ -40,7 +40,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     protected override void ReceiveHandler(CanMessage msg)
     {
-        HandleSystem(msg);
+        //HandleSystem(msg);
 
         HandleSystemStatus(msg);
 
@@ -59,6 +59,36 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region System 
 
+    public async Task<bool> SystemStopAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Stop);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
+    }
+
+    public async Task<bool> SystemGoAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Go);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
+    }
+
+    public async Task<bool> SystemHaltAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Halt);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
+    }
+
+    public async Task<bool> SystemLocomotiveEmergencyHaltAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.LocoHalt);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
+    }
+
+
+    /*
     private readonly Lock systemLock = new();
     private readonly AutoResetEvent systemEvent = new(false);
     private CanMessage? systemReqMsg;
@@ -187,6 +217,8 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             }
         });
     }
+
+    */
 
     #endregion
 

@@ -1,6 +1,7 @@
 ﻿using CentralStationWebApi.Serializer;
 using System.IO;
 using System.Reflection;
+using static CommunityToolkit.Mvvm.ComponentModel.__Internals.__TaskExtensions.TaskAwaitableWithoutEndValidation;
 
 namespace CentralStationDemo.ViewModel;
 
@@ -148,15 +149,27 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
 
     [RelayCommand]
-    private void OnStop()
+    private async Task OnStop()
     {
-        switch (Status)
-        {
-        case SystemStatus.Default: cs.SystemStop(); break;
-        case SystemStatus.Go: cs.SystemStop(); break;
-        case SystemStatus.Stop: cs.SystemGo(); break;
-        default: throw new InvalidEnumArgumentException(nameof(Status), (int)Status, typeof(SystemStatus));
-        }
+        CancellationTokenSource cts = new();
+
+        bool res;
+            switch (Status)
+            {
+            case SystemStatus.Default: 
+                res = await cs.SystemStopAsync(CentralStation.AllDevices, cts.Token); 
+                break;
+            case SystemStatus.Go: 
+                res = await cs.SystemStopAsync(CentralStation.AllDevices, cts.Token); 
+                break;
+            case SystemStatus.Stop: 
+                res = await cs.SystemGoAsync(CentralStation.AllDevices, cts.Token); 
+                break;
+            default: 
+                throw new InvalidEnumArgumentException(nameof(Status), (int)Status, typeof(SystemStatus));
+            }
+            Debug.WriteLine($"SystemStop/Go: {res}");
+       
     }
 
 

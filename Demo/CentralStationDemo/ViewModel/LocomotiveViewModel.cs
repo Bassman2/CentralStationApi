@@ -203,7 +203,7 @@ public partial class LocomotiveViewModel : ObservableObject
     [RelayCommand]
     private void OnEmergencyHalt()
     {
-        cs.SystemLocomotiveEmergencyHalt(Uid);
+        cs.SystemLocomotiveEmergencyHaltAsync(Uid).Start();
     }
 
     [RelayCommand]

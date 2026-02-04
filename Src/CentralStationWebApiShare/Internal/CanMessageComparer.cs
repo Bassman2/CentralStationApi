@@ -31,6 +31,14 @@ internal class CanMessageComparer : IEqualityComparer<CanMessage>
     {
         return req.Command switch
         {
+            Command.SystemCommand => req.SubCommand == res.SubCommand &&
+                req.SubCommand switch
+                {
+                    SubCommand.Stop => req.DeviceId == res.DeviceId,
+                    SubCommand.Go => req.DeviceId == res.DeviceId,
+                    SubCommand.Halt => req.DeviceId == res.DeviceId,
+                    _ => false,
+                },
             Command.LocoVelocity => req.DeviceId == res.DeviceId,
             Command.LocoDirection => req.DeviceId == res.DeviceId,
             Command.LocoFunction => req.DeviceId == res.DeviceId,

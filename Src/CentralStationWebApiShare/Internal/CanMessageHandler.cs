@@ -5,7 +5,7 @@ internal class CanMessageHandler(CentralStation cs)
     private readonly ConcurrentDictionary<CanMessage, TaskCompletionSource<CanMessage>> pendingRequests =
         new(CanMessageComparer.Instance);
 
-    public TimeSpan Timeout { get; set; } = new TimeSpan(0, 0, 0, 500);
+    public TimeSpan Timeout { get; set; } = TimeSpan.FromMilliseconds(500);
 
     public async Task<CanMessage?> SendMessageAsync(CanMessage req, CancellationToken cancellationToken = default)
     {
@@ -34,7 +34,7 @@ internal class CanMessageHandler(CentralStation cs)
                 {
                     return await tcs.Task;
                 }
-                catch (OperationCanceledException) when (cts.IsCancellationRequested == true && !cancellationToken.IsCancellationRequested)
+                catch (OperationCanceledException) //when (cts.IsCancellationRequested == true && !cancellationToken.IsCancellationRequested)
                 {
                     return null;
                 }

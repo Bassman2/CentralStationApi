@@ -149,90 +149,90 @@ public partial class CentralStationBasic : IDisposable
 
     #region 2 System Commands
 
-    public void SystemStop(uint device = AllDevices)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.Stop);
-        SendMessage(message);
-    }
+    //public void SystemStop(uint device = AllDevices)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.Stop);
+    //    SendMessage(message);
+    //}
 
-    public void SystemGo(uint device = AllDevices)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.Go);
-        SendMessage(message);
-    }
+    //public void SystemGo(uint device = AllDevices)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.Go);
+    //    SendMessage(message);
+    //}
 
-    public void SystemHalt(uint device = AllDevices)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.Halt);
-        SendMessage(message);
-    }
+    //public void SystemHalt(uint device = AllDevices)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.Halt);
+    //    SendMessage(message);
+    //}
 
-    public void SystemLocomotiveEmergencyHalt(uint device = AllDevices)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.LocoHalt);
-        SendMessage(message);
-    }
+    //public void SystemLocomotiveEmergencyHalt(uint device = AllDevices)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.LocoHalt);
+    //    SendMessage(message);
+    //}
 
-    public void SystemLocomotiveCycleStop(uint device = AllDevices)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.LocoCycleStop);
-        SendMessage(message);
-    }
+    //public void SystemLocomotiveCycleStop(uint device = AllDevices)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.LocoCycleStop);
+    //    SendMessage(message);
+    //}
 
-    public void SystemLocomotiveDataProtocol(uint device = AllDevices, byte protocoll = 0xff)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.LocoDataProtocol).
-            AddByte(protocoll);
-        SendMessage(message);
-    }
+    //public void SystemLocomotiveDataProtocol(uint device = AllDevices, byte protocoll = 0xff)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.LocoDataProtocol).
+    //        AddByte(protocoll);
+    //    SendMessage(message);
+    //}
 
-    public void SystemArticleSwitchingTime(uint device, ushort time)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.SwitchingTime).
-            AddUInt16(time);
-        SendMessage(message);
-    }
+    //public void SystemArticleSwitchingTime(uint device, ushort time)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.SwitchingTime).
+    //        AddUInt16(time);
+    //    SendMessage(message);
+    //}
 
-    public void SystemMfxFastRead(uint device, ushort mfxSid)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.FastRead).
-            AddUInt16(mfxSid);
-        SendMessage(message);
-    }
+    //public void SystemMfxFastRead(uint device, ushort mfxSid)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.FastRead).
+    //        AddUInt16(mfxSid);
+    //    SendMessage(message);
+    //}
 
-    public void SystemTrackProtocolSwitch(uint device, TrackProtocol protocoll)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.TrackProtocol).
-            AddByte((byte)protocoll);
-        SendMessage(message);
-    }
+    //public void SystemTrackProtocolSwitch(uint device, TrackProtocol protocoll)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.TrackProtocol).
+    //        AddByte((byte)protocoll);
+    //    SendMessage(message);
+    //}
 
-    public void SystemMfxNewRegistrationCounter(uint device, ushort newRegistrationCounter)
-    {
-        var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.NewRegistrationCounter).
-            AddUInt16(newRegistrationCounter);
-        SendMessage(message);
-    }
+    //public void SystemMfxNewRegistrationCounter(uint device, ushort newRegistrationCounter)
+    //{
+    //    var message = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.NewRegistrationCounter).
+    //        AddUInt16(newRegistrationCounter);
+    //    SendMessage(message);
+    //}
 
     //public void SystemOverload(uint device, byte channel)
     //{
