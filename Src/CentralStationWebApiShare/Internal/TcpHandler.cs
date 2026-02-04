@@ -51,21 +51,21 @@ internal class TcpHandler : IProtocolHandler, IDisposable
         }
     }
     
-    public void Send(CANMessage msg)
+    public void Send(CanMessage msg)
     {
         stream!.Write(msg.Buffer, 0, CANMsgLength);
     }
 
-    public async Task SendAsync(CANMessage msg)
+    public async Task SendAsync(CanMessage msg)
     {
         await stream!.WriteAsync(msg.Buffer.AsMemory(0, CANMsgLength));
     }
 
-    public async Task<CANMessage> ReceiveAsync()
+    public async Task<CanMessage> ReceiveAsync()
     {
         byte[] buffer = new byte[CANMsgLength];
         await stream!.ReadExactlyAsync(buffer, 0, CANMsgLength);
-        return new CANMessage(sender, buffer);
+        return new CanMessage(sender, buffer);
     }
 }
 

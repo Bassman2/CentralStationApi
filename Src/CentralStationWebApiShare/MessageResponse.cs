@@ -1,10 +1,10 @@
 ﻿namespace CentralStationWebApi;
 
-public class MessageResponse(CANMessage req, CANMessage? res = null)
+public class MessageResponse(CanMessage req, CanMessage? res = null)
 {
     public bool Success => res != null;
 
-    public CANMessage RequestMsg => req;
+    public CanMessage RequestMsg => req;
 
-    public CANMessage? ResponseMsg { get; internal set; }
+    public CanMessage? ResponseMsg { get; internal set; }
 }

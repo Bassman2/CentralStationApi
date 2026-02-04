@@ -446,7 +446,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Messages
 
     [ObservableProperty]
-    private ObservableCollection<CANMessage> messages = [];
+    private ObservableCollection<CanMessage> messages = [];
 
     #endregion
 }

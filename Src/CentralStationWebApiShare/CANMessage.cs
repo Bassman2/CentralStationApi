@@ -3,7 +3,7 @@ using System.Net;
 
 namespace CentralStationWebApi;
 
-public class CANMessage 
+public class CanMessage 
 {
     private const int DLC = 4;      // data length index
     private const int DATA = 5;     // data start index
@@ -22,7 +22,7 @@ public class CANMessage
 
     #region Send
 
-    public CANMessage(Priority priority, Command command, uint hash, bool response = false)
+    public CanMessage(Priority priority, Command command, uint hash, bool response = false)
     {
         Sender = local;
         Timestamp = DateTime.Now;
@@ -48,7 +48,7 @@ public class CANMessage
         set => buffer[DLC] = value;
     }
 
-    public CANMessage AddByte(byte? value)
+    public CanMessage AddByte(byte? value)
     {
         if (value is null) return this;
 
@@ -57,7 +57,7 @@ public class CANMessage
         return this;
     }
 
-    public CANMessage AddUInt16(ushort? value)
+    public CanMessage AddUInt16(ushort? value)
     {
         if (value is null) return this;
 
@@ -69,7 +69,7 @@ public class CANMessage
         return this;
     }
 
-    public CANMessage AddUInt32(uint? value)
+    public CanMessage AddUInt32(uint? value)
     {
         if (value is null) return this;
 
@@ -81,7 +81,7 @@ public class CANMessage
         return this;
     }
 
-    public CANMessage AddString(string value)
+    public CanMessage AddString(string value)
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(DataLength, 0, "Must be first and only AddXxx method");
 
@@ -92,7 +92,7 @@ public class CANMessage
         return this;
     }
 
-    public CANMessage AddSubCommand(SubCommand subCommand)
+    public CanMessage AddSubCommand(SubCommand subCommand)
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(DataLength, 4, "Must be after DeviceId");
 
@@ -103,7 +103,7 @@ public class CANMessage
 
     #region Receive
     
-    public CANMessage(string sender, byte[] data)
+    public CanMessage(string sender, byte[] data)
     {
         Sender = sender;
         Timestamp = DateTime.Now;
@@ -166,7 +166,7 @@ public class CANMessage
     }
 
     private const uint responseFlag = 0x00010000;
-    public bool IsResponseMsgFrom(CANMessage res)
+    public bool IsResponseMsgFrom(CanMessage res)
     {
         return ((this.GetDataUInt(0) | responseFlag) == res.GetDataUInt(0)) &&
             (this.Command != Command.SystemCommand || this.GetDataByte(9) == res.GetDataByte(9));   // on SubCommand compare sub command

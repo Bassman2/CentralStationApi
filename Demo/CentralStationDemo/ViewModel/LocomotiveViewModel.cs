@@ -50,7 +50,7 @@ public partial class LocomotiveViewModel : ObservableObject
         //}
     }
 
-    //public void UpdateLocomotive(CANMessage msg)
+    //public void UpdateLocomotive(CanMessage msg)
     //{
     //    switch (msg.Command)
     //    {
@@ -209,7 +209,9 @@ public partial class LocomotiveViewModel : ObservableObject
     [RelayCommand]
     private void OnDirection()
     { 
-        cs.SetLocomotiveDirection(Uid, DirectionChange.Toggle);
+        //cs.SetLocomotiveDirection(Uid, DirectionChange.Toggle);
+
+        var direction = Task.Run(async () => await cs.SetLocomotiveDirectionAsync(Uid, DirectionChange.Toggle)).Result;
     }
 
     [RelayCommand]

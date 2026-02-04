@@ -4,10 +4,10 @@
     {
         void Connect(string host);
 
-        void Send(CANMessage msg);
+        void Send(CanMessage msg);
 
-        //Task SendAsync(CANMessage msg);
+        //Task SendAsync(CanMessage msg);
 
-        Task<CANMessage> ReceiveAsync();
+        Task<CanMessage> ReceiveAsync();
     }
 }

@@ -1,6 +1,5 @@
 ﻿using CentralStationWebApi.Internal;
-using System;
-using System.Reflection;
+using System.Threading;
 
 namespace CentralStationWebApi;
 
@@ -19,6 +18,9 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
 
     private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
+
+    private readonly CanMessageHandler canMessageHandler; 
+
     //private readonly int retry = 3;
 
     internal static Uri GuiUri => new($"http://{Host}/images/gui/");
@@ -31,11 +33,12 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
     {
+        canMessageHandler = new CanMessageHandler(this);
         statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
     }
         
 
-    protected override void ReceiveHandler(CANMessage msg)
+    protected override void ReceiveHandler(CanMessage msg)
     {
         HandleSystem(msg);
 
@@ -50,16 +53,18 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         //HandleStatusData(msg);
         HandleDevices(msg);
         HandleDeviceInfo(msg);
+
+        canMessageHandler.OnResponseReceived(msg);
     }
 
     #region System 
 
     private readonly Lock systemLock = new();
     private readonly AutoResetEvent systemEvent = new(false);
-    private CANMessage? systemReqMsg;
+    private CanMessage? systemReqMsg;
     
 
-    private void HandleSystem(CANMessage msg)
+    private void HandleSystem(CanMessage msg)
     {
         if (systemReqMsg is not null && 
             msg.Command == Command.SystemCommand &&
@@ -125,7 +130,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         {
             lock (systemLock)
             {
-                systemReqMsg = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+                systemReqMsg = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
                     AddUInt32(deviceId).
                     AddSubCommand(subCommand);
                 SendMessage(systemReqMsg);
@@ -140,7 +145,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         {
             lock (systemLock)
             {
-                systemReqMsg = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+                systemReqMsg = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
                     AddUInt32(deviceId).
                     AddSubCommand(subCommand).
                     AddByte(para);
@@ -156,7 +161,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         {
             lock (systemLock)
             {
-                systemReqMsg = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+                systemReqMsg = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
                     AddUInt32(deviceId).
                     AddSubCommand(subCommand).
                     AddUInt16(para);
@@ -172,7 +177,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         {
             lock (systemLock)
             {
-                systemReqMsg = new CANMessage(Priority.Proirity1, Command.SystemCommand, hash).
+                systemReqMsg = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
                     AddUInt32(deviceId).
                     AddSubCommand(subCommand).
                     AddByte(para1).
@@ -187,45 +192,59 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Administration
 
-    public void GetLocomotiveDirectionAsync(uint locoId)
+    public async Task<DirectionChange?> GetLocomotiveDirectionAsync(uint locoId, CancellationToken cancellationToken = default)
     {
-        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId);
-        SendMessage(message);
+        var req = new CanMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return (DirectionChange?)res?.GetDataByte(4) ?? null;
     }
 
-    public void SetLocomotiveVelocityAsync(uint locoId, ushort velocity)
+    public async Task<DirectionChange?> SetLocomotiveDirectionAsync(uint locoId, DirectionChange direction, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte((byte)direction);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return (DirectionChange?)res?.GetDataByte(4) ?? null;
+    }
+
+    public async Task<byte?> GetLocomotiveFunctionAsync(uint locoId, byte function, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.LocoFunction, hash).AddUInt32(locoId).AddByte(function);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res?.GetDataByte(5) ?? null;
+    }
+
+    public async Task<byte?> SetLocomotiveFunctionAsync(uint locoId, byte function, byte value, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.LocoFunction, hash).AddUInt32(locoId).AddByte(function).AddByte(value);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res?.GetDataByte(5) ?? null;
+    }
+
+    public async Task<byte?> SetLocomotiveFunctionAsync(uint locoId, byte function, byte value, ushort functionValue, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.LocoFunction, hash).AddUInt32(locoId).AddByte(function).AddByte(value).AddUInt16(functionValue);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res?.GetDataByte(5) ?? null;
+    }
+
+    public async Task<ushort?> GetLocomotiveVelocityAsync(uint locoId, ushort velocity, CancellationToken cancellationToken = default)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(velocity, MaxVelocity, nameof(velocity));
 
-        var message = new CANMessage(Priority.Proirity1, Command.LocoVelocity, hash).AddUInt32(locoId).AddUInt16(velocity);
-        SendMessage(message);
+        var req = new CanMessage(Priority.Proirity1, Command.LocoVelocity, hash).AddUInt32(locoId);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res?.GetDataByte(5) ?? null;
     }
 
-    public void GetLocomotiveFunctionAsync(uint locoId, byte function)
+    public async Task<ushort?> SetLocomotiveVelocityAsync(uint locoId, ushort velocity, CancellationToken cancellationToken = default)
     {
-        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function);
-        SendMessage(message);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(velocity, MaxVelocity, nameof(velocity));
+
+        var req = new CanMessage(Priority.Proirity1, Command.LocoVelocity, hash).AddUInt32(locoId).AddUInt16(velocity);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res?.GetDataByte(5) ?? null;
     }
 
-    public void SetLocomotiveDirectionAsync(uint locoId, DirectionChange direction)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte((byte)direction);
-        SendMessage(message);
-    }
-
-    
-
-    public void SetLocomotiveFunctionAsync(uint locoId, byte function, byte value)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function).AddByte(value);
-        SendMessage(message);
-    }
-
-    public void SetLocomotiveFunctionAsync(uint locoId, byte function, byte value, ushort functionValue)
-    {
-        var message = new CANMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function).AddByte(value).AddUInt16(functionValue);
-        SendMessage(message);
-    }
 
     #endregion
 
@@ -243,7 +262,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         }
     }
 
-    private void HandleStatus(CANMessage message)
+    private void HandleStatus(CanMessage message)
     {
         if (message.Command == Command.SystemCommand && message.DeviceId == CentralStationBasic.AllDevices)
         {
@@ -268,7 +287,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly AutoResetEvent systemStatusEvent = new(false);
     private ushort? systemStatusValue = null;
 
-    private void HandleSystemStatus(CANMessage msg)
+    private void HandleSystemStatus(CanMessage msg)
     {
         if (msg.Command == Command.SystemCommand && msg.SubCommand == SubCommand.Status && msg.IsResponse)
         {
@@ -315,7 +334,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private string? configDataFileName = null;
     private FileCollector? configDataFileCollector = null;
 
-    private void HandleConfigData(CANMessage msg)
+    private void HandleConfigData(CanMessage msg)
     {
         if (msg.Command == Command.ConfigData && msg.IsResponse)
         {
@@ -386,7 +405,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region Locomotives
 
-    private void HandleLocomotive(CANMessage msg)
+    private void HandleLocomotive(CanMessage msg)
     {
         switch (msg.Command)
         {
@@ -654,7 +673,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     //    }
     //}
 
-    //private void HandleController(CANMessage msg)
+    //private void HandleController(CanMessage msg)
     //{
     //    if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
     //    {
@@ -696,7 +715,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
 
 
-    //private void HandleStatusData(CANMessage msg)
+    //private void HandleStatusData(CanMessage msg)
     //{
 
     //}
@@ -711,7 +730,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     //    private AutoResetEvent devicesEvent = new(false);
 
-    private void HandleDevices(CANMessage msg)
+    private void HandleDevices(CanMessage msg)
     {
         if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
@@ -756,7 +775,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private DataCollector? deviceDataCollector = null;
     private readonly Lock deviceLock = new Lock();
 
-    private void HandleDeviceInfo(CANMessage msg)
+    private void HandleDeviceInfo(CanMessage msg)
     {
         if (msg.Command == Command.StatusData && msg.IsResponse)
         {

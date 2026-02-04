@@ -35,24 +35,24 @@ internal class UdpHandler : IProtocolHandler, IDisposable
         listenerClient.Dispose();
     }
 
-    public void Send(CANMessage msg)
+    public void Send(CanMessage msg)
     {
         senderClient.Send(msg.Buffer, 13); 
     }
 
-    public async Task SendAsync(CANMessage msg)
+    public async Task SendAsync(CanMessage msg)
     {
         await senderClient.SendAsync(msg.Buffer, 13);
     }
 
-    public async Task<CANMessage> ReceiveAsync()
+    public async Task<CanMessage> ReceiveAsync()
     {
         var result = await listenerClient.ReceiveAsync();
         if (result.Buffer.Length != 13)
         {
             throw new InvalidDataException($"Invalid CAN message length: {result.Buffer.Length}");
         }
-        return new CANMessage(sender, result.Buffer);
+        return new CanMessage(sender, result.Buffer);
     }
 
 

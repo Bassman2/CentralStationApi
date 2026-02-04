@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-public class Controller(CANMessage msg, string host) 
+public class Controller(CanMessage msg, string host) 
 {
     // from SoftwareVersion
     public uint DeviceId => msg.DeviceId;

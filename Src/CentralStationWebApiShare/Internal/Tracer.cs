@@ -25,7 +25,7 @@ internal static class Tracer
     }
 
     private static StreamWriter? writer = null;
-    public static void TraceMessage(CANMessage msg)
+    public static void TraceMessage(CanMessage msg)
     {
         if (trace)
         {
