@@ -1,7 +1,4 @@
-﻿using CentralStationWebApi.Internal;
-using System.Threading;
-
-namespace CentralStationWebApi;
+﻿namespace CentralStationWebApi;
 
 public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
@@ -87,138 +84,67 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         return res is not null;
     }
 
-
-    /*
-    private readonly Lock systemLock = new();
-    private readonly AutoResetEvent systemEvent = new(false);
-    private CanMessage? systemReqMsg;
-    
-
-    private void HandleSystem(CanMessage msg)
+    public async Task<bool> SystemLocomotiveCycleStopAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
     {
-        if (systemReqMsg is not null && 
-            msg.Command == Command.SystemCommand &&
-            msg.SubCommand == systemReqMsg!.SubCommand && 
-            msg.DeviceId == systemReqMsg!.DeviceId && 
-            msg.IsResponse)
-        {
-            systemEvent.Set();
-        }
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.LocoCycleStop);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
     }
 
-    /// <summary>
-    /// Stops the system asynchronously for the specified device.
-    /// </summary>
-    /// <param name="deviceId">The identifier of the device to stop. Defaults to all devices.</param>
-    /// <returns>True if the operation was successful; otherwise, false.</returns>
-    public async Task<bool> SystemStopAsync(uint deviceId = AllDevices)
-        => await SystemCommandAsync(SubCommand.Stop, deviceId);
-    
-    public async Task<bool> SystemGoAsync(uint deviceId = AllDevices)
-        => await SystemCommandAsync(SubCommand.Go, deviceId);
+    public async Task<bool> SystemLocomotiveDataProtocolAsync(uint deviceId = AllDevices, byte protocoll = 0xff, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.LocoDataProtocol).AddByte(protocoll);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
+    }
 
-    public async Task<bool> SystemHaltAsync(uint deviceId = AllDevices)
-        => await SystemCommandAsync(SubCommand.Halt, deviceId);
-
-    public async Task<bool> SystemLocomotiveEmergencyHaltAsync(uint deviceId = AllDevices)
-        => await SystemCommandAsync(SubCommand.LocoHalt, deviceId);
-
-    public async Task<bool> SystemLocomotiveCycleStopAsync(uint deviceId = AllDevices)
-        => await SystemCommandAsync(SubCommand.LocoCycleStop, deviceId);
-
-    public async Task<bool> SystemLocomotiveDataProtocolAsync(uint deviceId = AllDevices, byte protocoll = 0xff)
-        => await SystemCommandAsync(SubCommand.LocoDataProtocol, deviceId, protocoll);
-
-    public async Task<bool> SystemArticleSwitchingTimeAsync(uint deviceId, ushort time = 0xff)
-        => await SystemCommandAsync(SubCommand.SwitchingTime, deviceId, time);
+    public async Task<bool> SystemArticleSwitchingTimeAsync(uint deviceId = AllDevices, ushort time = 0xff, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.SwitchingTime).AddUInt16(time);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
+    }
 
     // SubCommand.FastRead not implemented
 
-    public async Task<bool> SystemTrackProtocolSwitchAsync(uint deviceId, TrackProtocol protocoll)
-        => await SystemCommandAsync(SubCommand.TrackProtocol, deviceId, (byte)protocoll);
+    public async Task<bool> SystemTrackProtocolAsync(uint deviceId, TrackProtocol protocoll, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.TrackProtocol).AddByte((byte)protocoll);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
+    }
 
-    public async Task<bool> SystemMfxNewRegistrationCounterAsync(uint deviceId, TrackProtocol protocoll, ushort newRegistrationCounter)
-        => await SystemCommandAsync(SubCommand.NewRegistrationCounter, deviceId, (byte)protocoll, newRegistrationCounter);
+    public async Task<bool> SystemMfxNewRegistrationCounterAsync(uint deviceId, TrackProtocol protocoll, ushort newRegistrationCounter, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.NewRegistrationCounter).AddByte((byte)protocoll).AddUInt16(newRegistrationCounter);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
+    }
 
     // SubCommand.Overload not implemented only response from TFP/GFP
 
     // SubCommand.Status handled in HandleSystemStatus
 
-    public async Task<bool> GetSystemIdentifierAsync(uint device)
-         => await SystemCommandAsync(SubCommand.Identifier, deviceId);
-
-    public async Task<bool> SetSystemIdentifierAsync(uint device, byte identifier)
-        => await SystemCommandAsync(SubCommand.Identifier, deviceId);
-
-    public async Task<bool> SystemResetAsync(uint deviceId, byte resetTarget)
-        => await SystemCommandAsync(SubCommand.TrackProtocol, deviceId);
-
-
-    private async Task<bool> SystemCommandAsync(SubCommand subCommand, uint deviceId)
+    public async Task<bool> GetSystemIdentifierAsync(uint deviceId, CancellationToken cancellationToken = default)
     {
-        return await Task.Run(() =>
-        {
-            lock (systemLock)
-            {
-                systemReqMsg = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-                    AddUInt32(deviceId).
-                    AddSubCommand(subCommand);
-                SendMessage(systemReqMsg);
-                return systemEvent.WaitOne(MessageTimeout);
-            }
-        });
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Identifier);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
     }
 
-    private async Task<bool> SystemCommandAsync(SubCommand subCommand, uint deviceId, byte para)
+    public async Task<bool> SetSystemIdentifierAsync(uint deviceId, byte identifier, CancellationToken cancellationToken = default)
     {
-        return await Task.Run(() =>
-        {
-            lock (systemLock)
-            {
-                systemReqMsg = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-                    AddUInt32(deviceId).
-                    AddSubCommand(subCommand).
-                    AddByte(para);
-                SendMessage(systemReqMsg);
-                return systemEvent.WaitOne(MessageTimeout);
-            }
-        });
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Identifier).AddByte(identifier);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
     }
 
-    private async Task<bool> SystemCommandAsync(SubCommand subCommand, uint deviceId, ushort para)
+    public async Task<bool> SystemResetAsync(uint deviceId, byte resetTarge, CancellationToken cancellationToken = default)
     {
-        return await Task.Run(() =>
-        {
-            lock (systemLock)
-            {
-                systemReqMsg = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-                    AddUInt32(deviceId).
-                    AddSubCommand(subCommand).
-                    AddUInt16(para);
-                SendMessage(systemReqMsg);
-                return systemEvent.WaitOne(MessageTimeout);
-            }
-        });
+        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Reset).AddByte(resetTarge);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is not null;
     }
-
-    private async Task<bool> SystemCommandAsync(SubCommand subCommand, uint deviceId, byte para1, ushort para2)
-    {
-        return await Task.Run(() =>
-        {
-            lock (systemLock)
-            {
-                systemReqMsg = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).
-                    AddUInt32(deviceId).
-                    AddSubCommand(subCommand).
-                    AddByte(para1).
-                    AddUInt16(para2);
-                SendMessage(systemReqMsg);
-                return systemEvent.WaitOne(MessageTimeout);
-            }
-        });
-    }
-
-    */
 
     #endregion
 
@@ -276,7 +202,6 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res?.GetDataByte(5) ?? null;
     }
-
 
     #endregion
 
@@ -467,290 +392,6 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             break;
         }
     }
-
-    //public LocomotiveData? Locomotives;
-
-    //private void SetLocomotives(LocomotiveData locomotives)
-    //{
-    //    DeviceCache.AddLocomotiveDevices(locomotives);
-    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Locomotives)));
-    //    Locomotives = locomotives;
-    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Locomotives)));
-    //}
-
-    #endregion
-
-    #region Articles
-
-    //public ArticleData? Articles;
-
-    //private void SetArticles(ArticleData articles)
-    //{
-    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Articles)));
-    //    Articles = articles;
-    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Articles)));
-    //}
-
-
-    #endregion
-
-    #region Routes
-
-    //public RouteData? Routes;
-
-    //private void SetRoutes(RouteData routes)
-    //{
-    //    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Routes)));
-    //    Routes = routes;
-    //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Routes)));
-    //}
-
-
-    #endregion
-
-    #region Tracks
-
-    //public void StartTrackCollector()
-    //{
-    //    Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request Start");
-    //    // clear all existing data
-    //    trackCollector.Clear();
-
-    //    // TODO
-
-    //    // start collecting track data
-    //    isTrackCollectorRunning = true;
-    //    trackCollectorThread.Next();
-    //}
-
-    //public TrackData? Tracks;
-
-    ////private void SetTracks(TrackData tracks)
-    ////{
-    ////    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Tracks)));
-    ////    Tracks = tracks;
-    ////    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Tracks)));
-    ////}
-
-    //public TrackPageData? TrackPages;
-
-    ////private void SetTrackPages(TrackPageData trackPages)
-    ////{
-    ////    PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(TrackPages)));
-    ////    TrackPages = trackPages;
-    ////    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrackPages)));
-    ////}
-
-    
-
-
-    // track collector
-
-
-    //private readonly BlockingCollection<T> queue = [];
-    //private readonly AutoResetEvent autoResetEvent = new(false);
-    //private readonly TimeSpan timeout;
-
-    //public EventQueue(Action<T> action, TimeSpan timeout)
-    //{
-    //    this.action = action;
-    //    this.timeout = timeout;
-    //    thread = new Thread(WorkLoop) { Name = "EventQueueThread", IsBackground = true };
-
-    //private bool isTrackCollectorRunning = false;
-    ////private readonly DataCollector<TrackData> trackDataCollector = new();
-    //private readonly TrackCollector trackCollector = new();
-
-  
-
-    //private void TrackCollectorWorkerLoop() 
-    //{
-    //    Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "  Track Loop");
-
-    //    if (!isTrackCollectorRunning)
-    //    {
-    //        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
-    //        return;
-    //    }
-
-    //    if (trackCollector.ShouldRequest(out var page))
-    //    {
-    //        if (page == 0)
-    //        {
-    //            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, "Track Request");
-    //            ConfigDataTrackDiagram();
-    //        } 
-    //        else 
-    //        {
-    //            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Reqest Page: {page}");
-    //            ConfigDataTrackDiagramPage((int)page);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        // check if finished 
-    //        if (trackCollector.IsFinished)
-    //        {
-    //            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Request finished");
-    //            isTrackCollectorRunning = false;
-    //        }
-    //        else
-    //        {
-    //            Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Nothing");
-    //        }
-    //    }
-    //}
-
-    //private void SetTrackData(TrackData trackData)
-    //{
-    //    if (!isTrackCollectorRunning)
-    //    {
-    //        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
-    //        return;
-    //    }
-
-    //    Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Response");
-    //    trackCollector.Add(trackData);
-    //    trackCollectorThread.Next();
-    //}
-
-    //private void SetTrackPageData(TrackPageData trackPageData)
-    //{
-    //    if (!isTrackCollectorRunning)
-    //    {
-    //        Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"  Track not running");
-    //        return;
-    //    }
-
-    //    Debug.WriteLineIf(TraceSwitches.TracksSwitch.TraceInfo, $"Track Response Page {trackPageData.Page}");
-    //    trackCollector.Add(trackPageData);
-    //    trackCollectorThread.Next();
-    //}
-
-
-    #endregion
-
-    #region Controllers
-
-    //public void StartControllerCollection()
-    //{
-    //    Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, "Controller Request Start");
-
-    //    // clear all existing data
-    //    controllerCollector.Clear();
-
-    //    // start collecting track data
-    //    isControllerCollectorRunning = true;
-    //    SoftwareVersion();
-
-    //    // wait on all Command.SoftwareVersion messages to be handled
-    //    Task.Run(() => { Thread.Sleep(5000); contrCollectorThread.Next(); });
-    //}
-
-    //public IEnumerable<Controller>? Controllers { get; private set; } = null;
-
-    //private void SetController(IEnumerable<Controller> controllers)
-    //{
-    //    //if (!controllersDictionary.TryGetValue(controller.DeviceId, out Controller? value) && !controller.Equals(value))
-    //    {
-    //        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
-    //        Controllers = controllers;
-    //        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
-    //    }
-    //}
-
-
-
-
-    //private void UpdateController(Controller controller)
-    //{
-    //    if (!controllersDictionary.TryGetValue(controller.DeviceId, out Controller? value) && !controller.Equals(value))
-    //    {
-    //        PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Controllers)));
-    //        controllersDictionary[controller.DeviceId] = controller;
-    //        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Controllers)));
-    //    }
-    //}
-
-    //private readonly BlockingCollection<T> queue = [];
-    //private void StatusDataWorkerLoop()
-    //{
-    //    foreach (var item in queue.GetConsumingEnumerable())
-    //    {
-    //        try { action(item); }
-    //        catch (Exception ex) { Debug.WriteLine(ex); }
-    //    }
-    //}
-
-    //private bool isControllerCollectorRunning = false;
-    //private readonly ControllerCollector controllerCollector = new();
-    //private DataCollector controllerDataCollector = new();
-
-    //private readonly Dictionary<uint, Controller> controllersDictionary = [];
-
-    //private void ContrCollectorWorkerLoop()
-    //{
-    //    Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, "  Controller Loop");
-
-    //    if (!isControllerCollectorRunning)
-    //    {
-    //        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"  Controller not running");
-    //        return;
-    //    }
-
-    //    if (controllerCollector.ShouldRequest(out var controller))
-    //    {
-    //        Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"Controller Reqest DeviceId: {controller.deviceId:X8} Page: {controller.index}");
-    //        StatusData(controller.deviceId, (byte)controller.index);
-    //    }
-    //}
-
-    //private void HandleController(CanMessage msg)
-    //{
-    //    if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
-    //    {
-    //        var controller = new Controller(msg, Host!);
-    //        controllerCollector.Add(controller);
-
-    //        // contrCollectorThread.Next() on timer 
-    //    }
-    //    if (msg.Command == Command.StatusData) // && msg.IsResponse)
-    //    {
-    //        switch (msg.DataLength)
-    //        {
-    //        case 5:
-    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 5 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)}");
-    //            break;
-    //        case 6:
-    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 6 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
-    //            controllerCollector.Add(msg.DeviceId, msg.GetDataByte(4), controllerDataCollector);
-    //            break;
-    //        case 8:
-    //            ushort packageIndex = (byte)(msg.Hash & 0xff);
-    //            Debug.WriteLineIf(TraceSwitches.ControllerSwitch.TraceInfo, $"HandleStatusData Length 8 HashIndex {packageIndex}");
-    //            if (packageIndex == 1)
-    //            {
-    //                controllerDataCollector = new();
-    //            }
-    //            controllerDataCollector.AddData(msg.GetData());
-    //            break;
-    //        default:
-    //            throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
-    //        }
-    //    }
-    //}
-
-    //private Dictionary<uint, StatusDataDevice> statusData = [];
-    //public List<StatusDataDevice> StatusData = [];
-    //private StatusDataDevice? curStatusData;
-    //private ushort nextStatusDataPackage = 1;
-
-
-
-    //private void HandleStatusData(CanMessage msg)
-    //{
-
-    //}
 
     #endregion
 

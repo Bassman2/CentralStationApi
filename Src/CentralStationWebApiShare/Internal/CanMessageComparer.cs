@@ -31,17 +31,31 @@ internal class CanMessageComparer : IEqualityComparer<CanMessage>
     {
         return req.Command switch
         {
-            Command.SystemCommand => req.SubCommand == res.SubCommand &&
-                req.SubCommand switch
-                {
-                    SubCommand.Stop => req.DeviceId == res.DeviceId,
-                    SubCommand.Go => req.DeviceId == res.DeviceId,
-                    SubCommand.Halt => req.DeviceId == res.DeviceId,
-                    _ => false,
-                },
+            Command.SystemCommand => req.SubCommand == res.SubCommand && req.DeviceId == res.DeviceId,
+            Command.Discovery => true,
+            Command.Bind => req.DeviceId == res.DeviceId && req.GetDataUShort(4) == res.GetDataUShort(4),
+            Command.Verify => req.DeviceId == res.DeviceId,
             Command.LocoVelocity => req.DeviceId == res.DeviceId,
             Command.LocoDirection => req.DeviceId == res.DeviceId,
-            Command.LocoFunction => req.DeviceId == res.DeviceId,
+            Command.LocoFunction => req.DeviceId == res.DeviceId && req.GetDataByte(4) == res.GetDataByte(4),
+            Command.ReadConfig => req.DeviceId == res.DeviceId,
+            Command.WriteConfig => req.DeviceId == res.DeviceId,
+            Command.SwitchAccessories => req.DeviceId == res.DeviceId,
+            Command.ACC_CONFIG => req.DeviceId == res.DeviceId,
+            Command.S88Polling => req.DeviceId == res.DeviceId,
+            Command.S88Event => req.DeviceId == res.DeviceId,
+            Command.SX1Event => req.DeviceId == res.DeviceId,
+           // Command.SoftwareVersion => req.DeviceId == res.DeviceId,
+            //Command.UpdateOffer => req.DeviceId == res.DeviceId,
+            //Command.ReadConfigData => req.DeviceId == res.DeviceId,
+            Command.BootloaderCANBound => req.DeviceId == res.DeviceId,
+            Command.BootloaderRailBound => req.DeviceId == res.DeviceId,
+            Command.StatusData => req.DeviceId == res.DeviceId,
+            Command.ConfigData => req.DeviceId == res.DeviceId,
+            Command.ConfigDataStream => req.DeviceId == res.DeviceId,
+            Command.DataStream6021Adapter => req.DeviceId == res.DeviceId,
+            Command.AutomaticTransmission => req.DeviceId == res.DeviceId && req.GetDataByte(4) == res.GetDataByte(4),
+            Command.DebugMessage => req.DeviceId == res.DeviceId,
             _ => false,
         };
     }
