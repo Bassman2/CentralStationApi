@@ -26,5 +26,8 @@ public enum Command : byte
     ConfigDataStream = 0x21,
     DataStream6021Adapter = 0x22,
     AutomaticTransmission = 0x30,
-    DebugMessage = 0x42     // not is specification
+    DebugMessage = 0x42,     // not is specification
+
+    MS1Unknown54 = 0x54,
+    MS1Unknown94 = 0x94
 }

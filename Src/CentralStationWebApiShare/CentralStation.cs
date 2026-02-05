@@ -58,49 +58,49 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     public async Task<bool> SystemStopAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Stop);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Stop);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
 
     public async Task<bool> SystemGoAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Go);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Go);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
 
     public async Task<bool> SystemHaltAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Halt);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Halt);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
 
     public async Task<bool> SystemLocomotiveEmergencyHaltAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.LocoHalt);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.LocoHalt);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
 
     public async Task<bool> SystemLocomotiveCycleStopAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.LocoCycleStop);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.LocoCycleStop);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
 
     public async Task<bool> SystemLocomotiveDataProtocolAsync(uint deviceId = AllDevices, byte protocoll = 0xff, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.LocoDataProtocol).AddByte(protocoll);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.LocoDataProtocol).AddByte(protocoll);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
 
     public async Task<bool> SystemArticleSwitchingTimeAsync(uint deviceId = AllDevices, ushort time = 0xff, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.SwitchingTime).AddUInt16(time);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.SwitchingTime).AddUInt16(time);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
@@ -109,14 +109,14 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     public async Task<bool> SystemTrackProtocolAsync(uint deviceId, TrackProtocol protocoll, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.TrackProtocol).AddByte((byte)protocoll);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.TrackProtocol).AddByte((byte)protocoll);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
 
     public async Task<bool> SystemMfxNewRegistrationCounterAsync(uint deviceId, TrackProtocol protocoll, ushort newRegistrationCounter, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.NewRegistrationCounter).AddByte((byte)protocoll).AddUInt16(newRegistrationCounter);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.NewRegistrationCounter).AddByte((byte)protocoll).AddUInt16(newRegistrationCounter);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
@@ -127,21 +127,21 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     public async Task<bool> GetSystemIdentifierAsync(uint deviceId, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Identifier);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Identifier);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
 
     public async Task<bool> SetSystemIdentifierAsync(uint deviceId, byte identifier, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Identifier).AddByte(identifier);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Identifier).AddByte(identifier);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
 
     public async Task<bool> SystemResetAsync(uint deviceId, byte resetTarge, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Reset).AddByte(resetTarge);
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Reset).AddByte(resetTarge);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res is not null;
     }
@@ -152,35 +152,35 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     public async Task<DirectionChange?> GetLocomotiveDirectionAsync(uint locoId, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId);
+        var req = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return (DirectionChange?)res?.GetDataByte(4) ?? null;
     }
 
     public async Task<DirectionChange?> SetLocomotiveDirectionAsync(uint locoId, DirectionChange direction, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte((byte)direction);
+        var req = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte((byte)direction);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return (DirectionChange?)res?.GetDataByte(4) ?? null;
     }
 
     public async Task<byte?> GetLocomotiveFunctionAsync(uint locoId, byte function, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.LocoFunction, hash).AddUInt32(locoId).AddByte(function);
+        var req = new CanMessage(Priority.Prio1, Command.LocoFunction, hash).AddUInt32(locoId).AddByte(function);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res?.GetDataByte(5) ?? null;
     }
 
     public async Task<byte?> SetLocomotiveFunctionAsync(uint locoId, byte function, byte value, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.LocoFunction, hash).AddUInt32(locoId).AddByte(function).AddByte(value);
+        var req = new CanMessage(Priority.Prio1, Command.LocoFunction, hash).AddUInt32(locoId).AddByte(function).AddByte(value);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res?.GetDataByte(5) ?? null;
     }
 
     public async Task<byte?> SetLocomotiveFunctionAsync(uint locoId, byte function, byte value, ushort functionValue, CancellationToken cancellationToken = default)
     {
-        var req = new CanMessage(Priority.Proirity1, Command.LocoFunction, hash).AddUInt32(locoId).AddByte(function).AddByte(value).AddUInt16(functionValue);
+        var req = new CanMessage(Priority.Prio1, Command.LocoFunction, hash).AddUInt32(locoId).AddByte(function).AddByte(value).AddUInt16(functionValue);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res?.GetDataByte(5) ?? null;
     }
@@ -189,7 +189,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(velocity, MaxVelocity, nameof(velocity));
 
-        var req = new CanMessage(Priority.Proirity1, Command.LocoVelocity, hash).AddUInt32(locoId);
+        var req = new CanMessage(Priority.Prio1, Command.LocoVelocity, hash).AddUInt32(locoId);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res?.GetDataByte(5) ?? null;
     }
@@ -198,7 +198,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(velocity, MaxVelocity, nameof(velocity));
 
-        var req = new CanMessage(Priority.Proirity1, Command.LocoVelocity, hash).AddUInt32(locoId).AddUInt16(velocity);
+        var req = new CanMessage(Priority.Prio1, Command.LocoVelocity, hash).AddUInt32(locoId).AddUInt16(velocity);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res?.GetDataByte(5) ?? null;
     }
