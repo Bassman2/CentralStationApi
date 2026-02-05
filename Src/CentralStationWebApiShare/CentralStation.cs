@@ -30,6 +30,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
     {
+        HashCache.AddHash((ushort)hash, "PCApp");  
         canMessageHandler = new CanMessageHandler(this);
         statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
     }

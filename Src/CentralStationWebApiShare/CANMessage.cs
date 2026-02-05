@@ -109,10 +109,11 @@ public class CanMessage
         Timestamp = DateTime.Now;
         Array.Copy(data, Buffer, 13);
 
-        // add to DeviceCache
+        // add to DeviceCache & HashCache
         if (Command == Command.SoftwareVersion && DataLength == 8)
         {
             DeviceCache.AddDevice(DeviceId, GetDataUShort(6));
+            HashCache.AddHash(Hash, GetDataUShort(6));
         }
     }
 
@@ -296,7 +297,7 @@ public class CanMessage
         string sender = Dns.GetHostEntry(Sender)?.HostName.Split('.')[0] ?? Sender;
         string data = $"{GetHeader():X8} {DataLength:X} {GetDataByte(0):X2} {GetDataByte(1):X2} {GetDataByte(2):X2} {GetDataByte(3):X2} {GetDataByte(4):X2} {GetDataByte(5):X2} {GetDataByte(6):X2} {GetDataByte(7):X2}";
         string sendReq = IsResponse ? "<--" : "-->";
-        string header = $"{Priority,-6} {Command,-20} {sendReq} {Hash:X4}";
+        string header = $"{Priority,-6} {Command,-20} {sendReq} {HashCache.GetHash(Hash),-20} {Hash:X4}";
         string description = Description;
         return $"{timestamp} {sender,-12} {data} {header} {description}";
     }
