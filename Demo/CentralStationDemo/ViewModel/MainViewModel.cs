@@ -1,7 +1,6 @@
 ﻿using CentralStationWebApi.Serializer;
 using System.IO;
 using System.Reflection;
-using static CommunityToolkit.Mvvm.ComponentModel.__Internals.__TaskExtensions.TaskAwaitableWithoutEndValidation;
 
 namespace CentralStationDemo.ViewModel;
 
@@ -62,7 +61,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.LocomotiveDirection += (s, e) => OnLocomotiveDirection(e.LocomotiveId, e.Direction); 
         cs.LocomotiveFunction += (s, e) => OnLocomotiveFunction(e.LocomotiveId, e.Function, e.Value);
 
-        cs.FileReceived += (s, e) => OnFileReceived(e.FileName, e.Stream);
+        //cs.FileReceived += (s, e) => OnFileReceived(e.FileName, e.Stream);
 
     }
 

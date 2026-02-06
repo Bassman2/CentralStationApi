@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CentralStationBasic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CanMessageComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\HashCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)S88Event.cs" />
     <Compile Include="..\CentralStationWebApiShare\CanMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CSFileStream.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Device.cs" />

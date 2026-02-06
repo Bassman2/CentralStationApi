@@ -1,18 +1,23 @@
-﻿namespace CentralStationWebApi;
+﻿using System;
+using System.Reflection;
+using System.Reflection.Metadata;
+using System.Threading;
+
+namespace CentralStationWebApi;
 
 public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    public event EventHandler<FileReceivedEventArgs>? FileReceived;
+    //public event EventHandler<FileReceivedEventArgs>? FileReceived;
 
     public event EventHandler<LocomotiveEventArgs>? LocomotiveHalt;
     public event EventHandler<LocomotiveVelocityEventArgs>? LocomotiveVelocity;
     public event EventHandler<LocomotiveDirectionEventArgs>? LocomotiveDirection;
     public event EventHandler<LocomotiveFunctionEventArgs>? LocomotiveFunction;
 
-    private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
+    //private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
 
     private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
 
@@ -32,18 +37,21 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     {
         HashCache.AddHash((ushort)hash, "PCApp");  
         canMessageHandler = new CanMessageHandler(this);
-        statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
+        //statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
     }
         
 
     protected override void ReceiveHandler(CanMessage msg)
     {
-        //HandleSystem(msg);
+        HandleStatus(msg);
+        HandleLocomotive(msg);
 
         HandleSystemStatus(msg);
 
-        HandleLocomotive(msg);
-        HandleStatus(msg);
+
+        //HandleSystem(msg);
+
+
         //HandleStreams(msg);
 
         HandleConfigData(msg);
@@ -55,7 +63,70 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         canMessageHandler.OnResponseReceived(msg);
     }
 
-    #region System 
+    #region Status Events
+
+    public SystemStatus Status { get; private set; } = CentralStationWebApi.SystemStatus.Default;
+
+    private void SetStatus(SystemStatus status)
+    {
+        if (Status != status)
+        {
+            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Status)));
+            Status = status;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
+        }
+    }
+
+    private void HandleStatus(CanMessage message)
+    {
+        if (message.Command == Command.SystemCommand && message.DeviceId == CentralStationBasic.AllDevices)
+        {
+            if (message.SubCommand == SubCommand.Stop)
+            {
+                SetStatus(CentralStationWebApi.SystemStatus.Stop);
+            }
+            else if (message.SubCommand == SubCommand.Go)
+            {
+                SetStatus(CentralStationWebApi.SystemStatus.Go);
+
+            }
+        }
+    }
+
+    private void HandleLocomotive(CanMessage msg)
+    {
+        switch (msg.Command)
+        {
+        case Command.SystemCommand:
+            if (msg.SubCommand == SubCommand.LocoHalt && msg.IsResponse && msg.DataLength == 5)
+            {
+                LocomotiveHalt?.Invoke(this, new LocomotiveEventArgs(msg.DeviceId));
+            }
+            break;
+        case Command.LocoVelocity:
+            if (msg.IsResponse && msg.DataLength == 6)
+            {
+                LocomotiveVelocity?.Invoke(this, new LocomotiveVelocityEventArgs(msg.DeviceId, Math.Min(MaxVelocity, msg.GetDataUShort(4))));
+            }
+            break;
+        case Command.LocoDirection:
+            if (msg.IsResponse && msg.DataLength == 5)
+            {
+                LocomotiveDirection?.Invoke(this, new LocomotiveDirectionEventArgs(msg.DeviceId, (DirectionChange)msg.GetDataByte(4)));
+            }
+            break;
+        case Command.LocoFunction:
+            if (msg.IsResponse && (msg.DataLength == 6 || msg.DataLength == 8))
+            {
+                LocomotiveFunction?.Invoke(this, new LocomotiveFunctionEventArgs(msg.DeviceId, msg.GetDataByte(4), msg.GetDataByte(5), msg.DataLength == 8 ? msg.GetDataUShort(6) : null));
+            }
+            break;
+        }
+    }
+
+    #endregion 
+
+    #region 2 System Commands
 
     public async Task<bool> SystemStopAsync(uint deviceId = AllDevices, CancellationToken cancellationToken = default)
     {
@@ -124,7 +195,46 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     // SubCommand.Overload not implemented only response from TFP/GFP
 
-    // SubCommand.Status handled in HandleSystemStatus
+    private readonly Lock systemStatusLock = new();
+    private readonly AutoResetEvent systemStatusEvent = new(false);
+    private ushort? systemStatusValue = null;
+
+    private void HandleSystemStatus(CanMessage msg)
+    {
+        if (msg.Command == Command.SystemCommand && msg.SubCommand == SubCommand.Status && msg.IsResponse)
+        {
+            switch (msg.DataLength)
+            {
+            // no result
+            case 6:
+                systemStatusValue = null;
+                break;
+            // bool result
+            case 7:
+                systemStatusValue = msg.GetDataByte(6);
+                break;
+            // ushort value result
+            case 8:
+                systemStatusValue = msg.GetDataUShort(6);
+                break;
+            default:
+                throw new InvalidDataException();
+            }
+        }
+    }
+    public async Task<ushort?> GetSystemStatusAsync(uint device, byte channel, ushort? value = null)
+    {
+        return await Task.Run(() =>
+        {
+            lock (systemStatusLock)
+            {
+                systemStatusValue = null;
+                SystemStatus(device, channel, value);
+                systemStatusEvent.WaitOne(MessageTimeout);
+                return systemStatusValue;
+            }
+        });
+    }
 
     public async Task<bool> GetSystemIdentifierAsync(uint deviceId, CancellationToken cancellationToken = default)
     {
@@ -149,7 +259,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #endregion
 
-    #region Administration
+    #region 3 Administration
 
     public async Task<DirectionChange?> GetLocomotiveDirectionAsync(uint locoId, CancellationToken cancellationToken = default)
     {
@@ -206,85 +316,211 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #endregion
 
-    #region Status
+    #region 4 Article Commands
 
-    public SystemStatus Status { get; private set; } = CentralStationWebApi.SystemStatus.Default;
-
-    private void SetStatus(SystemStatus status)
+    public async Task<bool> SetArticleSwitchAsync(uint localId, byte standing, byte power, CancellationToken cancellationToken = default)
     {
-        if (Status != status)
-        {
-            PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(nameof(Status)));
-            Status = status;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
-        }
+        var req = new CanMessage(Priority.Prio1, Command.SwitchAccessories, hash).AddUInt32(localId).AddByte(standing).AddByte(power);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res != null;
     }
 
-    private void HandleStatus(CanMessage message)
+    public async Task<bool> SetArticleSwitchAsync(uint localId, byte standing, byte power, ushort time, CancellationToken cancellationToken = default)
     {
-        if (message.Command == Command.SystemCommand && message.DeviceId == CentralStationBasic.AllDevices)
-        {
-            if (message.SubCommand == SubCommand.Stop)
-            {
-                SetStatus(CentralStationWebApi.SystemStatus.Stop);
-            }
-            else if (message.SubCommand == SubCommand.Go)
-            {
-                SetStatus(CentralStationWebApi.SystemStatus.Go);
-
-            }
-        }
+        var req = new CanMessage(Priority.Prio1, Command.SwitchAccessories, hash).AddUInt32(localId).AddByte(standing).AddByte(power).AddUInt16(time);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res != null;
     }
 
     #endregion
 
-    #region SystemStatus
+    #region 5 Feedback
 
-    private const int systemStatusTimeout = 500;
-    private readonly Lock systemStatusLock = new();
-    private readonly AutoResetEvent systemStatusEvent = new(false);
-    private ushort? systemStatusValue = null;
-
-    private void HandleSystemStatus(CanMessage msg)
+    // obsolete
+    public async Task<ushort?> GetS88PollingAsync(uint deviceId, byte module, CancellationToken cancellationToken = default)
     {
-        if (msg.Command == Command.SystemCommand && msg.SubCommand == SubCommand.Status && msg.IsResponse)
+        var req = new CanMessage(Priority.Prio1, Command.S88Polling, hash).AddUInt32(deviceId).AddByte(module);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res?.GetDataUShort(5) ?? null; 
+    }
+
+
+    public async Task<S88Event?> GetS88EventAsync(ushort deviceId, ushort contactId, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Prio1, Command.S88Event, hash).AddUInt16(deviceId).AddUInt16(contactId);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is null ? null : new S88Event() { OldValue = res.GetDataByte(4), NewValue = res.GetDataByte(5), Time = res.GetDataUShort(6) };
+    }
+
+    public async Task<S88Event?> RegisterS88EventAsync(ushort deviceId, ushort contactId, byte parameter, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Prio1, Command.S88Event, hash).AddUInt16(deviceId).AddUInt16(contactId).AddByte(parameter);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is null ? null : new S88Event() { OldValue = res.GetDataByte(4), NewValue = res.GetDataByte(5), Time = res.GetDataUShort(6) };
+    }
+
+    #endregion
+
+    #region 6 Other Commands / Sonstige Befehle
+
+    private const int devicesTimeout = 500;
+    private Dictionary<uint, Device>? devices = null;
+
+    //    private AutoResetEvent devicesEvent = new(false);
+
+    private void HandleDevices(CanMessage msg)
+    {
+        if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
         {
-            switch (msg.DataLength)
+            if (devices != null && !devices.ContainsKey(msg.DeviceId))
             {
-            // no result
-            case 6: 
-                systemStatusValue = null;
-                break;
-            // bool result
-            case 7: 
-                systemStatusValue = msg.GetDataByte(6);
-                break;
-            // ushort value result
-            case 8:
-                systemStatusValue = msg.GetDataUShort(6);
-                break;
-            default:
-                throw new InvalidDataException();
+                var device = new Device(msg);
+                DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.Version} {device.DeviceType}");
+                devices?.Add(device.DeviceId, device);
             }
         }
     }
-    public async Task<ushort?> GetSystemStatusAsync(uint device, byte channel, ushort? value = null)
+
+    public async Task<List<Device>?> GetDevicesAsync()
     {
+        return await Task.Run(async () =>
+        {
+            DebugDevices($"GetDevicesAsync++");
+
+            devices = [];
+            
+            var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
+            SendMessage(message);
+
+            await Task.Delay(devicesTimeout);
+
+            var res = devices.Values.ToList();
+            devices = null;
+            DebugDevices($"GetDevicesAsync--");
+            return res;
+        });
+    }
+
+    public async Task<bool> GetAllDevicesSoftwareVersionAsync(CancellationToken cancellationToken = default)
+    {
+        var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
+        SendMessage(message);
+        await Task.CompletedTask;
+        return true;
+    }
+
+    public async Task<bool> GetStatusDataAsync(uint device, byte index, CancellationToken cancellationToken = default)
+    {
+        var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(index);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res is null ? false : true;  //new StatusDataDevice();
+    }
+
+    private const int deviceInfoTimeout = 500;
+    private readonly AutoResetEvent deviceInfoEvent = new(false);
+    private DeviceInfo? deviceInfo = null;
+
+    private const int deviceMeasurementTimeout = 500;
+    private readonly AutoResetEvent deviceMeasurementEvent = new(false);
+    private DeviceMeasurement? deviceMeasurement = null;
+
+    private DataCollector? deviceDataCollector = null;
+    private readonly Lock deviceLock = new Lock();
+
+    private void HandleDeviceInfo(CanMessage msg)
+    {
+        if (msg.Command == Command.StatusData && msg.IsResponse)
+        {
+            switch (msg.DataLength)
+            {
+            case 5:
+                DebugDevices($"HandleStatusData Length 5 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)}");
+                break;
+            case 6:
+                DebugDevices($"HandleStatusData Length 6 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
+                int index = msg.GetDataByte(4);
+                int packages = msg.GetDataByte(5);
+                if (index == 0)
+                {
+                    deviceInfo = new(deviceDataCollector!);
+                    deviceInfoEvent.Set();
+                }
+                else
+                {
+                    deviceMeasurement = new(deviceDataCollector!);
+                    deviceMeasurementEvent.Set();
+                }
+                break;
+            case 8:
+                ushort packageIndex = (byte)(msg.Hash & 0xff);
+                DebugDevices($"HandleStatusData Length 8 HashIndex {packageIndex}");
+                if (packageIndex == 1)
+                {
+                    deviceDataCollector = new();
+                }
+                deviceDataCollector?.AddData(msg.GetData());
+                break;
+            default:
+                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
+            }
+        }
+    }
+
+    public async Task<DeviceInfo?> GetDeviceInfoAsync(uint deviceId)
+    {
+        ArgumentOutOfRangeException.ThrowIfZero(deviceId, nameof(deviceId));
+
         return await Task.Run(() =>
         {
-            lock (systemStatusLock)
+            lock (deviceLock)
             {
-                systemStatusValue = null;
-                SystemStatus(device, channel, value);
-                systemStatusEvent.WaitOne(systemStatusTimeout);
-                return systemStatusValue;
+                DebugDevices($"GetDeviceInfoAsync++");
+
+                deviceInfoEvent.Reset();
+                var message = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(0);
+                SendMessage(message);
+                bool success = deviceInfoEvent.WaitOne(deviceInfoTimeout);
+                DebugDevices($"deviceInfoEvent fired {success}");
+
+                var res = deviceInfo;
+                deviceInfo = null;
+                DebugDevices($"GetDeviceInfoAsync--");
+                return res;
             }
         });
     }
 
+    public async Task<DeviceMeasurement?> GetDeviceMeasurementAsync(uint deviceId, byte index)
+    {
+        ArgumentOutOfRangeException.ThrowIfZero(deviceId, nameof(deviceId));
+        ArgumentOutOfRangeException.ThrowIfZero(index, nameof(index));
+
+        return await Task.Run(() =>
+        {
+            lock (deviceLock)
+            {
+                DebugDevices($"GetDeviceMeasurementAsync++");
+
+                deviceMeasurementEvent.Reset();
+                StatusData(deviceId, index);
+                bool success = deviceMeasurementEvent.WaitOne(deviceMeasurementTimeout);
+                DebugDevices($"deviceMeasurementEvent fired {success}");
+
+                var res = deviceMeasurement;
+                deviceMeasurement = null;
+                DebugDevices($"GetDeviceMeasurementAsync--");
+                return res;
+            }
+        });
+    }
+
+    [Conditional("DEBUG")]
+    private static void DebugDevices(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
+
+
     #endregion
 
-    #region ConfigData
+    #region 7 GUI Information Transfer
 
     private const int configDataTimeout = 2000;
     private readonly Lock configDataLock = new();
@@ -361,184 +597,14 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #endregion
 
-    #region Locomotives
+    #region 9 Automation
 
-    private void HandleLocomotive(CanMessage msg)
+    public async Task<byte?> SetAutomationAsync(ushort deviceExpert, ushort automaticFunction, byte position, byte parameter, CancellationToken cancellationToken = default)
     {
-        switch (msg.Command)
-        {
-        case Command.SystemCommand:
-            if (msg.SubCommand == SubCommand.LocoHalt && msg.IsResponse && msg.DataLength == 5)
-            {
-                LocomotiveHalt?.Invoke(this, new LocomotiveEventArgs(msg.DeviceId));
-            }
-            break;
-        case Command.LocoVelocity:
-            if (msg.IsResponse && msg.DataLength == 6)
-            {
-                LocomotiveVelocity?.Invoke(this, new LocomotiveVelocityEventArgs(msg.DeviceId, Math.Min(MaxVelocity, msg.GetDataUShort(4))));
-            }
-            break;
-        case Command.LocoDirection:
-            if (msg.IsResponse && msg.DataLength == 5)
-            {
-                LocomotiveDirection?.Invoke(this, new LocomotiveDirectionEventArgs(msg.DeviceId, (DirectionChange)msg.GetDataByte(4)));
-            }
-            break;
-        case Command.LocoFunction:
-            if (msg.IsResponse && (msg.DataLength == 6 || msg.DataLength == 8))
-            {
-                LocomotiveFunction?.Invoke(this, new LocomotiveFunctionEventArgs(msg.DeviceId, msg.GetDataByte(4), msg.GetDataByte(5), msg.DataLength == 8 ? msg.GetDataUShort(6) : null));
-            }
-            break;
-        }
+        var req = new CanMessage(Priority.Prio1, Command.AutomaticTransmission, hash).AddUInt16(deviceExpert).AddUInt16(automaticFunction).AddByte(position).AddByte(parameter);
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res?.GetDataByte(5) ?? null;
     }
-
-    #endregion
-
-    #region Devices
-
-
-    private const int devicesTimeout = 500;
-    private Dictionary<uint, Device>? devices = null;
-
-    //    private AutoResetEvent devicesEvent = new(false);
-
-    private void HandleDevices(CanMessage msg)
-    {
-        if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
-        {
-            if (devices != null && !devices.ContainsKey(msg.DeviceId))
-            {
-                var device = new Device(msg);
-                DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.Version} {device.DeviceType}");
-                devices?.Add(device.DeviceId, device);
-            }
-        }
-    }
-
-    public async Task<List<Device>?> GetDevicesAsync()
-    {
-        return await Task.Run(async () =>
-        {
-            DebugDevices($"GetDevicesAsync++");
-         
-            devices = [];
-            SoftwareVersion();
-            await Task.Delay(devicesTimeout);
-
-            var res = devices.Values.ToList();
-            devices = null;
-            DebugDevices($"GetDevicesAsync--");
-            return res; 
-        });
-    }
-
-    #endregion
-
-    #region DeviceInfo
-
-    private const int deviceInfoTimeout = 500;
-    private readonly AutoResetEvent deviceInfoEvent = new(false);
-    private DeviceInfo? deviceInfo = null;
-
-    private const int deviceMeasurementTimeout = 500;
-    private readonly AutoResetEvent deviceMeasurementEvent = new(false);
-    private DeviceMeasurement? deviceMeasurement = null;
-
-    private DataCollector? deviceDataCollector = null;
-    private readonly Lock deviceLock = new Lock();
-
-    private void HandleDeviceInfo(CanMessage msg)
-    {
-        if (msg.Command == Command.StatusData && msg.IsResponse)
-        {
-            switch (msg.DataLength)
-            {
-            case 5:
-                DebugDevices($"HandleStatusData Length 5 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)}");
-                break;
-            case 6:
-                DebugDevices($"HandleStatusData Length 6 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
-                int index = msg.GetDataByte(4);
-                int packages = msg.GetDataByte(5);
-                if (index == 0)
-                {
-                    deviceInfo = new(deviceDataCollector!);
-                    deviceInfoEvent.Set();
-                }
-                else
-                {
-                    deviceMeasurement = new(deviceDataCollector!);
-                    deviceMeasurementEvent.Set();
-                }
-                break;
-            case 8:
-                ushort packageIndex = (byte)(msg.Hash & 0xff);
-                DebugDevices($"HandleStatusData Length 8 HashIndex {packageIndex}");
-                if (packageIndex == 1)
-                {
-                    deviceDataCollector = new();
-                }
-                deviceDataCollector?.AddData(msg.GetData());
-                break;
-            default:
-                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
-            }
-        }
-    }
-
-    public async Task<DeviceInfo?> GetDeviceInfoAsync(uint deviceId)
-    {
-        ArgumentOutOfRangeException.ThrowIfZero(deviceId, nameof(deviceId));
-
-        return await Task.Run(() =>
-        {
-            lock (deviceLock)
-            {
-                DebugDevices($"GetDeviceInfoAsync++");
-
-                deviceInfoEvent.Reset();
-                StatusData(deviceId, 0);
-                bool success = deviceInfoEvent.WaitOne(deviceInfoTimeout);
-                DebugDevices($"deviceInfoEvent fired {success}");
-
-                var res = deviceInfo;
-                deviceInfo = null;
-                DebugDevices($"GetDeviceInfoAsync--");
-                return res;
-            }
-        });
-    }
-
-    public async Task<DeviceMeasurement?> GetDeviceMeasurementAsync(uint deviceId, byte index)
-    {
-        ArgumentOutOfRangeException.ThrowIfZero(deviceId, nameof(deviceId));
-        ArgumentOutOfRangeException.ThrowIfZero(index, nameof(index));
-
-        return await Task.Run(() =>
-        {
-            lock (deviceLock)
-            {
-                DebugDevices($"GetDeviceMeasurementAsync++");
-
-                deviceMeasurementEvent.Reset();
-                StatusData(deviceId, index);
-                bool success = deviceMeasurementEvent.WaitOne(deviceMeasurementTimeout);
-                DebugDevices($"deviceMeasurementEvent fired {success}");
-
-                var res = deviceMeasurement;
-                deviceMeasurement = null;
-                DebugDevices($"GetDeviceMeasurementAsync--");
-                return res;
-            }
-        });
-    }
-
-
-
-    [Conditional("DEBUG")]
-    private static void DebugDevices(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
 
     #endregion
 }
