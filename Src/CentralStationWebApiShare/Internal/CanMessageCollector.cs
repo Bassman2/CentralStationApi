@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi.Internal;
 
-internal class DataCollector
+internal class CanMessageCollector
 {
     protected readonly MemoryStream mem = new(4 * 1024);
 

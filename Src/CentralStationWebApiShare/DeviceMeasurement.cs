@@ -7,7 +7,7 @@ public class DeviceMeasurement
     public DeviceMeasurement()
     { }
 
-    internal DeviceMeasurement(DataCollector col)
+    internal DeviceMeasurement(CanMessageCollector col)
     {
         col.SetPositionToStart();
         

@@ -62,7 +62,7 @@ public class Controller(CanMessage msg, string host)
         }
     }
 
-    internal void Add(int index, DataCollector col)
+    internal void Add(int index, CanMessageCollector col)
     {
         col.SetPositionToStart();
         if (index == 0)

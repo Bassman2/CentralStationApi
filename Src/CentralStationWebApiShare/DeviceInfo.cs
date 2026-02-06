@@ -2,7 +2,7 @@
 
 public class DeviceInfo
 {
-    internal DeviceInfo(DataCollector col)
+    internal DeviceInfo(CanMessageCollector col)
     {
         col.SetPositionToStart();
         NumOfMeasuredValues = col.ReadByte();

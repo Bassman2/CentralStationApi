@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi.Internal;
 
-internal class FileCollector(CSFileStreamMode mode, string fileName, uint length, ushort cRC, byte reserved = 0) : DataCollector
+internal class FileCollector(CSFileStreamMode mode, string fileName, uint length, ushort cRC, byte reserved = 0) : CanMessageCollector
 {
     public CSFileStreamMode Mode => mode;
 

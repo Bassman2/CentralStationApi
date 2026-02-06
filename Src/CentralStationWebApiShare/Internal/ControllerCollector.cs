@@ -16,7 +16,7 @@
 //        dictionary[controller.DeviceId] = (0, controller);
 //    }
     
-//    public void Add(uint deviceId, int index, DataCollector dataCollector)
+//    public void Add(uint deviceId, int index, CanMessageCollector dataCollector)
 //    {
 //        dictionary[deviceId].controller.Add(index, dataCollector);
 //    }

@@ -424,7 +424,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
     private readonly AutoResetEvent deviceMeasurementEvent = new(false);
     private DeviceMeasurement? deviceMeasurement = null;
 
-    private DataCollector? deviceDataCollector = null;
+    private CanMessageCollector? deviceDataCollector = null;
     private readonly Lock deviceLock = new Lock();
 
     private void HandleDeviceInfo(CanMessage msg)

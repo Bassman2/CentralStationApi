@@ -3,7 +3,7 @@
 [DebuggerDisplay("StatusDataDevice {DeviceId} {ArticleNumber} {DeviceName}")]
 public class StatusDataValue
 {
-    internal StatusDataValue(uint device, byte index, byte numOfPackages, DataCollector col)
+    internal StatusDataValue(uint device, byte index, byte numOfPackages, CanMessageCollector col)
     {
         DeviceId = device;
         Index = index;
