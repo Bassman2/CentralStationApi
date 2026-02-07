@@ -6,7 +6,7 @@
 
         void Send(CanMessage msg);
 
-        //Task SendAsync(CanMessage msg);
+        Task SendAsync(CanMessage msg);
 
         Task<CanMessage> ReceiveAsync();
     }

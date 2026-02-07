@@ -1,6 +1,6 @@
 ﻿namespace CentralStationWebApi;
 
-public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
+public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
     private readonly IProtocolHandler client;
     private readonly CanMessageHandler canMessageHandler;
@@ -25,11 +25,8 @@ public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, I
     internal static Uri MagUri => new($"http://{Host}/app/assets/mag/");
     internal static Uri LocoUri => new($"http://{Host}/app/assets/lok/");
 
-
     public static string? Host { get; private set; }
-
     public DeviceData Device { get; }
-    public uint DeviceId { get; }
 
     public TimeSpan MessageTimeout
     {   
@@ -52,8 +49,7 @@ public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, I
 
         Host = host;
         Device = device ?? new DeviceData(0x6D554711, new System.Version(1, 0));
-        DeviceId = Device.DeviceId;
-        hash = DeviceId2Hash(DeviceId);
+        hash = DeviceId2Hash(Device.DeviceId);
 
         client = protocol switch
         {
@@ -86,6 +82,13 @@ public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, I
         Tracer.TraceMessage(msg);
     }
 
+    internal async Task SendMessageAsync(CanMessage msg)
+    {
+        messageReceivedQueue.Add(msg);
+        await client.SendAsync(msg);
+        Tracer.TraceMessage(msg);
+    }
+
     #endregion
 
     #region Receive Message
@@ -104,48 +107,32 @@ public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, I
 
                 if (msg.Command == Command.SoftwareVersion && msg.IsResponse == false)
                 {
-                    var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash, true).
-                                AddUInt32(DeviceId).
-                                AddByte((byte)Device.Version.Major).
-                                AddByte((byte)Device.Version.Minor).
-                                AddUInt16((ushort)DeviceType.Application);
-                    SendMessage(message);
+                    var res = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash, true).AddUInt32(Device.DeviceId).AddByte((byte)Device.Version.Major).AddByte((byte)Device.Version.Minor).AddUInt16((ushort)DeviceType.Application);
+                    SendMessage(res);
                 }
-                if (msg.Command == Command.StatusData && msg.IsResponse == false && msg.DeviceId == DeviceId && msg.IsResponse == false)
+                if (msg.Command == Command.StatusData && msg.IsResponse == false && msg.DeviceId == Device.DeviceId && msg.IsResponse == false)
                 {
-                    var message = new CanMessage(Priority.Prio1, Command.StatusData, 0x0301, true).
-                                AddByte(0).
-                                AddByte(0).
-                                AddByte(0).
-                                AddByte(0).
-                                AddUInt32(Device.SerialNumber);
-                    SendMessage(message);
+                    byte num = 2;
+                    var res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0301, true).AddUInt32(0).AddUInt32(Device.SerialNumber);
+                    SendMessage(res);
 
-                    message = new CanMessage(Priority.Prio1, Command.StatusData, 0x0302, true).
-                               AddString(Device.ArticleNumber);
-                    SendMessage(message);
+                    res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0302, true).AddString(Device.ArticleNumber);
+                    SendMessage(res);
 
                     string name = Device.DeviceName;
                     while (!string.IsNullOrEmpty(name))
                     {
-                        message = new CanMessage(Priority.Prio1, Command.StatusData, 0x0300, true).AddString(name.Substring(0, 8));
-                        SendMessage(message);
+                        res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0300, true).AddString(name.Substring(0, 8));
+                        SendMessage(res);
+                        num++;
                         name = name.Length > 8 ? name.Substring(8) : string.Empty;
                     }
 
-                    message = new CanMessage(Priority.Prio1, Command.StatusData, hash, true).
-                                AddUInt32(Device.DeviceId).
-                                AddByte(0).
-                                AddByte(5);
-                    SendMessage(message);
+                    res = new CanMessage(Priority.Prio1, Command.StatusData, hash, true).AddUInt32(Device.DeviceId).AddByte(0).AddByte(num);
+                    SendMessage(res);
                 }
 
-
-
                 ReceiveHandler(msg);
-
-
-                //HandleAsync(msg);
             }
         }
         catch (ObjectDisposedException)
@@ -523,8 +510,8 @@ public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, I
 
     //        devices = [];
 
-    //        var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
-    //        SendMessage(message);
+    //        var res = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
+    //        SendMessage(res);
 
     //        await Task.Delay(devicesTimeout);
 
@@ -537,8 +524,8 @@ public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, I
 
     //public async Task<bool> GetAllDevicesSoftwareVersionAsync(CancellationToken cancellationToken = default)
     //{
-    //    var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
-    //    SendMessage(message);
+    //    var res = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
+    //    SendMessage(res);
     //    await Task.CompletedTask;
     //    return true;
     //}
@@ -674,7 +661,7 @@ public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, I
         {
             configDataFileName = msg.GetDataString().Trim('\0');
         }
-        // hash compare: the message is for us 
+        // hash compare: the res is for us 
         if (msg.Command == Command.ConfigDataStream && !msg.IsResponse && msg.Hash == hash)
         {
             if (msg.DataLength == 6)
@@ -697,7 +684,7 @@ public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, I
             }
             else
             {
-                Debug.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} ERROR: Invalid ConfigDataStream message length");
+                Debug.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} ERROR: Invalid ConfigDataStream res length");
             }
         }
     }

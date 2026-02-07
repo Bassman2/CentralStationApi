@@ -26,8 +26,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Enums\TrackProtocol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileNameAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\AttributeExtentions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\CollectorThread.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\ControllerCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\DeviceCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\TrackCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\EventQueue.cs" />
