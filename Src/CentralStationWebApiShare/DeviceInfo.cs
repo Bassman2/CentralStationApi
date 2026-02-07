@@ -2,8 +2,9 @@
 
 public class DeviceInfo
 {
-    internal DeviceInfo(CanMessageCollector col)
+    internal DeviceInfo(uint deviceId, CanMessageCollector col)
     {
+        DeviceId = deviceId;
         col.SetPositionToStart();
         NumOfMeasuredValues = col.ReadByte();
         NumOfConfigurationChannels = col.ReadByte();
@@ -14,7 +15,7 @@ public class DeviceInfo
         DeviceName = col.ReadString();
         
     }
-
+    public uint DeviceId { get; internal set; } 
     public byte NumOfMeasuredValues { get; internal set; }
 
     public byte NumOfConfigurationChannels { get; internal set; }

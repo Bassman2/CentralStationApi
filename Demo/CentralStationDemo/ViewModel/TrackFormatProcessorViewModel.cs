@@ -101,7 +101,7 @@ public partial class TrackFormatProcessorViewModel: ObservableObject
             //Version = gfpDevice.Version;
 
 
-            var gfpInfo = await cs.GetDeviceInfoAsync(gfpDevice.DeviceId);
+            var gfpInfo = await cs.GetDeviceSystemDataAsync(gfpDevice.DeviceId);
             if (gfpInfo != null)
             {
                 AddMeasurement(new MeasurementViewModel("Name", gfpInfo.DeviceName));
@@ -114,10 +114,10 @@ public partial class TrackFormatProcessorViewModel: ObservableObject
                 //Serial = ;
             }
 
-            deviceMeasurement1 = await cs.GetDeviceMeasurementAsync(gfpDevice.DeviceId, 1);
-            deviceMeasurement2 = await cs.GetDeviceMeasurementAsync(gfpDevice.DeviceId, 2);
-            deviceMeasurement3 = await cs.GetDeviceMeasurementAsync(gfpDevice.DeviceId, 3);
-            deviceMeasurement4 = await cs.GetDeviceMeasurementAsync(gfpDevice.DeviceId, 4);
+            deviceMeasurement1 = await cs.GetMeasurementSystemDataAsync(gfpDevice.DeviceId, 1);
+            deviceMeasurement2 = await cs.GetMeasurementSystemDataAsync(gfpDevice.DeviceId, 2);
+            deviceMeasurement3 = await cs.GetMeasurementSystemDataAsync(gfpDevice.DeviceId, 3);
+            deviceMeasurement4 = await cs.GetMeasurementSystemDataAsync(gfpDevice.DeviceId, 4);
             AddMeasurement(new MeasurementViewModel(deviceMeasurement1!));
             AddMeasurement(new MeasurementViewModel(deviceMeasurement2!));
             AddMeasurement(new MeasurementViewModel(deviceMeasurement3!));

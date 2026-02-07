@@ -149,21 +149,6 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     {
         HandleStatus(msg);
         HandleLocomotive(msg);
-
-        HandleSystemStatus(msg);
-
-
-        //HandleSystem(msg);
-
-
-        //HandleStreams(msg);
-
-        HandleConfigData(msg);
-        //HandleController(msg);
-        //HandleStatusData(msg);
-        //HandleDevices(msg);
-        HandleDeviceInfo(msg);
-
         canMessageHandler.OnResponseReceived(msg);
     }
 
@@ -301,54 +286,18 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     // SubCommand.Overload not implemented only response from TFP/GFP
 
-    private readonly Lock systemStatusLock = new();
-    private readonly AutoResetEvent systemStatusEvent = new(false);
-    private ushort? systemStatusValue = null;
 
-    private void HandleSystemStatus(CanMessage msg)
+    public async Task<ushort?> GetSystemStatusAsync(uint deviceId, byte channel, ushort? configurationValue = null, CancellationToken cancellationToken = default)
     {
-        if (msg.Command == Command.SystemCommand && msg.SubCommand == SubCommand.Status && msg.IsResponse)
+        var req = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).AddUInt32(deviceId).AddSubCommand(SubCommand.Status).AddByte(channel).AddUInt16(configurationValue);  
+        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+        return res?.DataLength switch
         {
-            switch (msg.DataLength)
-            {
-            // no result
-            case 6:
-                systemStatusValue = null;
-                break;
-            // bool result
-            case 7:
-                systemStatusValue = msg.GetDataByte(6);
-                break;
-            // ushort value result
-            case 8:
-                systemStatusValue = msg.GetDataUShort(6);
-                break;
-            default:
-                throw new InvalidDataException();
-            }
-        }
-    }
-    public async Task<ushort?> GetSystemStatusAsync(uint device, byte channel, ushort? value = null)
-    {
-        return await Task.Run(() =>
-        {
-            lock (systemStatusLock)
-            {
-                systemStatusValue = null;
-                //SystemStatus(device, channel, value);
-
-                var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
-                    AddUInt32(device).
-                    AddSubCommand(SubCommand.Status).
-                    AddByte(channel).
-                    AddUInt16(value);   // optional
-                SendMessage(message);
-
-
-                systemStatusEvent.WaitOne(MessageTimeout);
-                return systemStatusValue;
-            }
-        });
+            6 => null,                  // no result
+            7 => res.GetDataByte(6),    // bool result
+            8 => res.GetDataUShort(6),  // ushort value result
+            _ => throw new InvalidDataException($"GetSystemStatusAsync: unexpected DataLength {res?.DataLength} in response")
+        };
     }
 
     public async Task<bool> GetSystemIdentifierAsync(uint deviceId, CancellationToken cancellationToken = default)
@@ -459,7 +408,6 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         return res?.GetDataUShort(5) ?? null; 
     }
 
-
     public async Task<S88Event?> GetS88EventAsync(ushort deviceId, ushort contactId, CancellationToken cancellationToken = default)
     {
         var req = new CanMessage(Priority.Prio1, Command.S88Event, hash).AddUInt16(deviceId).AddUInt16(contactId);
@@ -484,247 +432,37 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         return await canMessageHandler.SendMessageWithMultipleResponseAsync(req, cancellationToken);
     }
 
-    //private const int devicesTimeout = 500;
-    //private Dictionary<uint, Device>? devices = null;
-
-    ////    private AutoResetEvent devicesEvent = new(false);
-
-    //private void HandleDevices(CanMessage msg)
-    //{
-    //    if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
-    //    {
-    //        if (devices != null && !devices.ContainsKey(msg.DeviceId))
-    //        {
-    //            var device = new Device(msg);
-    //            DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.Version} {device.DeviceType}");
-    //            devices?.Add(device.DeviceId, device);
-    //        }
-    //    }
-    //}
-
-    //public async Task<List<Device>?> GetDevicesAsync()
-    //{
-    //    return await Task.Run(async () =>
-    //    {
-    //        DebugDevices($"GetDevicesAsync++");
-
-    //        devices = [];
-
-    //        var res = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
-    //        SendMessage(res);
-
-    //        await Task.Delay(devicesTimeout);
-
-    //        var res = devices.Values.ToList();
-    //        devices = null;
-    //        DebugDevices($"GetDevicesAsync--");
-    //        return res;
-    //    });
-    //}
-
-    //public async Task<bool> GetAllDevicesSoftwareVersionAsync(CancellationToken cancellationToken = default)
-    //{
-    //    var res = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
-    //    SendMessage(res);
-    //    await Task.CompletedTask;
-    //    return true;
-    //}
-
-    //public async Task<bool> GetStatusDataAsync(uint device, byte index, CancellationToken cancellationToken = default)
-    //{
-    //    var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(index);
-    //    var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
-    //    return res is null ? false : true;  //new StatusDataDevice();
-    //}
-
-    private const int deviceInfoTimeout = 500;
-    private readonly AutoResetEvent deviceInfoEvent = new(false);
-    private DeviceInfo? deviceInfo = null;
-
-    private const int deviceMeasurementTimeout = 500;
-    private readonly AutoResetEvent deviceMeasurementEvent = new(false);
-    private DeviceMeasurement? deviceMeasurement = null;
-
-    private CanMessageCollector? deviceDataCollector = null;
-    private readonly Lock deviceLock = new Lock();
-
-    private void HandleDeviceInfo(CanMessage msg)
-    {
-        if (msg.Command == Command.StatusData && msg.IsResponse)
-        {
-            switch (msg.DataLength)
-            {
-            case 5:
-                DebugDevices($"HandleStatusData Length 5 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)}");
-                break;
-            case 6:
-                DebugDevices($"HandleStatusData Length 6 DeviceId {msg.DeviceId:X8} Index {msg.GetDataByte(4)} NumOfPackages {msg.GetDataByte(5)}");
-                int index = msg.GetDataByte(4);
-                int packages = msg.GetDataByte(5);
-                if (index == 0)
-                {
-                    deviceInfo = new(deviceDataCollector!);
-                    deviceInfoEvent.Set();
-                }
-                else
-                {
-                    deviceMeasurement = new(deviceDataCollector!);
-                    deviceMeasurementEvent.Set();
-                }
-                break;
-            case 8:
-                ushort packageIndex = (byte)(msg.Hash & 0xff);
-                DebugDevices($"HandleStatusData Length 8 HashIndex {packageIndex}");
-                if (packageIndex == 1)
-                {
-                    deviceDataCollector = new();
-                }
-                deviceDataCollector?.AddData(msg.GetData());
-                break;
-            default:
-                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
-            }
-        }
-    }
-
-    public async Task<DeviceInfo?> GetDeviceInfoAsync(uint deviceId)
+    public async Task<DeviceInfo?> GetDeviceSystemDataAsync(uint deviceId, CancellationToken cancellationToken = default)
     {
         ArgumentOutOfRangeException.ThrowIfZero(deviceId, nameof(deviceId));
-
-        return await Task.Run(() =>
-        {
-            lock (deviceLock)
-            {
-                DebugDevices($"GetDeviceInfoAsync++");
-
-                deviceInfoEvent.Reset();
-                var message = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(0);
-                SendMessage(message);
-                bool success = deviceInfoEvent.WaitOne(deviceInfoTimeout);
-                DebugDevices($"deviceInfoEvent fired {success}");
-
-                var res = deviceInfo;
-                deviceInfo = null;
-                DebugDevices($"GetDeviceInfoAsync--");
-                return res;
-            }
-        });
+        
+        var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(0);
+        var res = await canMessageHandler.SendMessageWithCollectorResponseAsync(req, cancellationToken);
+        return res is null ? null : new DeviceInfo(deviceId, res);
     }
 
-    public async Task<DeviceMeasurement?> GetDeviceMeasurementAsync(uint deviceId, byte index)
+    public async Task<DeviceMeasurement?> GetMeasurementSystemDataAsync(uint deviceId, byte index, CancellationToken cancellationToken = default)
     {
         ArgumentOutOfRangeException.ThrowIfZero(deviceId, nameof(deviceId));
         ArgumentOutOfRangeException.ThrowIfZero(index, nameof(index));
 
-        return await Task.Run(() =>
-        {
-            lock (deviceLock)
-            {
-                DebugDevices($"GetDeviceMeasurementAsync++");
-
-                deviceMeasurementEvent.Reset();
-                //StatusData(deviceId, index);
-                var message = new CanMessage(Priority.Prio1, Command.StatusData, hash).
-                    AddUInt32(deviceId).
-                    AddByte(index);
-                SendMessage(message);
-
-
-                bool success = deviceMeasurementEvent.WaitOne(deviceMeasurementTimeout);
-                DebugDevices($"deviceMeasurementEvent fired {success}");
-
-                var res = deviceMeasurement;
-                deviceMeasurement = null;
-                DebugDevices($"GetDeviceMeasurementAsync--");
-                return res;
-            }
-        });
+        var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(index);
+        var res = await canMessageHandler.SendMessageWithCollectorResponseAsync(req, cancellationToken);
+        return res is null ? null : new DeviceMeasurement(deviceId, index, res);
     }
-
-    [Conditional("DEBUG")]
-    private static void DebugDevices(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
-
 
     #endregion
 
     #region 7 GUI Information Transfer
 
-    private const int configDataTimeout = 2000;
-    private readonly Lock configDataLock = new();
-    private readonly AutoResetEvent configDataEvent = new(false);
-    private string? configDataFileName = null;
-    private FileCollector? configDataFileCollector = null;
-
-    private void HandleConfigData(CanMessage msg)
-    {
-        if (msg.Command == Command.ConfigData && msg.IsResponse)
-        {
-            configDataFileName = msg.GetDataString().Trim('\0');
-        }
-        // hash compare: the res is for us 
-        if (msg.Command == Command.ConfigDataStream && !msg.IsResponse && msg.Hash == hash)
-        {
-            if (msg.DataLength == 6)
-            {
-                configDataFileCollector = new FileCollector(CSFileStreamMode.Request, configDataFileName!, msg.GetDataUInt(0), msg.GetDataUShort(4));
-            }
-            else if (msg.DataLength == 7)
-            {
-                configDataFileCollector = new FileCollector(CSFileStreamMode.Broadcast, configDataFileName!, msg.GetDataUInt(0), msg.GetDataUShort(4), msg.GetDataByte(6));
-            }
-            else if (msg.DataLength == 8 )
-            {
-                configDataFileCollector!.AddData(msg.GetData());
-                if (configDataFileCollector.IsReady())
-                {
-                    configDataEvent.Set();
-                    //fileReceivedQueue.Add(fileStream);
-                    //SetFile(configDataFileCollector.GetFileStream(), configDataFileCollector.FileKey, configDataFileCollector.FileName);
-                }
-            }
-            else
-            {
-                Debug.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} ERROR: Invalid ConfigDataStream res length");
-            }
-        }
-    }
-
-    public async Task<Stream?> GetConfigDataAsync(string filename)
+    public async Task<Stream?> GetConfigDataAsync(string filename, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(filename, nameof(filename));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(filename.Length, 8, nameof(filename));
-
-        return await Task.Run(() =>
-        {
-            lock (configDataLock)
-            {
-                DebugConfigData($"GetConfigDataAsync++");
-
-                //ConfigData(filename);
-
-                var message = new CanMessage(Priority.Prio1, Command.ConfigData, hash).AddString(filename);
-                SendMessage(message);
-            
-
-                bool success = configDataEvent.WaitOne(configDataTimeout);
-                if (success)
-                {
-                    var mem = new MemoryStream();
-                    //configDataFileCollector?.GetFileStream().CopyTo(mem);
-                    configDataFileCollector?.CopyTo(mem);
-                    DebugConfigData($"GetConfigDataAsync--");
-                    mem.Position = 0;
-                    return mem;
-                }
-                DebugConfigData($"GetConfigDataAsync-- NULL");
-                return null; 
-            }
-        });
+        
+        var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddString(filename);
+        var res = await canMessageHandler.SendMessageWithCollectorResponseAsync(req, cancellationToken);
+        return res?.GetStream();
     }
-
-    [Conditional("DEBUG")]
-    private static void DebugConfigData(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
-
 
     #endregion
 
@@ -741,12 +479,12 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     #region helper
 
-    private static ushort Index2Hash(byte index)
-    {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(index, 0x7f, nameof(index));
+    //private static ushort Index2Hash(byte index)
+    //{
+    //    ArgumentOutOfRangeException.ThrowIfGreaterThan(index, 0x7f, nameof(index));
 
-        return (ushort)(0x0300 | (index & 0x7f));
-    }
+    //    return (ushort)(0x0300 | (index & 0x7f));
+    //}
 
     internal static ushort DeviceId2Hash(uint deviceId)
     {

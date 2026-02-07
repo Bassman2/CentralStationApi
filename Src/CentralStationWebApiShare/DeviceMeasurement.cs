@@ -4,11 +4,11 @@ namespace CentralStationWebApi;
 
 public class DeviceMeasurement
 {
-    public DeviceMeasurement()
-    { }
-
-    internal DeviceMeasurement(CanMessageCollector col)
+    internal DeviceMeasurement(uint deviceId, byte index, CanMessageCollector col)
     {
+        DeviceId = deviceId;
+        Index = index;
+
         col.SetPositionToStart();
         
         Channel = col.ReadByte();
@@ -27,6 +27,9 @@ public class DeviceMeasurement
         End = col.ReadString();
         Unit = col.ReadString();
     }
+
+    public uint DeviceId { get; internal set; }
+    public byte Index { get; internal set; }
 
     public byte Channel { get; internal set; }
     public sbyte ValuePower { get; internal set; }

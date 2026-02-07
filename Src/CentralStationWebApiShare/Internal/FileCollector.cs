@@ -1,57 +1,57 @@
-﻿namespace CentralStationWebApi.Internal;
+﻿//namespace CentralStationWebApi.Internal;
 
-internal class FileCollector(CSFileStreamMode mode, string fileName, uint length, ushort cRC, byte reserved = 0) : CanMessageCollector
-{
-    public CSFileStreamMode Mode => mode;
+//internal class FileCollector(CSFileStreamMode mode, string fileName, uint length, ushort cRC, byte reserved = 0) : CanMessageCollector
+//{
+//    public CSFileStreamMode Mode => mode;
 
-    public string FileName => fileName;
+//    public string FileName => fileName;
 
-    public uint Length => length;
+//    public uint Length => length;
 
-    public ushort CRC => cRC;
+//    public ushort CRC => cRC;
 
-    public byte Reserved => reserved;
+//    public byte Reserved => reserved;
 
-    public bool IsReady() => mem.Length >= Length;
+//    public bool IsReady() => mem.Length >= Length;
 
-    private bool IsCompressed()
-    {
-        mem.Position = 4;
-        byte res = ReadByte();
-        mem.Position = 0;
-        return res == 0x78;
-    }
+//    private bool IsCompressed()
+//    {
+//        mem.Position = 4;
+//        byte res = ReadByte();
+//        mem.Position = 0;
+//        return res == 0x78;
+//    }
 
-    public void CopyTo(Stream stream)
-    {
-        if (mem.Length < Length)
-        {
-            throw new InvalidOperationException("Not enough data in FileCollector");
-        }
+//    public void CopyTo(Stream stream)
+//    {
+//        if (mem.Length < Length)
+//        {
+//            throw new InvalidOperationException("Not enough data in FileCollector");
+//        }
 
-        // TODO check CRC
+//        // TODO check CRC
 
-        try
-        {
-            if (IsCompressed())
-            {
-                mem.Position = 4;
-                using var zLibStream = new ZLibStream(mem, CompressionMode.Decompress);
-                zLibStream.CopyTo(stream);
-            }
-            else
-            {
-                mem.Position = 0;
-                mem.CopyTo(stream);
-            }
+//        try
+//        {
+//            if (IsCompressed())
+//            {
+//                mem.Position = 4;
+//                using var zLibStream = new ZLibStream(mem, CompressionMode.Decompress);
+//                zLibStream.CopyTo(stream);
+//            }
+//            else
+//            {
+//                mem.Position = 0;
+//                mem.CopyTo(stream);
+//            }
 
-            stream.Position = 0;
+//            stream.Position = 0;
 
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-            throw;
-        }
-    }
-}
+//        }
+//        catch (Exception ex)
+//        {
+//            Debug.WriteLine(ex);
+//            throw;
+//        }
+//    }
+//}

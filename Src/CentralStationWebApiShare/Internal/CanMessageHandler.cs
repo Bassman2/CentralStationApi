@@ -117,15 +117,61 @@ internal class CanMessageHandler(CentralStation cs)
             tcs.TrySetResult(msg);
         }
 
-
-
         if (pendingCollectorRequests.TryGetValue(msg, out var collectorTcs))
         {
-            var collector = new CanMessageCollector();
-            collector.AddData(msg.GetData());
+            var collector = collectorTcs.Result;
 
-            collectorTcs.TrySetResult(collector);
+            if (msg.Command == Command.StatusData && msg.IsResponse)
+            {
+                switch (msg.DataLength)
+                {
+                case 5:
+                    break;
+                case 6:
+                    collectorTcs.TrySetResult(collector);
+                    return;
+                case 8:
+                    //ushort packageIndex = (byte)(msg.Hash & 0xff);
+                    collector.AddData(msg.GetData());
+                    break;
+                default:
+                    throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
+                }
+            }
+            if (msg.Command == Command.ConfigData && msg.IsResponse)
+            {
+                //configDataFileName = msg.GetDataString().Trim('\0');
+                return; // break next handling
+            }
+            // hash compare: the res is for us 
+            if (msg.Command == Command.ConfigDataStream && !msg.IsResponse && msg.Hash == msg.Hash)
+            {
+                if (msg.DataLength == 6 || msg.DataLength == 7)
+                {
+                    collector.Length = msg.GetDataUInt(0);
+                    collector.Crc = msg.GetDataUShort(4);
+                }
+                else if (msg.DataLength == 8)
+                {
+                    collector.AddData(msg.GetData());
+                    if (collector.IsReady())
+                    {
+                        collectorTcs.TrySetResult(collector);
+                        return;
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine($"{DateTime.Now:HH:mm:ss.ffff} ERROR: Invalid ConfigDataStream res length");
+                }
+            }
         }
     }
+
+    //[Conditional("DEBUG")]
+    //private static void DebugConfigData(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
+
+    //[Conditional("DEBUG")]
+    //private static void DebugDevices(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
 
 }

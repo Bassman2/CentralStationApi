@@ -10,16 +10,16 @@ internal class CanMessageComparer : IEqualityComparer<CanMessage>
     {
         return
             // identical messages to remove after timeout or cancel 
-            req == res || 
+            req == res ||
             // compare req and res message
             (
-                req is not null && 
+                req is not null &&
                 res is not null &&
                 res.IsResponse &&
                 req.Command == res.Command &&
 
                 Comparer(req, res)
-            );        
+            );
     }
 
     public int GetHashCode([DisallowNull] CanMessage obj)
@@ -31,7 +31,7 @@ internal class CanMessageComparer : IEqualityComparer<CanMessage>
     {
         return req.Command switch
         {
-            Command.SystemCommand => req.SubCommand == res.SubCommand && req.DeviceId == res.DeviceId,
+            Command.SystemCommand => req.SubCommand == res.SubCommand && req.DeviceId == res.DeviceId && ComparerSubCommand(req, res),
             Command.Discovery => true,
             Command.Bind => req.DeviceId == res.DeviceId && req.GetDataUShort(4) == res.GetDataUShort(4),
             Command.Verify => req.DeviceId == res.DeviceId,
@@ -57,6 +57,15 @@ internal class CanMessageComparer : IEqualityComparer<CanMessage>
             Command.AutomaticTransmission => req.DeviceId == res.DeviceId && req.GetDataByte(4) == res.GetDataByte(4),
             Command.DebugMessage => req.DeviceId == res.DeviceId,
             _ => false,
+        };
+    }
+
+    public static bool ComparerSubCommand(CanMessage req, CanMessage res)
+    { 
+        return req.SubCommand switch
+        {
+            SubCommand.Status => req.GetDataByte(5) == res.GetDataByte(5),  // channel
+            _ => true,
         };
     }
 }

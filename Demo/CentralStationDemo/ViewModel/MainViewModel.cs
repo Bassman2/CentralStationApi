@@ -426,7 +426,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
         foreach (var device in Devices ?? [])
         {
-            var deviceInfo = await cs.GetDeviceInfoAsync(device.DeviceId);
+            var deviceInfo = await cs.GetDeviceSystemDataAsync(device.DeviceId);
             if (deviceInfo != null)
             {
                 device.AddDeviceInfo(deviceInfo);
@@ -437,7 +437,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             for (byte index = 1; index < 6; index++)
             {
-                var deviceMeasurement = await cs.GetDeviceMeasurementAsync(device.DeviceId, index);
+                var deviceMeasurement = await cs.GetMeasurementSystemDataAsync(device.DeviceId, index);
                 //var deviceMeasurement = new DeviceMeasurement() { Name = $"Measurement {index}" };
                 if (deviceMeasurement != null)
                 {
