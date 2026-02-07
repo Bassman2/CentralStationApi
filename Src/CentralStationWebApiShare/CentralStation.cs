@@ -1,47 +1,164 @@
-﻿using System;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Threading;
+﻿namespace CentralStationWebApi;
 
-namespace CentralStationWebApi;
-
-public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
+public class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
+    private readonly IProtocolHandler client;
+    private readonly CanMessageHandler canMessageHandler;
+    private readonly MessageQueue<CanMessage> messageReceivedQueue;
+    private readonly Task receiver;
+    private readonly uint hash;
+
+    public const uint AllDevices = 0x0000;
+    public const ushort MinVelocity = 0;
+    public const ushort MaxVelocity = 1000;
+
     public event PropertyChangedEventHandler? PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    //public event EventHandler<FileReceivedEventArgs>? FileReceived;
-
+    public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
     public event EventHandler<LocomotiveEventArgs>? LocomotiveHalt;
     public event EventHandler<LocomotiveVelocityEventArgs>? LocomotiveVelocity;
     public event EventHandler<LocomotiveDirectionEventArgs>? LocomotiveDirection;
     public event EventHandler<LocomotiveFunctionEventArgs>? LocomotiveFunction;
 
-    //private readonly EventQueue<(uint deviceId, byte index)> statusDataEventQueue;
-
-    private readonly TimeSpan timeout = TimeSpan.FromSeconds(1000);
-
-    private readonly CanMessageHandler canMessageHandler; 
-
-    //private readonly int retry = 3;
-
     internal static Uri GuiUri => new($"http://{Host}/images/gui/");
     internal static Uri MagUri => new($"http://{Host}/app/assets/mag/");
     internal static Uri LocoUri => new($"http://{Host}/app/assets/lok/");
 
-    public TimeSpan MessageTimeout { get; set; } = new TimeSpan(0, 0, 0, 500);
-    public TimeSpan DataTimeout { get; set; } = new TimeSpan(0, 0, 2);
 
+    public static string? Host { get; private set; }
 
-    public CentralStation(string host, Protocol protocol = Protocol.TCP) : base(host, protocol)
+    public DeviceData Device { get; }
+    public uint DeviceId { get; }
+
+    public TimeSpan MessageTimeout
+    {   
+        get => canMessageHandler.MessageTimeout;
+        set => canMessageHandler.MessageTimeout = value; 
+    }
+
+    public TimeSpan CollectionTimeout
     {
-        HashCache.AddHash((ushort)hash, "PCApp");  
+        get => canMessageHandler.CollectionTimeout;
+        set => canMessageHandler.CollectionTimeout = value;
+    }
+    
+    public CentralStation(string host, Protocol protocol = Protocol.TCP, DeviceData? device = null) 
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(host);
+        ArgumentOutOfRangeException.ThrowIfZero((int)Uri.CheckHostName(host), host);
+
         canMessageHandler = new CanMessageHandler(this);
+
+        Host = host;
+        Device = device ?? new DeviceData(0x6D554711, new System.Version(1, 0));
+        DeviceId = Device.DeviceId;
+        hash = DeviceId2Hash(DeviceId);
+
+        client = protocol switch
+        {
+            Protocol.TCP => new TcpHandler(),
+            Protocol.UDP => new UdpHandler(),
+            _ => throw new NotSupportedException($"Protocol {protocol} not supported"),
+        };
+
+        client.Connect(host);
+
+        messageReceivedQueue = new MessageQueue<CanMessage>((m) => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(m)));
+        this.receiver = Task.Run(async () => await ReceiveAsync());
+        HashCache.AddHash((ushort)hash, "PCApp");  
         //statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
     }
-        
 
-    protected override void ReceiveHandler(CanMessage msg)
+    public void Dispose()
+    {
+        client.Dispose();
+
+        messageReceivedQueue.Dispose();
+    }
+
+    #region Send Message
+
+    internal void SendMessage(CanMessage msg)
+    {
+        messageReceivedQueue.Add(msg);
+        client.Send(msg);
+        Tracer.TraceMessage(msg);
+    }
+
+    #endregion
+
+    #region Receive Message
+
+    private async Task ReceiveAsync()
+    {
+        try
+        {
+            while (true)
+            {
+                var msg = await client.ReceiveAsync();
+
+                Tracer.TraceMessage(msg);
+                Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceInfo, $"Received: {msg}");
+                messageReceivedQueue.Add(msg);
+
+                if (msg.Command == Command.SoftwareVersion && msg.IsResponse == false)
+                {
+                    var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash, true).
+                                AddUInt32(DeviceId).
+                                AddByte((byte)Device.Version.Major).
+                                AddByte((byte)Device.Version.Minor).
+                                AddUInt16((ushort)DeviceType.Application);
+                    SendMessage(message);
+                }
+                if (msg.Command == Command.StatusData && msg.IsResponse == false && msg.DeviceId == DeviceId && msg.IsResponse == false)
+                {
+                    var message = new CanMessage(Priority.Prio1, Command.StatusData, 0x0301, true).
+                                AddByte(0).
+                                AddByte(0).
+                                AddByte(0).
+                                AddByte(0).
+                                AddUInt32(Device.SerialNumber);
+                    SendMessage(message);
+
+                    message = new CanMessage(Priority.Prio1, Command.StatusData, 0x0302, true).
+                               AddString(Device.ArticleNumber);
+                    SendMessage(message);
+
+                    string name = Device.DeviceName;
+                    while (!string.IsNullOrEmpty(name))
+                    {
+                        message = new CanMessage(Priority.Prio1, Command.StatusData, 0x0300, true).AddString(name.Substring(0, 8));
+                        SendMessage(message);
+                        name = name.Length > 8 ? name.Substring(8) : string.Empty;
+                    }
+
+                    message = new CanMessage(Priority.Prio1, Command.StatusData, hash, true).
+                                AddUInt32(Device.DeviceId).
+                                AddByte(0).
+                                AddByte(5);
+                    SendMessage(message);
+                }
+
+
+
+                ReceiveHandler(msg);
+
+
+                //HandleAsync(msg);
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // expected on disposal
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceError, $"Receiver error: {ex}");
+        }
+    }
+
+    private void ReceiveHandler(CanMessage msg)
     {
         HandleStatus(msg);
         HandleLocomotive(msg);
@@ -63,6 +180,8 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         canMessageHandler.OnResponseReceived(msg);
     }
 
+    #endregion
+
     #region Status Events
 
     public SystemStatus Status { get; private set; } = CentralStationWebApi.SystemStatus.Default;
@@ -79,7 +198,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     private void HandleStatus(CanMessage message)
     {
-        if (message.Command == Command.SystemCommand && message.DeviceId == CentralStationBasic.AllDevices)
+        if (message.Command == Command.SystemCommand && message.DeviceId == AllDevices)
         {
             if (message.SubCommand == SubCommand.Stop)
             {
@@ -629,6 +748,28 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         var req = new CanMessage(Priority.Prio1, Command.AutomaticTransmission, hash).AddUInt16(deviceExpert).AddUInt16(automaticFunction).AddByte(position).AddByte(parameter);
         var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
         return res?.GetDataByte(5) ?? null;
+    }
+
+    #endregion
+
+    #region helper
+
+    private static ushort Index2Hash(byte index)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(index, 0x7f, nameof(index));
+
+        return (ushort)(0x0300 | (index & 0x7f));
+    }
+
+    internal static ushort DeviceId2Hash(uint deviceId)
+    {
+        ushort hd = (ushort)((deviceId & 0xffff0000) >> 16);
+        ushort ld = (ushort)(deviceId & 0x0000ffff);
+        ushort ro = (ushort)(hd ^ ld);
+        ushort lx = (ushort)(ro & 0x007f);
+        ushort hx = (ushort)((ro & 0x1f80) << 3);
+        ushort ha = (ushort)(0x0300 | hx | lx);
+        return ha;
     }
 
     #endregion

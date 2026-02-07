@@ -256,7 +256,7 @@ public class CanMessage
                     _ => "S88 Event unknown data size"
                 },
             Command.SX1Event => "SX1 Event",
-            Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - DeviceId: {DeviceId:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceType: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2} # Hash {CentralStationBasic.DeviceId2Hash(DeviceId, Hash):X2} #",
+            Command.SoftwareVersion => DataLength == 0 ? "Software Version - Request" :  $"Software Version - DeviceId: {DeviceId:X4} Version: {GetDataByte(4)}.{GetDataByte(5)} DeviceType: {(DeviceType)GetDataUShort(6)} {GetDataUShort(6):X2} # Hash {CentralStation.DeviceId2Hash(DeviceId):X2} #",
             Command.UpdateOffer => "Update Offer",
             Command.ReadConfigData => "Read Config Buffer",
             Command.BootloaderCANBound => "Bootloader CAN Bound",

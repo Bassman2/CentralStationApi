@@ -2,14 +2,17 @@
 
 public class Device
 {
-    internal Device(CanMessage msg)
+    public Device(uint deviceId, System.Version version, DeviceType deviceType) 
     {
-        DeviceId = msg.DeviceId;
-        Version = new System.Version(msg.GetDataByte(4), msg.GetDataByte(5));
-        DeviceType = (DeviceType)msg.GetDataUShort(6);
+        DeviceId = deviceId;
+        Version = version;
+        DeviceType = deviceType;
         DeviceTypeName = DeviceType.GetDescription();
-        IconUri = DeviceType.GetFileNamePath(CentralStation.GuiUri); 
+        IconUri = DeviceType.GetFileNamePath(CentralStation.GuiUri);
     }
+    internal Device(CanMessage msg) : this(msg.DeviceId, new System.Version(msg.GetDataByte(4), msg.GetDataByte(5)), (DeviceType)msg.GetDataUShort(6))
+    { }
+
     public uint DeviceId { get; internal set; }
     public System.Version Version { get; internal set; }    
     public DeviceType DeviceType { get; internal set; }
