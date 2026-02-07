@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace CentralStationWebApi;
+﻿namespace CentralStationWebApi;
 
 public class DeviceMeasurement
 {

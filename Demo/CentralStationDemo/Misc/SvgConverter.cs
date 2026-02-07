@@ -28,6 +28,7 @@ public static class SvgConverter
         }
         catch (Exception ex)
         {
+            Debug.WriteLine($"Error loading SVG from {uri}: {ex.Message}");
             throw;
         }
     }

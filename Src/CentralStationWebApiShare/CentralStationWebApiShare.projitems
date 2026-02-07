@@ -21,14 +21,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)DeviceInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DeviceMeasurement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CanMessageHandler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\FileCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\RouteItemType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\TrackProtocol.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileNameAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\AttributeExtentions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\DeviceCache.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\TrackCollector.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Internal\EventQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LocomotiveDirectionEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LocomotiveEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LocomotiveFunctionEventArgs.cs" />
@@ -43,8 +40,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Internal\TcpHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\Tracer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\UdpHandler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StatusDataDevice.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StatusDataValue.cs" />
     <Compile Include="..\CentralStationWebApiShare\Enums\DirectionChange.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Priority.cs" />
     <Compile Include="..\CentralStationWebApiShare\Enums\SubCommand.cs" />
@@ -52,7 +47,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)FileReceivedEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\MessageQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessageReceivedEventArgs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MessageResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Article.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ArticleType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\DecoderType.cs" />
