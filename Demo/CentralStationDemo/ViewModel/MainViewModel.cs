@@ -180,7 +180,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     [RelayCommand]
     private async Task OnUpdateSystemStatus()
     {
-        var devices = await cs.GetDevicesAsync();
+        var devices = await cs.GetAllDevicesAsync();
         var gfpDevice = devices?.FirstOrDefault(d => d.DeviceType == DeviceType.GFP || d.DeviceType == DeviceType.GFP3);
         if (gfpDevice == null)
         {
@@ -419,7 +419,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     [RelayCommand]
     private async Task OnUpdateDevices()
     {
-        var devices = await cs.GetDevicesAsync();
+        var devices = await cs.GetAllDevicesAsync();
 
         var vms = devices?.Select(d => new DeviceViewModel(d)).ToList();
         App.Current.Dispatcher.Invoke(() => Devices = vms);

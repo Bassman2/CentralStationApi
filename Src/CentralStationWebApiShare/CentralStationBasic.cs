@@ -243,117 +243,117 @@ public partial class CentralStationBasic : IDisposable
     //    SendMessage(message);
     //}
 
-    public void SystemStatus(uint device, byte channel, ushort? value = null)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.Status).
-            AddByte(channel).
-            AddUInt16(value);   // optional
-        SendMessage(message);
-    }
+    //public void SystemStatus(uint device, byte channel, ushort? value = null)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.Status).
+    //        AddByte(channel).
+    //        AddUInt16(value);   // optional
+    //    SendMessage(message);
+    //}
 
-    public void SystemIdentifier(uint device, byte identifier)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.Identifier).
-            AddUInt16(identifier);   // optional
-        SendMessage(message);
-    }
+    //public void SystemIdentifier(uint device, byte identifier)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.Identifier).
+    //        AddUInt16(identifier);   // optional
+    //    SendMessage(message);
+    //}
 
-    public void SystemMfxSeek(uint device)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.MfxSeek);
-        SendMessage(message);
-    }
+    //public void SystemMfxSeek(uint device)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.MfxSeek);
+    //    SendMessage(message);
+    //}
 
-    public void SystemReset(uint device, byte target)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
-            AddUInt32(device).
-            AddSubCommand(SubCommand.Reset).
-            AddByte(target);
-        SendMessage(message);
-    }
+    //public void SystemReset(uint device, byte target)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
+    //        AddUInt32(device).
+    //        AddSubCommand(SubCommand.Reset).
+    //        AddByte(target);
+    //    SendMessage(message);
+    //}
 
     #endregion
 
     #region 3 Administration
 
-    public void GetLocomotiveDiscovery(uint locoId)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.Discovery, hash).AddUInt32(locoId);
-        SendMessage(message);
-    }
+    //public void GetLocomotiveDiscovery(uint locoId)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.Discovery, hash).AddUInt32(locoId);
+    //    SendMessage(message);
+    //}
 
-    public void SetLocomotiveDiscovery(uint locoId, ushort velocity)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.Discovery, hash).AddUInt32(locoId).AddUInt16(velocity);
-        SendMessage(message);
-    }
+    //public void SetLocomotiveDiscovery(uint locoId, ushort velocity)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.Discovery, hash).AddUInt32(locoId).AddUInt16(velocity);
+    //    SendMessage(message);
+    //}
 
-    public void SetMfxBinding(uint mfxUID, ushort mfxSID)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.Bind, hash).
-            AddUInt32(mfxUID).
-            AddUInt16(mfxSID);
-        SendMessage(message);
-    }
+    //public void SetMfxBinding(uint mfxUID, ushort mfxSID)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.Bind, hash).
+    //        AddUInt32(mfxUID).
+    //        AddUInt16(mfxSID);
+    //    SendMessage(message);
+    //}
 
-    public void SetMfxVerify(uint mfxUID, ushort mfxSID)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.Bind, hash).
-            AddUInt32(mfxUID).
-            AddUInt16(mfxSID);
-        SendMessage(message);
-    }
+    //public void SetMfxVerify(uint mfxUID, ushort mfxSID)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.Bind, hash).
+    //        AddUInt32(mfxUID).
+    //        AddUInt16(mfxSID);
+    //    SendMessage(message);
+    //}
 
-    public void GetLocomotiveVelocity(uint locoId)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.LocoVelocity, hash).AddUInt32(locoId);
-        SendMessage(message);
-    }
+    //public void GetLocomotiveVelocity(uint locoId)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.LocoVelocity, hash).AddUInt32(locoId);
+    //    SendMessage(message);
+    //}
 
-    public void SetLocomotiveVelocity(uint locoId, ushort velocity)
-    {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(velocity, MaxVelocity, nameof(velocity));
+    //public void SetLocomotiveVelocity(uint locoId, ushort velocity)
+    //{
+    //    ArgumentOutOfRangeException.ThrowIfGreaterThan(velocity, MaxVelocity, nameof(velocity));
 
-        var message = new CanMessage(Priority.Prio1, Command.LocoVelocity, hash).AddUInt32(locoId).AddUInt16(velocity);
-        SendMessage(message);
-    }
+    //    var message = new CanMessage(Priority.Prio1, Command.LocoVelocity, hash).AddUInt32(locoId).AddUInt16(velocity);
+    //    SendMessage(message);
+    //}
 
-    public void GetLocomotiveDirection(uint locoId)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId);
-        SendMessage(message);
-    }
+    //public void GetLocomotiveDirection(uint locoId)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId);
+    //    SendMessage(message);
+    //}
 
-    public void SetLocomotiveDirection(uint locoId, DirectionChange direction)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte((byte)direction);
-        SendMessage(message);
-    }
+    //public void SetLocomotiveDirection(uint locoId, DirectionChange direction)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte((byte)direction);
+    //    SendMessage(message);
+    //}
 
-    public void GetLocomotiveFunction(uint locoId, byte function)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function);
-        SendMessage(message);
-    }
+    //public void GetLocomotiveFunction(uint locoId, byte function)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function);
+    //    SendMessage(message);
+    //}
 
-    public void SetLocomotiveFunction(uint locoId, byte function, byte value)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function).AddByte(value);
-        SendMessage(message);
-    }
+    //public void SetLocomotiveFunction(uint locoId, byte function, byte value)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function).AddByte(value);
+    //    SendMessage(message);
+    //}
 
-    public void SetLocomotiveFunction(uint locoId, byte function, byte value, ushort functionValue)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function).AddByte(value).AddUInt16(functionValue);
-        SendMessage(message);
-    }
+    //public void SetLocomotiveFunction(uint locoId, byte function, byte value, ushort functionValue)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.LocoDirection, hash).AddUInt32(locoId).AddByte(function).AddByte(value).AddUInt16(functionValue);
+    //    SendMessage(message);
+    //}
 
     #endregion
 
@@ -367,19 +367,19 @@ public partial class CentralStationBasic : IDisposable
 
     #region 6 Other Commands / Sonstige Befehle
 
-    public void SoftwareVersion()
-    {
-        var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
-        SendMessage(message);
-    }
+    //public void SoftwareVersion()
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
+    //    SendMessage(message);
+    //}
 
-    public void StatusData(uint device, byte index)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.StatusData, hash).
-            AddUInt32(device).
-            AddByte(index);
-        SendMessage(message);
-    }
+    //public void StatusData(uint device, byte index)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.StatusData, hash).
+    //        AddUInt32(device).
+    //        AddByte(index);
+    //    SendMessage(message);
+    //}
 
     #endregion
 
@@ -395,49 +395,49 @@ public partial class CentralStationBasic : IDisposable
         SendMessage(message);
     }
 
-    public void ConfigData(string filename, string lokname)
-    {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(filename, nameof(filename));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(8, filename.Length, nameof(filename));
+    //public void ConfigData(string filename, string lokname)
+    //{
+    //    ArgumentNullException.ThrowIfNullOrWhiteSpace(filename, nameof(filename));
+    //    ArgumentOutOfRangeException.ThrowIfGreaterThan(8, filename.Length, nameof(filename));
 
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(lokname, nameof(lokname));
+    //    ArgumentNullException.ThrowIfNullOrWhiteSpace(lokname, nameof(lokname));
 
-        var message = new CanMessage(Priority.Prio1, Command.ConfigData, hash).
-            AddString(filename);
-        SendMessage(message);
-        message = new CanMessage(Priority.Prio1, Command.ConfigData, hash).
-            AddString(lokname.Substring(0, 8));
-        SendMessage(message);
-        message = new CanMessage(Priority.Prio1, Command.ConfigData, hash).
-            AddString(lokname.Substring(8, 8));
-        SendMessage(message);
-    }
+    //    var message = new CanMessage(Priority.Prio1, Command.ConfigData, hash).
+    //        AddString(filename);
+    //    SendMessage(message);
+    //    message = new CanMessage(Priority.Prio1, Command.ConfigData, hash).
+    //        AddString(lokname.Substring(0, 8));
+    //    SendMessage(message);
+    //    message = new CanMessage(Priority.Prio1, Command.ConfigData, hash).
+    //        AddString(lokname.Substring(8, 8));
+    //    SendMessage(message);
+    //}
 
-    public void ConfigDataLocomotives() => ConfigData("loks");
+    //public void ConfigDataLocomotives() => ConfigData("loks");
 
-    public void ConfigDataMagneticItems() => ConfigData("mags");
+    //public void ConfigDataMagneticItems() => ConfigData("mags");
     
-    public void ConfigDataRailwayRoute() => ConfigData("fs");
+    //public void ConfigDataRailwayRoute() => ConfigData("fs");
     
 
-    public void ConfigDataTrackDiagram() => ConfigData("gbs");
+    //public void ConfigDataTrackDiagram() => ConfigData("gbs");
    
 
-    public void ConfigDataTrackDiagramPage(int page) => ConfigData($"gbs-{page}");
+    //public void ConfigDataTrackDiagramPage(int page) => ConfigData($"gbs-{page}");
    
     #endregion
 
     #region 9 Automation
 
-    public void AutomaticTransmission(ushort deviceExpert, ushort automaticFunction, byte position, byte parameter)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.AutomaticTransmission, hash).
-            AddUInt16(deviceExpert).
-            AddUInt16(automaticFunction).
-            AddByte(position).
-            AddByte(parameter);
-        SendMessage(message);
-    }
+    //public void AutomaticTransmission(ushort deviceExpert, ushort automaticFunction, byte position, byte parameter)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.AutomaticTransmission, hash).
+    //        AddUInt16(deviceExpert).
+    //        AddUInt16(automaticFunction).
+    //        AddByte(position).
+    //        AddByte(parameter);
+    //    SendMessage(message);
+    //}
 
     #endregion
 

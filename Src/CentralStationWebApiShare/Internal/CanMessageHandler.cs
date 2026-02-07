@@ -5,9 +5,10 @@ internal class CanMessageHandler(CentralStation cs)
     private readonly ConcurrentDictionary<CanMessage, TaskCompletionSource<CanMessage>> pendingRequests =
         new(CanMessageComparer.Instance);
 
-    private readonly ConcurrentDictionary<CanMessage, TaskCompletionSource<CanMessageCollector>> pendingCollectorRequests =
-        new(CanMessageComparer.Instance);
-    
+    private readonly ConcurrentDictionary<CanMessage, TaskCollectorSource<CanMessageCollector>> pendingCollectorRequests =
+        new(CanMessageCollectorComparer.Instance);
+
+    private readonly ConcurrentDictionary<uint, Device> devicesRequests = [];
 
     public TimeSpan MessageTimeout { get; set; } = TimeSpan.FromMilliseconds(500);
     public TimeSpan CollectionTimeout { get; set; } = TimeSpan.FromSeconds(2);
@@ -49,9 +50,25 @@ internal class CanMessageHandler(CentralStation cs)
         }
     }
 
+    public async Task<List<Device>?> SendMessageWithMultipleResponseAsync(CanMessage req, CancellationToken cancellationToken = default)
+    {
+        devicesRequests.Clear();
+        cs.SendMessage(req);
+
+        try
+        {
+            await Task.Delay(MessageTimeout, cancellationToken);
+            return [.. devicesRequests.Values];
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
+        }
+    }
+
     public async Task<CanMessageCollector?> SendMessageWithCollectorResponseAsync(CanMessage req, CancellationToken cancellationToken = default)
     {
-        var tcs = new TaskCompletionSource<CanMessageCollector>();
+        var tcs = new TaskCollectorSource<CanMessageCollector>(new CanMessageCollector());
 
         if (!pendingCollectorRequests.TryAdd(req, tcs))
         {
@@ -88,10 +105,19 @@ internal class CanMessageHandler(CentralStation cs)
 
     public void OnResponseReceived(CanMessage msg)
     {
+        if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
+        {
+            var device = new Device(msg);
+            devicesRequests.TryAdd(device.DeviceId, device);
+            return; // break next handling
+        }
+
         if (pendingRequests.TryGetValue(msg, out var tcs))
         {
             tcs.TrySetResult(msg);
         }
+
+
 
         if (pendingCollectorRequests.TryGetValue(msg, out var collectorTcs))
         {

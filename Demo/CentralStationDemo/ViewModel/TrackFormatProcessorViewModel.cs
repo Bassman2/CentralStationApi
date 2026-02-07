@@ -89,7 +89,7 @@ public partial class TrackFormatProcessorViewModel: ObservableObject
         // get TGP/GFP device
         if (gfpDevice == null)
         {
-            var devices = await cs.GetDevicesAsync();
+            var devices = await cs.GetAllDevicesAsync();
             gfpDevice = devices?.FirstOrDefault(d => d.DeviceType == DeviceType.GFP || d.DeviceType == DeviceType.GFP3);
             if (gfpDevice == null)
             {

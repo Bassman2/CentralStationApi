@@ -57,7 +57,7 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
         HandleConfigData(msg);
         //HandleController(msg);
         //HandleStatusData(msg);
-        HandleDevices(msg);
+        //HandleDevices(msg);
         HandleDeviceInfo(msg);
 
         canMessageHandler.OnResponseReceived(msg);
@@ -229,7 +229,16 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             lock (systemStatusLock)
             {
                 systemStatusValue = null;
-                SystemStatus(device, channel, value);
+                //SystemStatus(device, channel, value);
+
+                var message = new CanMessage(Priority.Prio1, Command.SystemCommand, hash).
+                    AddUInt32(device).
+                    AddSubCommand(SubCommand.Status).
+                    AddByte(channel).
+                    AddUInt16(value);   // optional
+                SendMessage(message);
+
+
                 systemStatusEvent.WaitOne(MessageTimeout);
                 return systemStatusValue;
             }
@@ -363,58 +372,64 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
 
     #region 6 Other Commands / Sonstige Befehle
 
-    private const int devicesTimeout = 500;
-    private Dictionary<uint, Device>? devices = null;
-
-    //    private AutoResetEvent devicesEvent = new(false);
-
-    private void HandleDevices(CanMessage msg)
+    public async Task<List<Device>?> GetAllDevicesAsync(CancellationToken cancellationToken = default)
     {
-        if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
-        {
-            if (devices != null && !devices.ContainsKey(msg.DeviceId))
-            {
-                var device = new Device(msg);
-                DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.Version} {device.DeviceType}");
-                devices?.Add(device.DeviceId, device);
-            }
-        }
+        var req = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
+        return await canMessageHandler.SendMessageWithMultipleResponseAsync(req, cancellationToken);
     }
 
-    public async Task<List<Device>?> GetDevicesAsync()
-    {
-        return await Task.Run(async () =>
-        {
-            DebugDevices($"GetDevicesAsync++");
+    //private const int devicesTimeout = 500;
+    //private Dictionary<uint, Device>? devices = null;
 
-            devices = [];
-            
-            var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
-            SendMessage(message);
+    ////    private AutoResetEvent devicesEvent = new(false);
 
-            await Task.Delay(devicesTimeout);
+    //private void HandleDevices(CanMessage msg)
+    //{
+    //    if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
+    //    {
+    //        if (devices != null && !devices.ContainsKey(msg.DeviceId))
+    //        {
+    //            var device = new Device(msg);
+    //            DebugDevices($"--> SoftwareVersion {device.DeviceId:X8} {device.Version} {device.DeviceType}");
+    //            devices?.Add(device.DeviceId, device);
+    //        }
+    //    }
+    //}
 
-            var res = devices.Values.ToList();
-            devices = null;
-            DebugDevices($"GetDevicesAsync--");
-            return res;
-        });
-    }
+    //public async Task<List<Device>?> GetDevicesAsync()
+    //{
+    //    return await Task.Run(async () =>
+    //    {
+    //        DebugDevices($"GetDevicesAsync++");
 
-    public async Task<bool> GetAllDevicesSoftwareVersionAsync(CancellationToken cancellationToken = default)
-    {
-        var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
-        SendMessage(message);
-        await Task.CompletedTask;
-        return true;
-    }
+    //        devices = [];
 
-    public async Task<bool> GetStatusDataAsync(uint device, byte index, CancellationToken cancellationToken = default)
-    {
-        var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(index);
-        var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
-        return res is null ? false : true;  //new StatusDataDevice();
-    }
+    //        var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
+    //        SendMessage(message);
+
+    //        await Task.Delay(devicesTimeout);
+
+    //        var res = devices.Values.ToList();
+    //        devices = null;
+    //        DebugDevices($"GetDevicesAsync--");
+    //        return res;
+    //    });
+    //}
+
+    //public async Task<bool> GetAllDevicesSoftwareVersionAsync(CancellationToken cancellationToken = default)
+    //{
+    //    var message = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
+    //    SendMessage(message);
+    //    await Task.CompletedTask;
+    //    return true;
+    //}
+
+    //public async Task<bool> GetStatusDataAsync(uint device, byte index, CancellationToken cancellationToken = default)
+    //{
+    //    var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(index);
+    //    var res = await canMessageHandler.SendMessageAsync(req, cancellationToken);
+    //    return res is null ? false : true;  //new StatusDataDevice();
+    //}
 
     private const int deviceInfoTimeout = 500;
     private readonly AutoResetEvent deviceInfoEvent = new(false);
@@ -502,7 +517,13 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
                 DebugDevices($"GetDeviceMeasurementAsync++");
 
                 deviceMeasurementEvent.Reset();
-                StatusData(deviceId, index);
+                //StatusData(deviceId, index);
+                var message = new CanMessage(Priority.Prio1, Command.StatusData, hash).
+                    AddUInt32(deviceId).
+                    AddByte(index);
+                SendMessage(message);
+
+
                 bool success = deviceMeasurementEvent.WaitOne(deviceMeasurementTimeout);
                 DebugDevices($"deviceMeasurementEvent fired {success}");
 
@@ -573,7 +594,11 @@ public class CentralStation : CentralStationBasic, INotifyPropertyChanged, INoti
             {
                 DebugConfigData($"GetConfigDataAsync++");
 
-                ConfigData(filename);
+                //ConfigData(filename);
+
+                var message = new CanMessage(Priority.Prio1, Command.ConfigData, hash).AddString(filename);
+                SendMessage(message);
+            
 
                 bool success = configDataEvent.WaitOne(configDataTimeout);
                 if (success)

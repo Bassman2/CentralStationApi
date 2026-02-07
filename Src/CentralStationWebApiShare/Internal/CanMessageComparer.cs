@@ -45,7 +45,7 @@ internal class CanMessageComparer : IEqualityComparer<CanMessage>
             Command.S88Polling => req.DeviceId == res.DeviceId,
             Command.S88Event => req.DeviceId == res.DeviceId,
             Command.SX1Event => req.DeviceId == res.DeviceId,
-           // Command.SoftwareVersion => req.DeviceId == res.DeviceId,
+            Command.SoftwareVersion => false,   // not used with single result message
             //Command.UpdateOffer => req.DeviceId == res.DeviceId,
             //Command.ReadConfigData => req.DeviceId == res.DeviceId,
             Command.BootloaderCANBound => req.DeviceId == res.DeviceId,

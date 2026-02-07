@@ -197,7 +197,8 @@ public partial class LocomotiveViewModel : ObservableObject
 
     partial void OnVelocityChanged(ushort value)
     {
-        cs.SetLocomotiveVelocity(Uid, value);
+        var direction = Task.Run(async () =>
+        await cs.SetLocomotiveVelocityAsync(Uid, value)).Result;
     }
 
     [RelayCommand]
@@ -211,7 +212,8 @@ public partial class LocomotiveViewModel : ObservableObject
     { 
         //cs.SetLocomotiveDirection(Uid, DirectionChange.Toggle);
 
-        var direction = Task.Run(async () => await cs.SetLocomotiveDirectionAsync(Uid, DirectionChange.Toggle)).Result;
+        var direction = Task.Run(async () => 
+        await cs.SetLocomotiveDirectionAsync(Uid, DirectionChange.Toggle)).Result;
     }
 
     [RelayCommand]
