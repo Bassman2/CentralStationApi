@@ -20,4 +20,6 @@ public static class TraceSwitches
 
     public readonly static TraceSwitch ConfigDataSwitch = new("ConfigDataSwitch", "ConfigDataSwitch", "Info");
 
+    public readonly static TraceSwitch CanMessageHandlerSwitch = new("CanMessageHandlerSwitch", "CanMessageHandlerSwitch", "Info");
+
 }

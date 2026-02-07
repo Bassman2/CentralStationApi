@@ -33,7 +33,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)LocomotiveEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LocomotiveFunctionEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LocomotiveVelocityEventArgs.cs" />
-    <Compile Include="..\CentralStationWebApiShare\Controller.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\CSFileStreamMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\DeviceType.cs" />

@@ -168,10 +168,8 @@ internal class CanMessageHandler(CentralStation cs)
         }
     }
 
-    //[Conditional("DEBUG")]
-    //private static void DebugConfigData(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
+    [Conditional("DEBUG")]
+    private static void DebugInfo(string text) => Debug.WriteLineIf(TraceSwitches.CanMessageHandlerSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} CanMessageHandler: {text}");
 
-    //[Conditional("DEBUG")]
-    //private static void DebugDevices(string text) => Debug.WriteLineIf(TraceSwitches.DevicesSwitch.TraceInfo, $"{DateTime.Now:HH:mm:ss.ffff} Devices: {text}");
-
+    
 }

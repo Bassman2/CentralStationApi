@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace CentralStationImageCache;
@@ -61,6 +62,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
+            Debug.WriteLine($"Error loading {uri}: {ex}");
         }
     }
 }
