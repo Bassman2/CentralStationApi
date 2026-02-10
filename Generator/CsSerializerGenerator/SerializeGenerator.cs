@@ -105,10 +105,10 @@ namespace CsSerializerGenerator
                         sb.AppendLine($"            {prop.Name}.Add({LowercaseFirst(prop.Name)});");
                         sb.AppendLine($"            return {LowercaseFirst(prop.Name)};");
                     }
-                    //else if (prop.Type.FullName == "Version")
+                    //else if (prop.Type.Name == "Version")
                     //{
                     //    sb.AppendLine($"        case {arg.Value}:");
-                    //    sb.AppendLine($"            return {prop.Name} = (version)new VersionSerializer();");
+                    //    sb.AppendLine($"            return {prop.Name} = (Version)new CsVersion();");
                     //}
                     else if (prop.Type.FullName == "string" || prop.Type.FullName == "string?")
                     {
