@@ -4,7 +4,7 @@
 public partial class ArticleData
 {
     [CsProperty("version")]
-    public Version? Version { get; private set; }
+    public CsVersion? Version { get; private set; }
 
     [CsProperty("artikel")]
     public List<Article>? Articles { get; private set; }

@@ -37,7 +37,7 @@
         </Menu>
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
-                <TextBlock Text="{Binding SystemStatus}" />
+                <TextBlock Text="{Binding StatusText}" />
             </StatusBarItem>
             <StatusBarItem>
                 <Slider Value="{Binding ZoomValue}" Minimum="0.5" Maximum="2.0" TickFrequency="0.05" Width="200" />

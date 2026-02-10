@@ -34,7 +34,7 @@ public partial class TrackFormatProcessorViewModel: ObservableObject
     //private string? article;
 
     //[ObservableProperty]
-    //private System.Version? version;
+    //private Version? version;
 
     //[ObservableProperty]
     //private uint? serial;

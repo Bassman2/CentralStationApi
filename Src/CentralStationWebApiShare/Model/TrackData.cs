@@ -7,7 +7,7 @@ public partial class TrackData
     public bool Readonly { get; private set; }
 
     [CsProperty("version")]
-    public Version? Version { get; private set; }
+    public CsVersion? Version { get; private set; }
 
     [CsProperty("groesse")]
     public Size? Size { get; private set; }

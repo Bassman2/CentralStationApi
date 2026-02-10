@@ -303,7 +303,7 @@ public class CanMessage
 
     #endregion
 
-        #region Bits
+    #region Bits
 
     protected static void SetBits(ref uint value, int position, int length, uint bits)
     {

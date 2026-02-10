@@ -4,7 +4,7 @@
 public partial class TrackPageData
 {
     [CsProperty("version")]
-    public Version? Version { get; private set; }
+    public CsVersion? Version { get; private set; }
 
     [CsProperty("page")]
     public uint Page { get; private set; }

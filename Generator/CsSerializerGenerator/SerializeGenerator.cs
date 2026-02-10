@@ -105,6 +105,11 @@ namespace CsSerializerGenerator
                         sb.AppendLine($"            {prop.Name}.Add({LowercaseFirst(prop.Name)});");
                         sb.AppendLine($"            return {LowercaseFirst(prop.Name)};");
                     }
+                    //else if (prop.Type.FullName == "Version")
+                    //{
+                    //    sb.AppendLine($"        case {arg.Value}:");
+                    //    sb.AppendLine($"            return {prop.Name} = (version)new VersionSerializer();");
+                    //}
                     else if (prop.Type.FullName == "string" || prop.Type.FullName == "string?")
                     {
                         // do nothing
@@ -180,7 +185,7 @@ namespace CsSerializerGenerator
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToBool(value);");
                     sb.AppendLine("            break;");
                     break;
-
+                
                 default:
                     if (prop.Type.IsEnum)
                     {

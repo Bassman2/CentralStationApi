@@ -38,7 +38,7 @@ public partial class DeviceViewModel : ObservableObject
     private uint deviceId;
 
     [ObservableProperty]
-    private System.Version version;
+    private Version version;
     
     [ObservableProperty]
     private DeviceType deviceType;

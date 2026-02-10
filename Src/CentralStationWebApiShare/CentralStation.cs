@@ -48,7 +48,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         canMessageHandler = new CanMessageHandler(this);
 
         Host = host;
-        Device = device ?? new DeviceData(0x6D554711, new System.Version(1, 0));
+        Device = device ?? new DeviceData(0x6D554711, new Version(1, 0));
         hash = DeviceId2Hash(Device.DeviceId);
 
         client = protocol switch
@@ -122,7 +122,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
                     string name = Device.DeviceName;
                     while (!string.IsNullOrEmpty(name))
                     {
-                        res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0300, true).AddString(name.Substring(0, 8));
+                        res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0300, true).AddString(name.Substring(0, Math.Min(name.Length, 8)));
                         SendMessage(res);
                         num++;
                         name = name.Length > 8 ? name.Substring(8) : string.Empty;

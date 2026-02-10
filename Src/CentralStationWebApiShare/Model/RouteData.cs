@@ -7,7 +7,7 @@ public partial class RouteData
     public bool Readonly { get; private set; }
 
     [CsProperty("version")]
-    public Version? Version { get; private set; }
+    public CsVersion? Version { get; private set; }
 
     [CsProperty("fahrstrasse")]
     public List<Route>? Routes { get; private set; }
