@@ -21,7 +21,7 @@ public class CanMessage
 
     #region Send
 
-    public CanMessage(Priority priority, Command command, uint hash, bool response = false)
+    public CanMessage(Priority priority, Command command, ushort hash, bool response = false)
     {
         Sender = local;
         Timestamp = DateTime.Now;
@@ -270,7 +270,7 @@ public class CanMessage
 
 
                 },
-            Command.ConfigData => $"Config Buffer - Filename: {GetDataString()}",
+            Command.ConfigDataRequest => $"Config Buffer - Filename: {GetDataString()}",
             Command.ConfigDataStream =>
                 DataLength switch
                 {

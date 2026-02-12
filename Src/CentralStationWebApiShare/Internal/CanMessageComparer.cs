@@ -51,7 +51,7 @@ internal class CanMessageComparer : IEqualityComparer<CanMessage>
             Command.BootloaderCANBound => req.DeviceId == res.DeviceId,
             Command.BootloaderRailBound => req.DeviceId == res.DeviceId,
             Command.StatusData => req.DeviceId == res.DeviceId,
-            Command.ConfigData => req.DeviceId == res.DeviceId,
+            Command.ConfigDataRequest => req.DeviceId == res.DeviceId,
             Command.ConfigDataStream => req.DeviceId == res.DeviceId,
             Command.DataStream6021Adapter => req.DeviceId == res.DeviceId,
             Command.AutomaticTransmission => req.DeviceId == res.DeviceId && req.GetDataByte(4) == res.GetDataByte(4),

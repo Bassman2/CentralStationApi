@@ -6,7 +6,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     private readonly CanMessageHandler canMessageHandler;
     private readonly MessageQueue<CanMessage> messageReceivedQueue;
     private readonly Task receiver;
-    private readonly uint hash;
+    private readonly ushort hash;
 
     public const uint AllDevices = 0x0000;
     public const ushort MinVelocity = 0;
@@ -459,7 +459,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(filename, nameof(filename));
         
-        var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddString(filename);
+        var req = new CanMessage(Priority.Prio1, Command.ConfigDataRequest, hash).AddString(filename);
         var res = await canMessageHandler.SendMessageWithCollectorResponseAsync(req, cancellationToken);
         return res?.GetStream();
     }

@@ -4,23 +4,30 @@ internal class CanMessageCollector
 {
     protected readonly MemoryStream mem = new(4 * 1024);
 
+    public CanMessageCollector(CanMessage req)
+    {
+        if (req.Command != Command.StatusData && req.Command != Command.ConfigDataRequest)
+        {
+            throw new ArgumentException($"Command {req.Command} not supported for CanMessageCollector");
+        }
 
-    //public long Position
-    //{         
-    //    get => mem.Position;
-    //    set => mem.Position = value;
-    //}
+
+        if (req.Command == Command.StatusData && !req.IsResponse)
+        {
+            DeviceId = req.DeviceId;
+            Index = req.GetDataByte(4);
+        }
+        else if (req.Command == Command.ConfigDataRequest && !req.IsResponse)
+        {
+            FileName = req.GetDataString();
+        }
+    }
 
     public void SetPositionToStart()
     {
         mem.Position = 0;
     }
-
-    public void AddData(byte[] data, int offset = 0, int count = 8)
-    {
-        mem.Write(data, offset, count);
-    }
-
+    
     public sbyte ReadSByte()
     {
         int value = mem.ReadByte();
@@ -85,22 +92,71 @@ internal class CanMessageCollector
 
     public int Package { get; set; } = 1;
 
+    public bool AddMessage(CanMessage msg)
+    {
+        if (msg.Command == Command.StatusData)
+        {
+            switch (msg.DataLength)
+            {
+            case 5:
+                break;
+            case 6:
+                // must be always first message; break if not
+                if (mem.Length > 0)
+                {
+                    throw new InvalidDataException("StatusData break!");
+                }
+                DeviceId = msg.GetDataUInt(0);
+                Index = msg.GetDataByte(4);
+                PackageNumber = msg.GetDataByte(5);
+                mem.Position = 0;
+                return true;    // is ready
+            case 8:
+                mem.Write(msg.GetData(), 0, 8);
+                break;
+            default:
+                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
+
+            }
+        }
+        else if (msg.Command == Command.ConfigDataStream)
+        {
+            switch (msg.DataLength)
+            {
+            case 6:
+            case 7:
+                Length = msg.GetDataUInt(0);
+                Crc = msg.GetDataUShort(4);
+                break;
+            case 8:
+                mem.Write(msg.GetData(), 0, 8);
+                if (mem.Length >= Length)
+                {
+                    return true;    // is ready
+                }
+                break;
+            }
+        }
+        return false;
+    }
+
+    /////////////////////////////////////////////////////////////////
+    // StatusData
+
+    public uint DeviceId { get; private set; }
+    public uint Index { get; private set; }
+    public uint PackageNumber { get; private set; }
 
     //////////////////////////////////////////////////////////////////
-    // File Collector
+    // ConfigDataStream
 
-    //public CSFileStreamMode Mode => mode;
+    public string FileName { get; private set; } = string.Empty;
+    public uint Length { get; private set; }
+    public ushort Crc { get; private set; }
 
-    //public string FileName => fileName;
-
-    public uint Length { get; set; }
-
-    public ushort Crc { get; set; }
-
-    //public byte Reserved => reserved;
-
-    public bool IsReady() => mem.Length >= Length;
-
+    ///////////////////////////////////////////////////
+    // get stream
+    
     private bool IsCompressed()
     {
         mem.Position = 4;
@@ -117,7 +173,7 @@ internal class CanMessageCollector
         return memory;
     }
 
-    public void CopyTo(Stream stream)
+    private void CopyTo(Stream stream)
     {
         if (mem.Length < Length)
         {

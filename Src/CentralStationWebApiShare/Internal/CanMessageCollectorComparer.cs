@@ -4,7 +4,7 @@ namespace CentralStationWebApi.Internal;
 
 internal class CanMessageCollectorComparer : IEqualityComparer<CanMessage>
 {
-    public static CanMessageComparer Instance { get; } = new CanMessageComparer();
+    public static CanMessageCollectorComparer Instance { get; } = new CanMessageCollectorComparer();
 
     public bool Equals(CanMessage? req, CanMessage? res)
     {
@@ -15,7 +15,7 @@ internal class CanMessageCollectorComparer : IEqualityComparer<CanMessage>
             res is not null &&
             // config data 
             ((
-                req.Command == Command.ConfigData &&
+                req.Command == Command.ConfigDataRequest &&
                 res.Command == Command.ConfigDataStream
             ) 
             ||

@@ -10,8 +10,8 @@ internal class CanMessageHandler(CentralStation cs)
 
     private readonly ConcurrentDictionary<uint, Device> devicesRequests = [];
 
-    public TimeSpan MessageTimeout { get; set; } = TimeSpan.FromMilliseconds(500);
-    public TimeSpan CollectionTimeout { get; set; } = TimeSpan.FromSeconds(2);
+    public TimeSpan MessageTimeout { get; set; } = TimeSpan.FromMilliseconds(10000);
+    public TimeSpan CollectionTimeout { get; set; } = TimeSpan.FromSeconds(20);
 
     public async Task<CanMessage?> SendMessageAsync(CanMessage req, CancellationToken cancellationToken = default)
     {
@@ -76,7 +76,7 @@ internal class CanMessageHandler(CentralStation cs)
 
     public async Task<CanMessageCollector?> SendMessageWithCollectorResponseAsync(CanMessage req, CancellationToken cancellationToken = default)
     {
-        var tcs = new TaskCollectorSource<CanMessageCollector>(new CanMessageCollector());
+        var tcs = new TaskCollectorSource<CanMessageCollector>(new CanMessageCollector(req));
 
         DebugInfo($"SendMessageWithCollectorResponseAsync: {req.ToTrace()}");
 
@@ -89,7 +89,7 @@ internal class CanMessageHandler(CentralStation cs)
 
         // Create a combined cancellation token source for both timeout and cancellation
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(CollectionTimeout);
+        //cts.CancelAfter(CollectionTimeout);
         var ct = cts.Token;
 
         try
@@ -118,77 +118,32 @@ internal class CanMessageHandler(CentralStation cs)
 
     public void OnResponseReceived(CanMessage msg)
     {
-        if (msg.Command == Command.SoftwareVersion && msg.IsResponse)
+        switch (msg.Command)
         {
+        case Command.SoftwareVersion when msg.IsResponse:
             DebugInfo($"OnResponseReceived SoftwareVersion: {msg.ToTrace()}");
-            var device = new Device(msg);
-            devicesRequests.TryAdd(device.DeviceId, device);
-            return; // break next handling
-        }
-
-        if (pendingRequests.TryGetValue(msg, out var tcs))
-        {
-            DebugInfo($"OnResponseReceived: pendingRequests res {msg.ToTrace()}");
-            tcs.TrySetResult(msg);
-        }
-
-        if (pendingCollectorRequests.TryGetValue(msg, out var collectorTcs))
-        {
-            var collector = collectorTcs.Result;
-
-            if (msg.Command == Command.StatusData && msg.IsResponse)
+            devicesRequests.TryAdd(msg.DeviceId, new Device(msg));
+            break;
+        case Command.StatusData when msg.IsResponse:
+        case Command.ConfigDataStream when !msg.IsResponse:
+            DebugInfo($"OnResponseReceived: {msg.Command} res {msg.ToTrace()}");
+            if (pendingCollectorRequests.TryGetValue(msg, out var collectorTcs))
             {
-                DebugInfo($"OnResponseReceived: HandleStatusData res {msg.ToTrace()}");
-                switch (msg.DataLength)
+                var collector = collectorTcs.Result;
+                if (collector.AddMessage(msg))
                 {
-                case 5:
-                    break;
-                case 6:
+                    DebugInfo($"OnResponseReceived: HandleConfigDataStream Ready");
                     collectorTcs.TrySetResult(collector);
-                    return;
-                case 8:
-                    //ushort packageIndex = (byte)(msg.Hash & 0xff);
-                    collector.AddData(msg.GetData());
-                    break;
-                default:
-                    throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
                 }
             }
-            else if (msg.Command == Command.ConfigData && msg.IsResponse)
+            break;
+        default:
+            if (pendingRequests.TryGetValue(msg, out var tcs))
             {
-                DebugInfo($"OnResponseReceived: HandleConfigData res {msg.ToTrace()}");
-                //configDataFileName = msg.GetDataString().Trim('\0');
-                return; // break next handling
+                DebugInfo($"OnResponseReceived: pendingRequests res {msg.ToTrace()}");
+                tcs.TrySetResult(msg);
             }
-            // hash compare: the res is for us 
-            else if (msg.Command == Command.ConfigDataStream && !msg.IsResponse && msg.Hash == msg.Hash)
-            {
-                DebugInfo($"OnResponseReceived: HandleConfigDataStream res {msg.ToTrace()}");
-
-                if (msg.DataLength == 6 || msg.DataLength == 7)
-                {
-                    DebugInfo($"OnResponseReceived: HandleConfigDataStream Length 6 & 7");
-                    collector.Length = msg.GetDataUInt(0);
-                    collector.Crc = msg.GetDataUShort(4);
-                }
-                else if (msg.DataLength == 8)
-                {
-                    DebugInfo($"OnResponseReceived: HandleConfigDataStream Length 8");
-
-                    collector.AddData(msg.GetData());
-                    if (collector.IsReady())
-                    {
-                        DebugInfo($"OnResponseReceived: HandleConfigDataStream Ready");
-                        collectorTcs.TrySetResult(collector);
-                        return;
-                    }
-                }
-                else
-                {
-                    DebugInfo($"OnResponseReceived ERROR: Invalid ConfigDataStream res length");
-                }
-            }
-            else DebugInfo($"OnResponseReceived: IGNORE {msg.ToTrace()}");
+            break;
         }
     }
 
