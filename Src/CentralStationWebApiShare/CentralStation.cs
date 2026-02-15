@@ -429,7 +429,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     public async Task<List<Device>?> GetAllDevicesAsync(CancellationToken cancellationToken = default)
     {
         var req = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash);
-        return await canMessageHandler.SendMessageWithMultipleResponseAsync(req, cancellationToken);
+        return await canMessageHandler.SendSoftwareVersionMessageAsync(req, cancellationToken);
     }
 
     public async Task<DeviceInfo?> GetDeviceSystemDataAsync(uint deviceId, CancellationToken cancellationToken = default)
@@ -437,7 +437,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         ArgumentOutOfRangeException.ThrowIfZero(deviceId, nameof(deviceId));
         
         var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(0);
-        var res = await canMessageHandler.SendMessageWithCollectorResponseAsync(req, cancellationToken);
+        var res = await canMessageHandler.SendStatusMessageAsync(req, cancellationToken);
         return res is null ? null : new DeviceInfo(deviceId, res);
     }
 
@@ -447,7 +447,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         ArgumentOutOfRangeException.ThrowIfZero(index, nameof(index));
 
         var req = new CanMessage(Priority.Prio1, Command.StatusData, hash).AddUInt32(deviceId).AddByte(index);
-        var res = await canMessageHandler.SendMessageWithCollectorResponseAsync(req, cancellationToken);
+        var res = await canMessageHandler.SendStatusMessageAsync(req, cancellationToken);
         return res is null ? null : new DeviceMeasurement(deviceId, index, res);
     }
 
@@ -460,7 +460,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         ArgumentNullException.ThrowIfNullOrWhiteSpace(filename, nameof(filename));
         
         var req = new CanMessage(Priority.Prio1, Command.ConfigDataRequest, hash).AddString(filename);
-        var res = await canMessageHandler.SendMessageWithCollectorResponseAsync(req, cancellationToken);
+        var res = await canMessageHandler.SendStreamMessageAsync(req, cancellationToken);
         return res?.GetStream();
     }
 

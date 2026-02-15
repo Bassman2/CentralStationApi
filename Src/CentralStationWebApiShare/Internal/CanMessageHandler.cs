@@ -1,14 +1,17 @@
-﻿namespace CentralStationWebApi.Internal;
+﻿using System.Collections.Generic;
+
+namespace CentralStationWebApi.Internal;
 
 internal class CanMessageHandler(CentralStation cs)
 {
-    private readonly ConcurrentDictionary<CanMessage, TaskCompletionSource<CanMessage>> pendingRequests =
-        new(CanMessageComparer.Instance);
-
-    private readonly ConcurrentDictionary<CanMessage, TaskCollectorSource<CanMessageCollector>> pendingCollectorRequests =
-        new(CanMessageCollectorComparer.Instance);
+    private readonly ConcurrentDictionary<CanMessage, TaskCompletionSource<CanMessage>> pendingRequests = new(CanMessageComparer.Instance);
 
     private readonly ConcurrentDictionary<uint, Device> devicesRequests = [];
+
+    private readonly ConcurrentDictionary<CanMessage, TaskCollectorSource<CanStatusCollector>> pendingStatusCollectorRequests = new(CanStatusComparer.Instance);
+
+    private readonly ConcurrentDictionary<CanMessage, TaskCollectorSource<CanStreamCollector>> pendingStreamCollectorRequests = new(CanStreamComparer.Instance);
+
 
     public TimeSpan MessageTimeout { get; set; } = TimeSpan.FromMilliseconds(10000);
     public TimeSpan CollectionTimeout { get; set; } = TimeSpan.FromSeconds(20);
@@ -55,7 +58,7 @@ internal class CanMessageHandler(CentralStation cs)
         }
     }
 
-    public async Task<List<Device>?> SendMessageWithMultipleResponseAsync(CanMessage req, CancellationToken cancellationToken = default)
+    public async Task<List<Device>?> SendSoftwareVersionMessageAsync(CanMessage req, CancellationToken cancellationToken = default)
     {
         DebugInfo($"SendMessageWithMultipleResponseAsync: {req.ToTrace()}");
         devicesRequests.Clear();
@@ -74,13 +77,13 @@ internal class CanMessageHandler(CentralStation cs)
         }
     }
 
-    public async Task<CanMessageCollector?> SendMessageWithCollectorResponseAsync(CanMessage req, CancellationToken cancellationToken = default)
+    public async Task<CanMessageCollector?> SendStatusMessageAsync(CanMessage req, CancellationToken cancellationToken = default)
     {
-        var tcs = new TaskCollectorSource<CanMessageCollector>(new CanMessageCollector(req));
+        var tcs = new TaskCollectorSource<CanStatusCollector>(new CanStatusCollector(req));
 
         DebugInfo($"SendMessageWithCollectorResponseAsync: {req.ToTrace()}");
 
-        if (!pendingCollectorRequests.TryAdd(req, tcs))
+        if (!pendingStatusCollectorRequests.TryAdd(req, tcs))
         {
             throw new InvalidOperationException($"A request is already pending.");
         }
@@ -100,12 +103,54 @@ internal class CanMessageHandler(CentralStation cs)
                 try
                 {
                     var res = await tcs.Task;
-                    DebugInfo($"SendMessageWithCollectorResponseAsync return");
+                    DebugInfo($"SendStatusMessageAsync return");
                     return res; //  return await tcs.Task;
                 }
                 catch (OperationCanceledException) 
                 {
-                    DebugInfo($"SendMessageWithCollectorResponseAsync return: null");
+                    DebugInfo($"SendStatusMessageAsync return: null");
+                    return null;
+                }
+            }
+        }
+        finally
+        {
+            pendingRequests.TryRemove(req, out _);
+        }
+    }
+
+    public async Task<CanStreamCollector?> SendStreamMessageAsync(CanMessage req, CancellationToken cancellationToken = default)
+    {
+        var tcs = new TaskCollectorSource<CanStreamCollector>(new CanStreamCollector(req));
+
+        DebugInfo($"SendMessageWithCollectorResponseAsync: {req.ToTrace()}");
+
+        if (!pendingStreamCollectorRequests.TryAdd(req, tcs))
+        {
+            throw new InvalidOperationException($"A request is already pending.");
+        }
+
+        cs.SendMessage(req);
+
+        // Create a combined cancellation token source for both timeout and cancellation
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(CollectionTimeout);
+        var ct = cts.Token;
+
+        try
+        {
+            // Wait for the response with cancellation support
+            using (ct.Register(() => tcs.TrySetCanceled(ct)))
+            {
+                try
+                {
+                    var res = await tcs.Task;
+                    DebugInfo($"SendStreamMessageAsync return");
+                    return res; //  return await tcs.Task;
+                }
+                catch (OperationCanceledException)
+                {
+                    DebugInfo($"SendStreamMessageAsync return: null");
                     return null;
                 }
             }
@@ -125,15 +170,26 @@ internal class CanMessageHandler(CentralStation cs)
             devicesRequests.TryAdd(msg.DeviceId, new Device(msg));
             break;
         case Command.StatusData when msg.IsResponse:
-        case Command.ConfigDataStream when !msg.IsResponse:
             DebugInfo($"OnResponseReceived: {msg.Command} res {msg.ToTrace()}");
-            if (pendingCollectorRequests.TryGetValue(msg, out var collectorTcs))
+            if (pendingStatusCollectorRequests.TryGetValue(msg, out var statusCollectorTcs))
             {
-                var collector = collectorTcs.Result;
+                var collector = statusCollectorTcs.Result;
                 if (collector.AddMessage(msg))
                 {
                     DebugInfo($"OnResponseReceived: HandleConfigDataStream Ready");
-                    collectorTcs.TrySetResult(collector);
+                    statusCollectorTcs.TrySetResult(collector);
+                }
+            }
+            break;
+        case Command.ConfigDataStream when !msg.IsResponse:
+            DebugInfo($"OnResponseReceived: {msg.Command} res {msg.ToTrace()}");
+            if (pendingStreamCollectorRequests.TryGetValue(msg, out var streamCollectorTcs))
+            {
+                var collector = streamCollectorTcs.Result;
+                if (collector.AddMessage(msg))
+                {
+                    DebugInfo($"OnResponseReceived: HandleConfigDataStream Ready");
+                    streamCollectorTcs.TrySetResult(collector);
                 }
             }
             break;

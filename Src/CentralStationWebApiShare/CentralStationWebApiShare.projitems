@@ -13,6 +13,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)DeviceData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CanMessageCollectorComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CanMessageComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\CanStatusCollector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\CanStatusComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\CanStreamCollector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\CanStreamComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\HashCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\TaskCollectorSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)S88Event.cs" />

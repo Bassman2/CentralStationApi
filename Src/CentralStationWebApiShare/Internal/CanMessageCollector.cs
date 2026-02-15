@@ -1,27 +1,29 @@
 ﻿namespace CentralStationWebApi.Internal;
 
-internal class CanMessageCollector
+internal abstract class CanMessageCollector
 {
     protected readonly MemoryStream mem = new(4 * 1024);
 
-    public CanMessageCollector(CanMessage req)
-    {
-        if (req.Command != Command.StatusData && req.Command != Command.ConfigDataRequest)
-        {
-            throw new ArgumentException($"Command {req.Command} not supported for CanMessageCollector");
-        }
+    //public CanMessageCollector(CanMessage req)
+    //{
+    //    if (req.Command != Command.StatusData && req.Command != Command.ConfigDataRequest)
+    //    {
+    //        throw new ArgumentException($"Command {req.Command} not supported for CanMessageCollector");
+    //    }
 
 
-        if (req.Command == Command.StatusData && !req.IsResponse)
-        {
-            DeviceId = req.DeviceId;
-            Index = req.GetDataByte(4);
-        }
-        else if (req.Command == Command.ConfigDataRequest && !req.IsResponse)
-        {
-            FileName = req.GetDataString();
-        }
-    }
+    //    if (req.Command == Command.StatusData && !req.IsResponse)
+    //    {
+    //        DeviceId = req.DeviceId;
+    //        Index = req.GetDataByte(4);
+    //    }
+    //    else if (req.Command == Command.ConfigDataRequest && !req.IsResponse)
+    //    {
+    //        FileName = req.GetDataString();
+    //    }
+    //}
+
+    public abstract bool AddMessage(CanMessage msg);
 
     public void SetPositionToStart()
     {
@@ -92,117 +94,117 @@ internal class CanMessageCollector
 
     public int Package { get; set; } = 1;
 
-    public bool AddMessage(CanMessage msg)
-    {
-        if (msg.Command == Command.StatusData)
-        {
-            switch (msg.DataLength)
-            {
-            case 5:
-                break;
-            case 6:
-                // must be always first message; break if not
-                if (mem.Length > 0)
-                {
-                    throw new InvalidDataException("StatusData break!");
-                }
-                DeviceId = msg.GetDataUInt(0);
-                Index = msg.GetDataByte(4);
-                PackageNumber = msg.GetDataByte(5);
-                mem.Position = 0;
-                return true;    // is ready
-            case 8:
-                mem.Write(msg.GetData(), 0, 8);
-                break;
-            default:
-                throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
+    //public bool AddMessage(CanMessage msg)
+    //{
+    //    if (msg.Command == Command.StatusData)
+    //    {
+    //        switch (msg.DataLength)
+    //        {
+    //        case 5:
+    //            break;
+    //        case 6:
+    //            // must be always first message; break if not
+    //            if (mem.Length > 0)
+    //            {
+                    
+    //            }
+    //            DeviceId = msg.GetDataUInt(0);
+    //            Index = msg.GetDataByte(4);
+    //            PackageNumber = msg.GetDataByte(5);
+    //            mem.Position = 0;
+    //            return true;    // is ready
+    //        case 8:
+    //            mem.Write(msg.GetData(), 0, 8);
+    //            break;
+    //        default:
+    //            throw new InvalidDataException($"HandleStatusData DataLength {msg.DataLength} not supported!");
 
-            }
-        }
-        else if (msg.Command == Command.ConfigDataStream)
-        {
-            switch (msg.DataLength)
-            {
-            case 6:
-            case 7:
-                Length = msg.GetDataUInt(0);
-                Crc = msg.GetDataUShort(4);
-                break;
-            case 8:
-                mem.Write(msg.GetData(), 0, 8);
-                if (mem.Length >= Length)
-                {
-                    return true;    // is ready
-                }
-                break;
-            }
-        }
-        return false;
-    }
+    //        }
+    //    }
+    //    else if (msg.Command == Command.ConfigDataStream)
+    //    {
+    //        switch (msg.DataLength)
+    //        {
+    //        case 6:
+    //        case 7:
+    //            Length = msg.GetDataUInt(0);
+    //            Crc = msg.GetDataUShort(4);
+    //            break;
+    //        case 8:
+    //            mem.Write(msg.GetData(), 0, 8);
+    //            if (mem.Length >= Length)
+    //            {
+    //                return true;    // is ready
+    //            }
+    //            break;
+    //        }
+    //    }
+    //    return false;
+    //}
 
     /////////////////////////////////////////////////////////////////
     // StatusData
 
-    public uint DeviceId { get; private set; }
-    public uint Index { get; private set; }
-    public uint PackageNumber { get; private set; }
+    //public uint DeviceId { get; private set; }
+    //public uint Index { get; private set; }
+    //public uint PackageNumber { get; private set; }
 
     //////////////////////////////////////////////////////////////////
     // ConfigDataStream
 
-    public string FileName { get; private set; } = string.Empty;
-    public uint Length { get; private set; }
-    public ushort Crc { get; private set; }
+    //public string FileName { get; private set; } = string.Empty;
+    //public uint Length { get; private set; }
+    //public ushort Crc { get; private set; }
 
-    ///////////////////////////////////////////////////
-    // get stream
+    /////////////////////////////////////////////////////
+    //// get stream
     
-    private bool IsCompressed()
-    {
-        mem.Position = 4;
-        byte res = ReadByte();
-        mem.Position = 0;
-        return res == 0x78;
-    }
+    //private bool IsCompressed()
+    //{
+    //    mem.Position = 4;
+    //    byte res = ReadByte();
+    //    mem.Position = 0;
+    //    return res == 0x78;
+    //}
 
-    public MemoryStream GetStream()
-    {
-        MemoryStream memory = new MemoryStream();
-        CopyTo(memory);
-        memory.Position = 0;
-        return memory;
-    }
+    //public MemoryStream GetStream()
+    //{
+    //    MemoryStream memory = new MemoryStream();
+    //    CopyTo(memory);
+    //    memory.Position = 0;
+    //    return memory;
+    //}
 
-    private void CopyTo(Stream stream)
-    {
-        if (mem.Length < Length)
-        {
-            throw new InvalidOperationException("Not enough data in FileCollector");
-        }
+    //private void CopyTo(Stream stream)
+    //{
+    //    if (mem.Length < Length)
+    //    {
+    //        throw new InvalidOperationException("Not enough data in FileCollector");
+    //    }
 
-        // TODO check CRC
+    //    // TODO check CRC
 
-        try
-        {
-            if (IsCompressed())
-            {
-                mem.Position = 4;
-                using var zLibStream = new ZLibStream(mem, CompressionMode.Decompress);
-                zLibStream.CopyTo(stream);
-            }
-            else
-            {
-                mem.Position = 0;
-                mem.CopyTo(stream);
-            }
+    //    try
+    //    {
+    //        if (IsCompressed())
+    //        {
+    //            mem.Position = 4;
+    //            using var zLibStream = new ZLibStream(mem, CompressionMode.Decompress);
+    //            zLibStream.CopyTo(stream);
+    //        }
+    //        else
+    //        {
+    //            mem.Position = 0;
+    //            mem.CopyTo(stream);
+    //        }
 
-            stream.Position = 0;
+    //        stream.Position = 0;
 
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-            throw;
-        }
-    }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        Debug.WriteLine(ex);
+    //        throw;
+    //    }
+    //}
 }
