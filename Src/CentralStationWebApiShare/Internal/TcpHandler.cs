@@ -12,6 +12,8 @@ internal class TcpHandler : IProtocolHandler, IDisposable
 
     private string sender = "unknown";
 
+    
+
     public TcpHandler()
     {
         client = new();
@@ -38,6 +40,8 @@ internal class TcpHandler : IProtocolHandler, IDisposable
 
         sender = Dns.GetHostEntry(host).HostName.Split('.')[0];
     }
+
+    public bool IsConnected => client.Connected;
 
     public void Dispose()
     {

@@ -1,4 +1,6 @@
-﻿namespace CentralStationDemo;
+﻿using CentralStationDemo.Model;
+
+namespace CentralStationDemo;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -17,9 +19,12 @@ public partial class App : Application
         Ioc.Default.ConfigureServices
         (
             new ServiceCollection()
-                //.AddSingleton<IBusinessLogic, BusinessLogic>()
+                .AddSingleton<CentralStation>()
+                .AddSingleton<CentralStationModel>()
 
                 .AddSingleton<MainViewModel>()
+                .AddSingleton<SystemViewModel>()
+
                 .AddSingleton<TrackFormatProcessorViewModel>()
 
                 //.AddScoped<UsersViewModel>()
@@ -31,7 +36,7 @@ public partial class App : Application
                 .BuildServiceProvider()
         );
 
-        new CentralStationDemo.View.MainView().Show();
+        new CentralStationDemo.View.MainView() { }.Show();
     }
 
     protected override void OnExit(ExitEventArgs e)

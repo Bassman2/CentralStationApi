@@ -9,18 +9,18 @@ public class CentralStationModel : IJsonOnDeserialized
 
     private static readonly string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CentralStationDemo", "CentralStationModel.json");
 
-    public static CentralStationModel? LoadOrCreate()
+    public static CentralStationModel LoadOrCreate()
     {
         JsonTypeInfo<CentralStationModel> jsonTypeInfo = (JsonTypeInfo<CentralStationModel>)SourceGenerationContext.Default.GetTypeInfo(typeof(CentralStationModel))!;
 
-        if (!File.Exists(path))
+        if (File.Exists(path))
         {
-            return new CentralStationModel();
+            using Stream stream = File.OpenRead(path);
+            CentralStationModel? centralStationModel = JsonSerializer.Deserialize<CentralStationModel>(stream, jsonTypeInfo);
+            return centralStationModel ?? new CentralStationModel();
         }
 
-        using Stream stream = File.OpenRead(path);
-        CentralStationModel? centralStationModel = JsonSerializer.Deserialize<CentralStationModel>(stream, jsonTypeInfo);
-        return centralStationModel;
+        return new CentralStationModel();
     }
 
     public void Save()

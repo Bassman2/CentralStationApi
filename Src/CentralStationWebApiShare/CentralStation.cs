@@ -2,11 +2,12 @@
 
 public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
-    private readonly IProtocolHandler client;
+    private IProtocolHandler? client;
+    private Task? receiver;
+    private ushort hash;
+
     private readonly CanMessageHandler canMessageHandler;
     private readonly MessageQueue<CanMessage> messageReceivedQueue;
-    private readonly Task receiver;
-    private readonly ushort hash;
 
     public const uint AllDevices = 0x0000;
     public const ushort MinVelocity = 0;
@@ -26,7 +27,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     internal static Uri LocoUri => new($"http://{Host}/app/assets/lok/");
 
     public static string? Host { get; private set; }
-    public DeviceData Device { get; }
+    public DeviceData Device { get; private set; } = new DeviceData(0x6D554711, new Version(1, 0));
 
     public TimeSpan MessageTimeout
     {   
@@ -39,17 +40,28 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         get => canMessageHandler.CollectionTimeout;
         set => canMessageHandler.CollectionTimeout = value;
     }
-    
-    public CentralStation(string host, Protocol protocol = Protocol.TCP, DeviceData? device = null) 
+
+    public CentralStation()
+    {
+        canMessageHandler = new CanMessageHandler(this);
+        messageReceivedQueue = new MessageQueue<CanMessage>((m) => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(m)));
+    }
+
+    public CentralStation(string host, Protocol protocol = Protocol.TCP, DeviceData? device = null) : this()
+    {
+        Connect(host, protocol, device);
+    }
+
+    public void Connect(string host, Protocol protocol = Protocol.TCP, DeviceData? device = null)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(host);
         ArgumentOutOfRangeException.ThrowIfZero((int)Uri.CheckHostName(host), host);
 
-        canMessageHandler = new CanMessageHandler(this);
-
         Host = host;
         Device = device ?? new DeviceData(0x6D554711, new Version(1, 0));
         hash = DeviceId2Hash(Device.DeviceId);
+
+        HashCache.AddHash((ushort)hash, "PCApp");
 
         client = protocol switch
         {
@@ -60,15 +72,17 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
         client.Connect(host);
 
-        messageReceivedQueue = new MessageQueue<CanMessage>((m) => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(m)));
+        //messageReceivedQueue = new MessageQueue<CanMessage>((m) => MessageReceived?.Invoke(this, new MessageReceivedEventArgs(m)));
         this.receiver = Task.Run(async () => await ReceiveAsync());
-        HashCache.AddHash((ushort)hash, "PCApp");  
-        //statusDataEventQueue = new (tuple => StatusData(tuple.deviceId, tuple.index), TimeSpan.FromSeconds(10));
     }
 
     public void Dispose()
     {
-        client.Dispose();
+        if (client is not null)
+        {
+            client.Dispose();
+            client = null;
+        }
 
         messageReceivedQueue.Dispose();
     }
@@ -77,6 +91,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     internal void SendMessage(CanMessage msg)
     {
+        
         messageReceivedQueue.Add(msg);
         client.Send(msg);
         Tracer.TraceMessage(msg);

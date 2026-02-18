@@ -13,6 +13,8 @@ internal class UdpHandler : IProtocolHandler, IDisposable
 
     private string sender = "unknown";
 
+    
+
     public UdpHandler()
     {
         listenerClient = new UdpClient(UDPPortReceive);
@@ -25,6 +27,8 @@ internal class UdpHandler : IProtocolHandler, IDisposable
 
         sender = Dns.GetHostEntry(host).HostName.Split('.')[0];
     }
+
+    public bool IsConnected => senderClient.Client.Connected && listenerClient.Client.Connected;
 
     public void Dispose()
     {

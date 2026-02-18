@@ -4,6 +4,8 @@
     {
         void Connect(string host);
 
+        bool IsConnected { get; }
+
         void Send(CanMessage msg);
 
         Task SendAsync(CanMessage msg);

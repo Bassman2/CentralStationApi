@@ -1,4 +1,5 @@
-﻿using CentralStationWebApi.Serializer;
+﻿using CentralStationDemo.Model;
+using CentralStationWebApi.Serializer;
 using System.IO;
 using System.Reflection;
 
@@ -25,7 +26,7 @@ namespace CentralStationDemo.ViewModel;
 public sealed partial class MainViewModel : AppViewModel, IDisposable
 {
     private const string host = "CS3";
-   
+
     private readonly static string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyTitleAttribute>()!.Title);
     private readonly static string appFilesPath = Path.Combine(appDataPath, "Files");
     private readonly static string appCachePath = Path.Combine(appDataPath, "Cache");
@@ -44,21 +45,25 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private readonly static string locomotivesDBVersionFileName = "lokomotive-db-version.txt";
     private readonly static string languageFileName = "language.bin";
 
-
+    private readonly CentralStationModel centralStationModel;
 
     private readonly CentralStation cs;
 
     public string Host => host;
 
-    public MainViewModel()
+    public MainViewModel(CentralStation centralStation, CentralStationModel centralStationModel)
     {
-        cs = new CentralStation(host, Protocol.TCP);
+        this.cs = centralStation;
+        this.centralStationModel = centralStationModel;
+
+        cs.Connect(host, Protocol.TCP);
+
         cs.MessageReceived += (s, e) => App.Current.Dispatcher.Invoke(() => Messages.Insert(0, e.Message));
         cs.PropertyChanged += (s, e) => OnCsPropertyChanged(e.PropertyName);
 
         cs.LocomotiveHalt += (s, e) => OnLocomotiveHalt(e.LocomotiveId);
-        cs.LocomotiveVelocity += (s,e) => OnLocomotiveVelocity(e.LocomotiveId, e.Velocity);
-        cs.LocomotiveDirection += (s, e) => OnLocomotiveDirection(e.LocomotiveId, e.Direction); 
+        cs.LocomotiveVelocity += (s, e) => OnLocomotiveVelocity(e.LocomotiveId, e.Velocity);
+        cs.LocomotiveDirection += (s, e) => OnLocomotiveDirection(e.LocomotiveId, e.Direction);
         cs.LocomotiveFunction += (s, e) => OnLocomotiveFunction(e.LocomotiveId, e.Function, e.Value);
 
         //cs.FileReceived += (s, e) => OnFileReceived(e.FileName, e.Stream);
@@ -76,13 +81,13 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
         // load locomotive data 
         Locomotives = LoadFile<LocomotiveData>(locomotivesFileName)?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
-        
+
         // load articles data 
         Articles = LoadFile<ArticleData>(articlesFileName)?.Articles?.ToViewModelList<ArticleViewModel>(cs);
-        
+
         // load routes data 
         Routes = LoadFile<RouteData>(routesFileName)?.Routes?.ToViewModelList<RouteViewModel>();
-        
+
         // load tracks data 
         TrackData = LoadFile<TrackData>(tracksFileName);
         TrackPages = [];
@@ -153,22 +158,22 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         CancellationTokenSource cts = new();
 
         bool res;
-            switch (Status)
-            {
-            case SystemStatus.Default: 
-                res = await cs.SystemStopAsync(CentralStation.AllDevices, cts.Token); 
-                break;
-            case SystemStatus.Go: 
-                res = await cs.SystemStopAsync(CentralStation.AllDevices, cts.Token); 
-                break;
-            case SystemStatus.Stop: 
-                res = await cs.SystemGoAsync(CentralStation.AllDevices, cts.Token); 
-                break;
-            default: 
-                throw new InvalidEnumArgumentException(nameof(Status), (int)Status, typeof(SystemStatus));
-            }
-            Debug.WriteLine($"SystemStop/Go: {res}");
-       
+        switch (Status)
+        {
+        case SystemStatus.Default:
+            res = await cs.SystemStopAsync(CentralStation.AllDevices, cts.Token);
+            break;
+        case SystemStatus.Go:
+            res = await cs.SystemStopAsync(CentralStation.AllDevices, cts.Token);
+            break;
+        case SystemStatus.Stop:
+            res = await cs.SystemGoAsync(CentralStation.AllDevices, cts.Token);
+            break;
+        default:
+            throw new InvalidEnumArgumentException(nameof(Status), (int)Status, typeof(SystemStatus));
+        }
+        Debug.WriteLine($"SystemStop/Go: {res}");
+
     }
 
 
@@ -195,8 +200,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         }
     }
 
-    
-    public TrackFormatProcessorViewModel TrackFormatProcessor => new(this); 
+
+    public TrackFormatProcessorViewModel TrackFormatProcessor => new(this);
 
     #endregion
 
@@ -276,19 +281,19 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.Halt();
     }
     private void OnLocomotiveVelocity(uint locomotiveId, ushort velocity)
-    {   
+    {
         Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.SetVelocity(velocity);
     }
 
     private void OnLocomotiveDirection(uint locomotiveId, DirectionChange direction)
-    { 
+    {
         Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.SetDirection(direction);
     }
 
     private void OnLocomotiveFunction(uint locomotiveId, byte function, byte value)
     {
         Locomotives?.FirstOrDefault(l => l.Uid == locomotiveId)?.SetFunction(function, value);
-    } 
+    }
 
     #endregion
 
@@ -452,6 +457,19 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     {
         CollectionViewSource.GetDefaultView(Devices).SortDescriptions.Add(new SortDescription(propertyName, ListSortDirection.Ascending));
     }
+
+    #endregion
+
+    #region System
+
+    [RelayCommand]
+    private async Task OnUpdateSystem()
+    {
+        var devices = await cs.GetAllDevicesAsync();
+    }
+
+    //[ObservableProperty]
+    //private SystemViewModel systemViewModel;
 
     #endregion
 
