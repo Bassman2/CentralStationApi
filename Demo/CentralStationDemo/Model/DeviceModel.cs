@@ -5,14 +5,14 @@ public class DeviceModel
     [JsonPropertyName("uid")]
     public uint Id { get; set; }
 
-    [JsonPropertyName("uid")]
+    [JsonPropertyName("version")]
     public Version Version { get; set; } = new Version(0, 0);
 
     [JsonPropertyName("type")]
     public DeviceType Type { get; set; }
 
     [JsonPropertyName("serial")]
-    public string SerialNumber { get; set; } = null!;
+    public uint SerialNumber { get; set; }
 
     [JsonPropertyName("article")]
     public string ArticleNumber { get; set; } = null!;
@@ -27,4 +27,6 @@ public class DeviceModel
     [JsonPropertyName("numOfChannels")]
     public int NumberOfChannels { get; set; }
 
+
+    public static implicit operator DeviceData(DeviceModel model) => new DeviceData(model.Id, model.Version, model.Type, model.SerialNumber, model.ArticleNumber, model.Name);
 }

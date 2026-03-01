@@ -21,10 +21,14 @@ global using Microsoft.Extensions.DependencyInjection;
 
 global using WpfToolbox.ViewModel;
 
+global using AutoConverter;
+
 global using CentralStationWebApi;
 global using CentralStationWebApi.Model;
 
+global using CentralStationDemo.Model;
 global using CentralStationDemo.ViewModel;
+global using CentralStationDemo.Misc;
 
 
 

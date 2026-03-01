@@ -1,5 +1,7 @@
 ﻿using CentralStationDemo.Model;
+using CentralStationWebApi.Model;
 using CentralStationWebApi.Serializer;
+using DocumentFormat.OpenXml.EMMA;
 using System.IO;
 using System.Reflection;
 
@@ -45,19 +47,35 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private readonly static string locomotivesDBVersionFileName = "lokomotive-db-version.txt";
     private readonly static string languageFileName = "language.bin";
 
-    private readonly CentralStationModel centralStationModel;
-
+    private readonly CentralStationModel model;
     private readonly CentralStation cs;
 
-    public string Host => host;
+    //public string Host => host;
 
-    public MainViewModel(CentralStation centralStation, CentralStationModel centralStationModel)
+    public CentralStation CentralStation => cs;
+
+    public MainViewModel()
     {
-        this.cs = centralStation;
-        this.centralStationModel = centralStationModel;
+        Directory.CreateDirectory(appFilesPath);
+        Directory.CreateDirectory(appCachePath);
 
-        cs.Connect(host, Protocol.TCP);
+        model = CentralStationModel.LoadOrCreate();
+        model.Save();
 
+
+        cs = new CentralStation();
+
+
+    }
+
+    public void Dispose()
+    {
+        cs.Dispose();
+        model.Save();
+    }
+
+    protected override void OnStartup()
+    {
         cs.MessageReceived += (s, e) => App.Current.Dispatcher.Invoke(() => Messages.Insert(0, e.Message));
         cs.PropertyChanged += (s, e) => OnCsPropertyChanged(e.PropertyName);
 
@@ -66,24 +84,16 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.LocomotiveDirection += (s, e) => OnLocomotiveDirection(e.LocomotiveId, e.Direction);
         cs.LocomotiveFunction += (s, e) => OnLocomotiveFunction(e.LocomotiveId, e.Function, e.Value);
 
-        //cs.FileReceived += (s, e) => OnFileReceived(e.FileName, e.Stream);
+        cs.Connect(model.Host, Protocol.TCP, model.Device);
 
-    }
-
-    public CentralStation CentralStation => cs;
-
-    public void Dispose() => cs.Dispose();
-
-    protected override void OnStartup()
-    {
-        Directory.CreateDirectory(appFilesPath);
-        Directory.CreateDirectory(appCachePath);
+        Locomotives = model.Locomotives.CastModel<LocomotiveViewModel>(cs);
+        Articles = model.Articles.CastModel<ArticleViewModel>(cs);
 
         // load locomotive data 
-        Locomotives = LoadFile<LocomotiveData>(locomotivesFileName)?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+        //Locomotives = LoadFile<LocomotiveData>(locomotivesFileName)?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
 
         // load articles data 
-        Articles = LoadFile<ArticleData>(articlesFileName)?.Articles?.ToViewModelList<ArticleViewModel>(cs);
+       // Articles = LoadFile<ArticleData>(articlesFileName)?.Articles?.ToViewModelList<ArticleViewModel>(cs);
 
         // load routes data 
         Routes = LoadFile<RouteData>(routesFileName)?.Routes?.ToViewModelList<RouteViewModel>();
@@ -99,6 +109,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             TrackPages.Add(new TrackPageViewModel(page, trackPage));
         }
     }
+
+   
 
     private static T? LoadFile<T>(string fileName) where T : ICsSerialize, new()
     {
@@ -218,7 +230,13 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             StoreFile(locomotivesFileName, stream);
             var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-            Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+
+
+            model.Locomotives = data.Locomotives?.Select(l => new LocomotiveModel(l)).ToList() ?? [];
+            model.Save();
+
+
+            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
         }
     }
 
@@ -230,7 +248,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             StoreFile(locomotivesStateFileName, stream);
             //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(centralStation);
         }
     }
 
@@ -242,7 +260,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             StoreFile(locomotivesDBFileName, stream);
             //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(centralStation);
         }
     }
 
@@ -254,7 +272,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             StoreFile(locomotivesDBVersionFileName, stream);
             //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(centralStation);
         }
     }
 
@@ -266,7 +284,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             StoreFile(languageFileName, stream);
             //var data = CsSerializer.Deserialize<LocomotiveData>(stream);
-            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(centralStation);
         }
     }
 
@@ -310,7 +328,11 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             StoreFile(articlesFileName, stream);
             var data = CsSerializer.Deserialize<ArticleData>(stream);
-            Articles = data.Articles?.ToViewModelList<ArticleViewModel>(cs);
+
+            model.Articles = data.Articles.FromArticles(); //.Select(l => new LocomotiveModel(l)).ToList() ?? [];
+            model.Save();
+
+            //Articles = data.Articles?.ToViewModelList<ArticleViewModel>(cs);
         }
     }
 
@@ -322,7 +344,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         {
             StoreFile(articlesStateFileName, stream);
             //var data = CsSerializer.Deserialize<ArticleData>(stream);
-            //Articles = data.Articles?.ToViewModelList<ArticleViewModel>(cs);
+            //Articles = data.Articles?.ToViewModelList<ArticleViewModel>(centralStation);
         }
     }
 
@@ -403,7 +425,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             //foreach (var page in TrackData.Pages ?? [])
             //{
 
-            //    using var pageStream = await cs.GetConfigDataAsync($"gbs-{page.Id}");
+            //    using var pageStream = await centralStation.GetConfigDataAsync($"gbs-{page.Id}");
             //    if (pageStream is not null)
             //    {
             //        StoreFile($"gleisbild-{page.Id}.cs2", pageStream);

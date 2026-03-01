@@ -26,6 +26,10 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
     internal static Uri MagUri => new($"http://{Host}/app/assets/mag/");
     internal static Uri LocoUri => new($"http://{Host}/app/assets/lok/");
 
+    public Uri GetGuiUri(string name) => new($"http://{Host}/images/gui/");
+    public Uri GetMagUri(string name) => new($"http://{Host}/app/assets/mag/");
+    public Uri GetLocoUri(string name) => new($"http://{Host}/app/assets/lok/{name}.png");
+
     public static string? Host { get; private set; }
     public DeviceData Device { get; private set; } = new DeviceData(0x6D554711, new Version(1, 0));
 

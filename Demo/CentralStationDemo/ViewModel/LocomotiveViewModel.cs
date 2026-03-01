@@ -1,16 +1,51 @@
-﻿//using System.Windows.Media;
-
-using CentralStationWebApi;
-using CentralStationWebApi.Model;
-
-namespace CentralStationDemo.ViewModel;
+﻿namespace CentralStationDemo.ViewModel;
 
 public partial class LocomotiveViewModel : ObservableObject
 {
     //private static MainViewModel mainViewModel = Ioc.Default.GetRequiredService<MainViewModel>();
     private readonly CentralStation cs;
 
-    public LocomotiveViewModel(Locomotive loco, CentralStation cs)
+    //public LocomotiveViewModel(Locomotive loco, CentralStation cs)
+    //{
+    //    this.cs = cs;
+
+    //    Name = loco.Name;
+    //    Uid = loco.Uid;
+    //    MfxUid = loco.MfxUid;
+    //    Address = loco.Address;
+    //    IconName = loco.IconName;
+    //    IconUri = loco.IconUri;
+    //    Type = loco.Type;
+    //    MfxType = loco.MfxType;
+    //    Symbol = loco.Symbol;
+
+    //    Sid = loco.Sid;
+    //    MaxSpeed = loco.MaxSpeed;
+    //    VMax = loco.VMax;
+    //    VMin = loco.VMin;
+    //    Av = loco.Av;
+    //    Bv = loco.Bv;
+    //    Volume = loco.Volume;
+    //    Spa = loco.Spa;
+    //    Spm = loco.Spm;
+    //    Velocity = loco.Velocity;
+    //    Direction = loco.Direction;
+
+    //    Functions = [.. loco.Functions!.Select(f => new FunctionViewModel(this, f)).
+    //        Concat(     loco.Functions2?.Select(f => new FunctionViewModel(this, f)) ?? [])];
+    //    //// http://cs3/app/assets/lok/NS%20186%20012-8.png
+
+    //    //if (!string.IsNullOrEmpty(IconName))
+    //    //{
+    //    //    Icon = App.Current.Dispatcher.Invoke(() =>
+    //    //    {
+    //    //        var uri = new Uri($"http://{host}/app/assets/lok/{IconName}.png");
+    //    //        return new BitmapImage(uri);
+    //    //    });
+    //    //}
+    //}
+
+    public LocomotiveViewModel(CentralStation cs, LocomotiveModel loco)
     {
         this.cs = cs;
 
@@ -19,7 +54,7 @@ public partial class LocomotiveViewModel : ObservableObject
         MfxUid = loco.MfxUid;
         Address = loco.Address;
         IconName = loco.IconName;
-        IconUri = loco.IconUri;
+        IconUri = IconName != null ? cs.GetLocoUri(IconName) : null; 
         Type = loco.Type;
         MfxType = loco.MfxType;
         Symbol = loco.Symbol;
@@ -36,8 +71,8 @@ public partial class LocomotiveViewModel : ObservableObject
         Velocity = loco.Velocity;
         Direction = loco.Direction;
 
-        Functions = [.. loco.Functions!.Select(f => new FunctionViewModel(this, f)).
-            Concat(     loco.Functions2?.Select(f => new FunctionViewModel(this, f)) ?? [])];
+        Functions = loco.Functions!.Select(f => new FunctionViewModel(this, f)).ToList() ?? [];
+            ;
         //// http://cs3/app/assets/lok/NS%20186%20012-8.png
 
         //if (!string.IsNullOrEmpty(IconName))
@@ -84,7 +119,7 @@ public partial class LocomotiveViewModel : ObservableObject
     //        throw new NotImplementedException();
     //    }
     //}
-    
+
     public void Halt() => Velocity = 0;
 
     public void SetVelocity(ushort velocity) => Velocity = velocity;
@@ -176,29 +211,15 @@ public partial class LocomotiveViewModel : ObservableObject
 
     [ObservableProperty]
     private List<FunctionViewModel> functions;
-
-    //[ObservableProperty]
-    //private Uri? function00Uri = null;
-
-    //[ObservableProperty]
-    //private Uri? function01Uri = null;
-
-    //[ObservableProperty]
-    //private Uri? function02Uri = null;
-
-    //[ObservableProperty]
-    //private Uri? function03Uri = null;
-
-
-
+    
     #endregion
 
     #region control
 
     partial void OnVelocityChanged(ushort value)
     {
-        var direction = Task.Run(async () =>
-        await cs.SetLocomotiveVelocityAsync(Uid, value)).Result;
+        //var direction = Task.Run(async () =>
+        //await cs.SetLocomotiveVelocityAsync(Uid, value)).Result;
     }
 
     [RelayCommand]
@@ -210,7 +231,7 @@ public partial class LocomotiveViewModel : ObservableObject
     [RelayCommand]
     private void OnDirection()
     { 
-        //cs.SetLocomotiveDirection(Uid, DirectionChange.Toggle);
+        //centralStation.SetLocomotiveDirection(Uid, DirectionChange.Toggle);
 
         var direction = Task.Run(async () => 
         await cs.SetLocomotiveDirectionAsync(Uid, DirectionChange.Toggle)).Result;

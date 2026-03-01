@@ -138,10 +138,10 @@ public partial class TrackFormatProcessorViewModel: ObservableObject
         //    GetChannel(4)?.SetValue
 
         // get system status
-        //MainTrack = await cs.GetSystemStatusAsync(gfpDevice.DeviceId, 1) * Math.Pow(10.0, deviceMeasurement1?.ValuePower ?? -3.0);
-        //ProgrammingTrack = await cs.GetSystemStatusAsync(gfpDevice.DeviceId, 2) * Math.Pow(10.0, deviceMeasurement2?.ValuePower ?? -3.0);
-        //Voltage = await cs.GetSystemStatusAsync(gfpDevice.DeviceId, 3) * Math.Pow(10.0, deviceMeasurement3?.ValuePower ?? -3.0);
-        //Temperature = await cs.GetSystemStatusAsync(gfpDevice.DeviceId, 4) * Math.Pow(10.0, deviceMeasurement4?.ValuePower ?? 0.0);
+        //MainTrack = await centralStation.GetSystemStatusAsync(gfpDevice.DeviceId, 1) * Math.Pow(10.0, deviceMeasurement1?.ValuePower ?? -3.0);
+        //ProgrammingTrack = await centralStation.GetSystemStatusAsync(gfpDevice.DeviceId, 2) * Math.Pow(10.0, deviceMeasurement2?.ValuePower ?? -3.0);
+        //Voltage = await centralStation.GetSystemStatusAsync(gfpDevice.DeviceId, 3) * Math.Pow(10.0, deviceMeasurement3?.ValuePower ?? -3.0);
+        //Temperature = await centralStation.GetSystemStatusAsync(gfpDevice.DeviceId, 4) * Math.Pow(10.0, deviceMeasurement4?.ValuePower ?? 0.0);
     }
 
     private void AddMeasurement(MeasurementViewModel measurementViewModel)

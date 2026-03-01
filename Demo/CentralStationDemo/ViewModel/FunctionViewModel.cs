@@ -11,6 +11,13 @@ public partial class FunctionViewModel : ObservableObject
         info = function.Num.ToString();
     }
 
+    public FunctionViewModel(LocomotiveViewModel locomotive, FunctionModel function)
+    {
+        this.locomotive = locomotive;
+        no = function.Num;
+        info = function.Num.ToString();
+    }
+
     [ObservableProperty]
     private int no;
 

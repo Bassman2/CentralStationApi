@@ -1,31 +1,44 @@
-﻿using System.IO;
-using System.Windows.Media;
-using System.ComponentModel;
-using System.Reflection;
+﻿namespace CentralStationDemo.ViewModel;
 
-namespace CentralStationDemo.ViewModel;
-
+[AutoConverterClass(nameof(ArticleModel), AdditionalParameter = nameof(CentralStation))]
 public partial class ArticleViewModel : ObservableObject
 {
-    private readonly CentralStation cs;
+    //private readonly CentralStation cs;
 
-    public ArticleViewModel(Article article, CentralStation cs)
-    {
-        this.cs = cs;
+    //public ArticleViewModel(Article article, CentralStation cs)
+    //{
+    //    this.cs = cs;
 
-        Id = article.Id;
-        Name = article.Name;
-        ArticleType = article.ArticleType;
-        ArticleTypeName = article.ArticleTypeName; 
-        //ArticleTypeName = typeof(ArticleType).GetField(article.ArticleType.ToString())?.GetCustomAttribute<DescriptionAttribute>()?.Description;
-        Position = article.Position;
-        SwitchingTime = article.SwitchingTime;
-        Odd = article.Odd;
-        DecoderType = article.DecoderType;
-        IconUri = article.IconUri;
-    }
+    //    Id = article.Id;
+    //    Name = article.Name;
+    //    ArticleType = article.ArticleType;
+    //    ArticleTypeName = article.ArticleTypeName; 
+    //    //ArticleTypeName = typeof(ArticleType).GetField(article.ArticleType.ToString())?.GetCustomAttribute<DescriptionAttribute>()?.Description;
+    //    Position = article.Position;
+    //    SwitchingTime = article.SwitchingTime;
+    //    Odd = article.Odd;
+    //    DecoderType = article.DecoderType;
+    //    IconUri = article.IconUri;
+    //}
+
+    //public ArticleViewModel(CentralStation cs, ArticleModel article)
+    //{
+    //    this.cs = cs;
+
+    //    Id = article.Id;
+    //    Name = article.Name;
+    //    ArticleType = article.ArticleType;
+    //    ArticleTypeName = article.ArticleTypeName;
+    //    //ArticleTypeName = typeof(ArticleType).GetField(article.ArticleType.ToString())?.GetCustomAttribute<DescriptionAttribute>()?.Description;
+    //    Position = article.Position;
+    //    SwitchingTime = article.SwitchingTime;
+    //    Odd = article.Odd;
+    //    DecoderType = article.DecoderType;
+    //    IconUri = article.IconUri;
+    //}
 
     [ObservableProperty]
+    [AutoConverterProperty(nameof(ArticleModel.Id))]
     private uint id;
 
     [ObservableProperty]
