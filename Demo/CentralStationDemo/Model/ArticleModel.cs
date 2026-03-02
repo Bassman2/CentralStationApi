@@ -3,6 +3,8 @@
 [AutoConverterClass(nameof(Article))]
 public partial class ArticleModel
 {
+    public ArticleModel() { }
+
     [JsonPropertyName("id")]
     [AutoConverterProperty(nameof(Article.Id))]
     public uint Id { get; set; }

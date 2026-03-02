@@ -86,8 +86,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
 
         cs.Connect(model.Host, Protocol.TCP, model.Device);
 
-        Locomotives = model.Locomotives.CastModel<LocomotiveViewModel>(cs);
-        Articles = model.Articles.CastModel<ArticleViewModel>(cs);
+        //Locomotives = model.Locomotives.CastModel<LocomotiveViewModel>(cs);
+        Articles = model.Articles.FromArticleModels(cs);
 
         // load locomotive data 
         //Locomotives = LoadFile<LocomotiveData>(locomotivesFileName)?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
