@@ -42,27 +42,34 @@ public partial class ArticleViewModel : ObservableObject
     private uint id;
 
     [ObservableProperty]
+    [AutoConverterProperty(nameof(ArticleModel.Name))]
     private string? name;
 
     [ObservableProperty]
+    [AutoConverterProperty(nameof(ArticleModel.ArticleType))]
     private ArticleType articleType;
 
     [ObservableProperty]
+    [AutoConverterProperty(nameof(ArticleModel.ArticleTypeName))]
     private string? articleTypeName;
 
     [ObservableProperty]
+    [AutoConverterProperty(nameof(ArticleModel.Position))]
     private uint position;
 
     [ObservableProperty]
+    [AutoConverterProperty(nameof(ArticleModel.SwitchingTime))]
     private uint switchingTime;
 
     [ObservableProperty]
+    [AutoConverterProperty(nameof(ArticleModel.Odd))]
     private uint odd;
 
     [ObservableProperty]
+    [AutoConverterProperty(nameof(ArticleModel.DecoderType))]
     private DecoderType decoderType;
 
     [ObservableProperty]
+    [AutoConverterProperty(nameof(ArticleModel.IconUri))]
     private Uri? iconUri;
-
 }
