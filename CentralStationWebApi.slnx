@@ -7,6 +7,8 @@
   <Folder Name="/External/">
     <Project Path="../../Libraries/AutoConverter/AutoConverter/AutoConverter.csproj" />
     <Project Path="../../Libraries/AutoConverter/AutoConverterGenerator/AutoConverterGenerator.csproj" />
+    <Project Path="../../Libraries/GeneratorLibrary/GeneratorLibrary/GeneratorLibrary.csproj" />
+    <Project Path="../../Libraries/GeneratorLibrary/GeneratorLibraryShare/GeneratorLibraryShare.shproj" Id="dca7dd44-310c-48bd-bc75-c4203d5c3200" />
   </Folder>
   <Folder Name="/Generator/">
     <Project Path="Generator/CsSerializerGenerator/CsSerializerGenerator.csproj" />

@@ -1,4 +1,4 @@
-﻿using CsSerializerGenerator.GeneratorLibrary;
+﻿using GeneratorLibrary;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -99,7 +99,7 @@ namespace CsSerializerGenerator
                 {
                     if (prop.Type.Name == "List")
                     {
-                        sb.AppendLine($"        case {arg.Value}:");
+                        sb.AppendLine($"        case \"{arg.Value}\":");
                         sb.AppendLine($"            {prop.Name} ??= [];");
                         sb.AppendLine($"            var {LowercaseFirst(prop.Name)} = new {prop.Type.BaseTypeName}();");
                         sb.AppendLine($"            {prop.Name}.Add({LowercaseFirst(prop.Name)});");
@@ -107,7 +107,7 @@ namespace CsSerializerGenerator
                     }
                     //else if (prop.Type.Name == "Version")
                     //{
-                    //    sb.AppendLine($"        case {arg.Value}:");
+                    //    sb.AppendLine($"        case \"{arg.Value}\":");
                     //    sb.AppendLine($"            return {prop.Name} = (Version)new CsVersion();");
                     //}
                     else if (prop.Type.FullName == "string" || prop.Type.FullName == "string?")
@@ -116,7 +116,7 @@ namespace CsSerializerGenerator
                     }
                     else
                     {
-                        sb.AppendLine($"        case {arg.Value}:");
+                        sb.AppendLine($"        case \"{arg.Value}\":");
                         sb.AppendLine($"            return {prop.Name} = new {prop.Type.Name}();");
                     }
                 }
@@ -136,52 +136,52 @@ namespace CsSerializerGenerator
                     //sb.AppendLine($"// List {prop.Name} {prop.Type.FullName}");
                     break;
                 case "string?":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = value;");
                     sb.AppendLine("            break;");
                     break;
                 case "int":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToInt(value);");
                     sb.AppendLine("            break;");
                     break;
                 case "uint":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToUInt(value);");
                     sb.AppendLine("            break;");
                     break;
                 case "short":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToShort(value);");
                     sb.AppendLine("            break;");
                     break;
                 case "ushort":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToUShort(value);");
                     sb.AppendLine("            break;");
                     break;
                 case "List<int>":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToIntArray(value);");
                     sb.AppendLine("            break;");
                     break;
                 case "List<uint>":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToUIntArray(value);");
                     sb.AppendLine("            break;");
                     break;
                 case "int[]?":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToIntArray(value);");
                     sb.AppendLine("            break;");
                     break;
                 case "uint[]?":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToUIntArray(value);");
                     sb.AppendLine("            break;");
                     break;
                 case "bool":
-                    sb.AppendLine($"        case {arg.Value}:");
+                    sb.AppendLine($"        case \"{arg.Value}\":");
                     sb.AppendLine($"            {prop.Name} = CsSerializer.ToBool(value);");
                     sb.AppendLine("            break;");
                     break;
@@ -189,7 +189,7 @@ namespace CsSerializerGenerator
                 default:
                     if (prop.Type.IsEnum)
                     {
-                        sb.AppendLine($"        case {arg.Value}:");
+                        sb.AppendLine($"        case \"{arg.Value}\":");
                         sb.AppendLine($"            {prop.Name} = {prop.Type.Name}_Converter.Deserialize(value);");
                         sb.AppendLine("            break;");
                     }
@@ -255,8 +255,8 @@ namespace CsSerializerGenerator
                 var attr = field.GetAttribute("System.Runtime.Serialization.EnumMemberAttribute");
                 //sb.AppendLine($"// {attr?.Name ?? "0"}");
                 var arg = attr?.GetNamedArgument("Value");
-                string name = arg?.Value ?? $"\"{field.Name}\"";
-                sb.AppendLine($"        {name} => {en.Name}.{field.Name},");
+                string name = arg?.Value ?? field.Name;
+                sb.AppendLine($"        \"{name}\" => {en.Name}.{field.Name},");
             }
         }
 
