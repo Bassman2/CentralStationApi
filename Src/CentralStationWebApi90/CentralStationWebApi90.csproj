@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>CentralStationWebApi</AssemblyName>
     <RootNamespace>CentralStationWebApi</RootNamespace>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

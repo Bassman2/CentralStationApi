@@ -48,6 +48,14 @@ namespace CsSerializerGenerator
 
                 partial class {{cl.Name}} : ICsSerialize
                 {
+                    /// <summary>
+                    /// Handles the completion of deserializing a nested section within an article.
+                    /// </summary>
+                    /// <param name="name">The name of the section that has been deserialized.</param>
+                    /// <returns>
+                    /// An <see cref="ICsSerialize"/> implementation for the nested section, 
+                    /// or a <see cref="CsDummy"/> instance if the section name is unknown.
+                    /// </returns>
                     public ICsSerialize? DeserializeLeave(string name)
                     {
                         switch (name)
@@ -65,6 +73,11 @@ namespace CsSerializerGenerator
                         }
                     }
 
+                    /// <summary>
+                    /// Deserializes a property value and assigns it to the corresponding article property.
+                    /// </summary>
+                    /// <param name="name">The name of the property as it appears in the serialized data.</param>
+                    /// <param name="value">The string value to deserialize and assign to the property.</param>
                     public void DeserializeProperty(string name, string value)
                     {
                         switch (name)
