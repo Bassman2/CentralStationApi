@@ -187,7 +187,8 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     internal void SendMessage(CanMessage msg)
     {
-        
+        CentralStationNotConnectedException.ThrowIfNotConnected(client);
+
         messageReceivedQueue.Add(msg);
         client.Send(msg);
         Tracer.TraceMessage(msg);
@@ -195,6 +196,8 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     internal async Task SendMessageAsync(CanMessage msg)
     {
+        CentralStationNotConnectedException.ThrowIfNotConnected(client);
+
         messageReceivedQueue.Add(msg);
         await client.SendAsync(msg);
         Tracer.TraceMessage(msg);
@@ -206,6 +209,8 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
 
     private async Task ReceiveAsync()
     {
+        CentralStationNotConnectedException.ThrowIfNotConnected(client);
+
         try
         {
             while (true)
