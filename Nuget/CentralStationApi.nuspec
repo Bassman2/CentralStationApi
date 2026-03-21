@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>CentralStationApi</id>
+    <version>0.1.0</version>
+    <title>Central Station Api</title>
+    <authors>Ralf Beckers</authors>
+    <owners>Ralf Beckers</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>https://github.com/Bassman2/CentralStationApi</projectUrl>
+    <description>Central Station Api</description>
+    <releaseNotes>Creation</releaseNotes>
+    <copyright>Copyright 2026 (c) by Ralf Beckers</copyright>
+    <repository type="git" url="https://github.com/Bassman2/CentralStationApi"/>
+    <tags>CentralStation Api</tags>
+    <readme>docs\README.md</readme>
+     <dependencies>
+      <group targetFramework=".NET10.0" />
+      <group targetFramework=".NET9.0" />
+      <group targetFramework=".NET8.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\Src\CentralStationApi100\bin\Release\net10.0\**" target="lib/net10.0" />
+    <file src="..\Src\CentralStationApi90\bin\Release\net9.0\**" target="lib/net9.0" />
+    <file src="..\Src\CentralStationApi80\bin\Release\net8.0\**" target="lib/net8.0" />
+    <file src="..\README.md" target="docs\" />
+    <file src="..\LICENSE" target="content" />
+  </files>
+</package>

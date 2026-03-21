@@ -23,8 +23,8 @@ global using WpfToolbox.ViewModel;
 
 global using AutoConverter;
 
-global using CentralStationWebApi;
-global using CentralStationWebApi.Model;
+global using CentralStationApi;
+global using CentralStationApi.Model;
 
 global using CentralStationDemo.Model;
 global using CentralStationDemo.ViewModel;

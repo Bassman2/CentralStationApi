@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/Demo/">
+    <Project Path="Demo/CentralStationConsole/CentralStationConsole.csproj" Id="2621c761-639a-4762-a10d-f1ae57ddd6dc" />
+    <Project Path="Demo/CentralStationDemo/CentralStationDemo.csproj" Id="919214bd-a8a3-4a96-8b95-65325919fb84" />
+    <Project Path="Demo/CentralStationImageCache/CentralStationImageCache.csproj" Id="43d9560d-c441-4894-be1f-6fee5e5e8461" />
+  </Folder>
+  <Folder Name="/External/">
+    <Project Path="../AutoConverter/AutoConverter/AutoConverter.csproj" />
+    <Project Path="../AutoConverter/AutoConverterGenerator/AutoConverterGenerator.csproj" />
+    <Project Path="../GeneratorLibrary/GeneratorLibrary/GeneratorLibrary.csproj" />
+    <Project Path="../GeneratorLibrary/GeneratorLibraryShare/GeneratorLibraryShare.shproj" Id="dca7dd44-310c-48bd-bc75-c4203d5c3200" />
+  </Folder>
+  <Folder Name="/Generator/">
+    <Project Path="Generator/CsSerializerGenerator/CsSerializerGenerator.csproj" />
+  </Folder>
+  <Folder Name="/Src/">
+    <Project Path="Src/CentralStationApi100/CentralStationApi100.csproj" />
+    <Project Path="Src/CentralStationApi80/CentralStationApi80.csproj" />
+    <Project Path="Src/CentralStationApi90/CentralStationApi90.csproj" />
+    <Project Path="Src/CentralStationApiShare/CentralStationApiShare.shproj" Id="16266f29-bc26-4edd-acc7-3d09422c0e74" />
+  </Folder>
+</Solution>

@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Libraries\AutoConverter\AutoConverter\AutoConverter.csproj" />
-    <ProjectReference Include="..\..\Src\CentralStationWebApi90\CentralStationWebApi90.csproj" />
+    <ProjectReference Include="..\..\Src\CentralStationApi90\CentralStationApi90.csproj" />
   </ItemGroup>
 
   <ItemGroup>

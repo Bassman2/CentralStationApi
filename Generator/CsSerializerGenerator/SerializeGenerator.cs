@@ -16,7 +16,7 @@ namespace CsSerializerGenerator
             CreateDebug();
 
             // get all classes with [CsSerializeAttribute] 
-            foreach (var cl in GetAllClassesWithAttribute("CentralStationWebApi.Serializer.CsSerializeAttribute"))
+            foreach (var cl in GetAllClassesWithAttribute("CentralStationApi.Serializer.CsSerializeAttribute"))
             {
                 CreateSerializerClassFile(cl);
                 //CreateModelFile(cl);
@@ -24,7 +24,7 @@ namespace CsSerializerGenerator
             }
 
             // get all enums with [EnumConverterAttribute] 
-            foreach (var en in GetAllEnumsWithAttribute("CentralStationWebApi.Serializer.EnumConverterAttribute"))
+            foreach (var en in GetAllEnumsWithAttribute("CentralStationApi.Serializer.EnumConverterAttribute"))
             {
                 CreateSerializerEnumFile(en);
                 //CreateModelFile(cl);
@@ -101,9 +101,9 @@ namespace CsSerializerGenerator
 
         private void AddLeaves(StringBuilder sb, Class cl)
         {
-            foreach (var prop in cl.Properties.Where(p => p.HasAttribute("CentralStationWebApi.Serializer.CsPropertyAttribute")))
+            foreach (var prop in cl.Properties.Where(p => p.HasAttribute("CentralStationApi.Serializer.CsPropertyAttribute")))
             {
-                var arg = prop.GetAttribute("CentralStationWebApi.Serializer.CsPropertyAttribute")?.ConstructorArguments.First();
+                var arg = prop.GetAttribute("CentralStationApi.Serializer.CsPropertyAttribute")?.ConstructorArguments.First();
                 if (arg == null) continue;
 
                 //sb.AppendLine($"// {prop.Name} - {prop.Type.Name} - {prop.Type.FullName} - {prop.Type.TypeKind} || {prop.Type.BaseTypeName} - {prop.Type.BaseTypeFullName}");
@@ -138,9 +138,9 @@ namespace CsSerializerGenerator
 
         private void AddProperties(StringBuilder sb, Class cl)
         {
-            foreach (var prop in cl.Properties.Where(p => p.HasAttribute("CentralStationWebApi.Serializer.CsPropertyAttribute")))
+            foreach (var prop in cl.Properties.Where(p => p.HasAttribute("CentralStationApi.Serializer.CsPropertyAttribute")))
             {
-                var arg = prop.GetAttribute("CentralStationWebApi.Serializer.CsPropertyAttribute")?.ConstructorArguments.First();
+                var arg = prop.GetAttribute("CentralStationApi.Serializer.CsPropertyAttribute")?.ConstructorArguments.First();
                 if (arg == null) continue;
 
                 switch (prop.Type.FullName)

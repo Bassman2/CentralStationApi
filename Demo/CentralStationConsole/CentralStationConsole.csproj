@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Src\CentralStationWebApi90\CentralStationWebApi90.csproj" />
+    <ProjectReference Include="..\..\Src\CentralStationApi90\CentralStationApi90.csproj" />
   </ItemGroup>
 
 </Project>

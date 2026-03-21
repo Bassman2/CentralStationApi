@@ -1,4 +1,4 @@
-﻿using CentralStationWebApi;
+﻿using CentralStationApi;
 
 namespace CentralStationConsole
 {
