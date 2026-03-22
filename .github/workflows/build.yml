@@ -1,0 +1,58 @@
+name: Continuous Integration
+
+permissions:
+  contents: read
+  pull-requests: write
+  
+on:
+  push:
+    branches: [main,]
+  pull_request:
+    branches: [main]
+
+jobs:
+  buildWindows:
+    name: Windows Build
+    runs-on: windows-latest
+    environment: sign
+    env:
+      Solution: ${{ github.event.repository.name }}.slnx
+
+    steps:
+    - name: Checkout Main
+      uses: actions/checkout@v6  
+    
+    - name: Add SignKeys
+      uses: Bassman2/SignKey@v1
+      with:
+        file: Bassman.snk
+        key: ${{ secrets.SIGNKEY }}
+
+    - name: Cache packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: ${{ runner.os }}-nuget-
+
+    - name: Dotnet restore dependencies
+      run: dotnet restore ${{ env.Solution }}
+
+    - name: Build Debug
+      run: dotnet build ${{ env.Solution }} -c Debug --no-restore
+
+    - name: Build Release
+      run: dotnet build ${{ env.Solution }} -c Release --no-restore
+
+    - name: Nuget pack nuspec
+      working-directory: Nuget
+      run: nuget pack ${{ github.event.repository.name }}.nuspec -properties Configuration=Release
+      if: ${{ hashFiles( 'Nuget/*.nuspec' ) != '' }}
+
+    - name: Upload nuget pack artifact
+      uses: actions/upload-artifact@v5
+      with:
+        name: ${{ github.event.repository.name }}NugetPackage.zip
+        path: Nuget/*.nupkg
+      if: ${{ hashFiles( 'Nuget/*.nuspec' ) != '' }}
+

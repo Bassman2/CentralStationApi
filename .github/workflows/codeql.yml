@@ -1,0 +1,47 @@
+name: CodeQL
+
+permissions:
+  pull-requests: write
+  security-events: write
+  packages: read
+  actions: read
+  contents: read
+
+on:
+  push:
+    branches: [main, ]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 5'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: windows-latest
+    environment: sign
+    env:
+      Solution: ${{ github.event.repository.name }}.slnx
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      
+    - name: Add SignKeys
+      uses: Bassman2/SignKey@v1
+      with:
+        file: Bassman.snk
+        key: ${{ secrets.SIGNKEY }}
+
+    - name: Dotnet restore dependencies
+      run: dotnet restore ${{ env.Solution }}
+
+    - name: Build Release
+      run: dotnet build ${{ env.Solution }} -c Release --no-restore
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
+      
