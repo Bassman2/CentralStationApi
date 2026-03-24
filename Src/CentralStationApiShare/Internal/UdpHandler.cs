@@ -1,9 +1,8 @@
 ﻿using System.Net;
-using System.Net.Sockets;
 
 namespace CentralStationApi.Internal;
 
-internal class UdpHandler : IProtocolHandler, IDisposable
+internal sealed class UdpHandler : IProtocolHandler, IDisposable
 {
     private const int UDPPortSend = 15731;
     private const int UDPPortReceive = 15730;

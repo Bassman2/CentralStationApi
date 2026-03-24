@@ -2,7 +2,7 @@
 
 namespace CentralStationApi.Internal;
 
-internal class TcpHandler : IProtocolHandler, IDisposable
+internal sealed class TcpHandler : IProtocolHandler, IDisposable
 {
     private const int CANMsgLength = 13;
     private const int TCPPort = 15731;
