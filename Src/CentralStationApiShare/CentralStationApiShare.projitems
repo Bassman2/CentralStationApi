@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CentralStation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CentralStationNotConnectedException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DeviceData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\CanHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CanMessageComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CanStatusCollector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\CanStatusComparer.cs" />
