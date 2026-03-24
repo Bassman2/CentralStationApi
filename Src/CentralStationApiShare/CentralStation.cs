@@ -160,6 +160,7 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         {
             Protocol.TCP => new TcpHandler(),
             Protocol.UDP => new UdpHandler(),
+            Protocol.CAN => new CanHandler(),
             _ => throw new NotSupportedException($"Protocol {protocol} not supported"),
         };
 
