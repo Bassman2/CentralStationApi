@@ -6,6 +6,15 @@ namespace CentralStationApi.Internal;
 // 29-Bit-IDs 
 // Baudrate 250 kBaud.
 
+// CAN Mode: Normal
+// Frame Type: Extended Frame (CAN2.0B 29-bit ID)
+// CAN Baud Rate: 250k
+// SYNC_SEG: CAN_SJW_1tq
+// BS1: CAN_BS1_6tq
+// BS2: CAN_BS2_7tq
+// Prescale (Dec): 12
+
+
 // https://www.waveshare.com/wiki/USB-CAN-B?srsltid=AfmBOoq1ePaZ7Enp9sWvnNCJVRptROrrDNTx7FSYwDnfiY9j88lU6aqt#Driver_Installation
 // https://www.waveshare.com/wiki/USB-CAN-A?srsltid=AfmBOoq7ZrcF4TVP25PmkYyEvwLRpUS7c4MgSnb8M0thHWall8IavnV6#Features
 
