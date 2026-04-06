@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CentralStationTracer": {
+      "commandName": "Project",
+      "commandLineArgs": "-p CAN -n COM4"
+    }
+  }
+}

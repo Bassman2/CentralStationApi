@@ -170,6 +170,12 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
         this.receiver = Task.Run(async () => await ReceiveAsync());
     }
 
+    
+    /// <summary>
+    /// Gets a value indicating whether the central station client is currently connected.
+    /// </summary>
+    public bool IsConnected => client?.IsConnected ?? false;
+
     /// <summary>
     /// Releases all resources used by the <see cref="CentralStation"/>.
     /// </summary>

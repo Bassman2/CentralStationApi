@@ -12,7 +12,9 @@ public class BusinessService : IBusinessService
     public BusinessService()
     {
         centralStationModel = CentralStationModel.LoadOrCreate();
-        centralStation = new CentralStation("CS3", Protocol.TCP);
+        //centralStation = new CentralStation("CS3", Protocol.TCP);
+        centralStation = new CentralStation("COM4", Protocol.CAN);
+
     }
 
     public void Dispose()

@@ -84,7 +84,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.LocomotiveDirection += (s, e) => OnLocomotiveDirection(e.LocomotiveId, e.Direction);
         cs.LocomotiveFunction += (s, e) => OnLocomotiveFunction(e.LocomotiveId, e.Function, e.Value);
 
-        cs.Connect(model.Host, Protocol.TCP, model.Device);
+        //cs.Connect(model.Host, Protocol.TCP, model.Device);
+        cs.Connect("COM4", Protocol.CAN, model.Device);
 
         //Locomotives = model.Locomotives.CastModel<LocomotiveViewModel>(cs);
         Articles = model.Articles.FromArticleModels(cs);
