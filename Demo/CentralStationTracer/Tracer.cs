@@ -12,36 +12,44 @@ internal class Tracer
     {
         ArgumentNullException.ThrowIfNull(name, nameof(name));
 
-        StreamWriter? writer; // = string.IsNullOrWhiteSpace(outputFile) ? null : File.CreateText(outputFile);
-
-        if (string.IsNullOrWhiteSpace(outputFile))
+        try
         {
-            writer = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }; 
-            Console.SetOut(writer);
-        }
-        else
-        {
-            writer = File.CreateText(outputFile);
-        }
+            StreamWriter? writer; // = string.IsNullOrWhiteSpace(outputFile) ? null : File.CreateText(outputFile);
 
-        CentralStation centralStation = new();
-        centralStation.MessageReceived += (sender, message) =>
-        {
-            writer.WriteLine(message.Message.ToTrace());
-        };
-
-        centralStation.Connect(name, protocol);
-
-        while (centralStation.IsConnected) 
-        {
-            if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape)
+            if (string.IsNullOrWhiteSpace(outputFile))
             {
-                return 0;
+                writer = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true };
+                Console.SetOut(writer);
             }
-            Thread.Sleep(500);
-        }
+            else
+            {
+                writer = File.CreateText(outputFile);
+            }
 
-        return 0;
+            CentralStation centralStation = new();
+            centralStation.MessageReceived += (sender, message) =>
+            {
+                writer.WriteLine(message.Message.ToTrace());
+            };
+
+            centralStation.Connect(name, protocol);
+
+            while (centralStation.IsConnected)
+            {
+                if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape)
+                {
+                    return 0;
+                }
+                Thread.Sleep(500);
+            }
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+            return 1;
+        }
+        
     }
                  
 }
