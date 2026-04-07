@@ -26,6 +26,8 @@ internal class Tracer
                 writer = File.CreateText(outputFile);
             }
 
+            writer.WriteLine("Start");
+
             CentralStation centralStation = new();
             centralStation.MessageReceived += (sender, message) =>
             {

@@ -159,11 +159,12 @@ public sealed class CanMessage
     /// </summary>
     /// <param name="sender">The hostname of the sender.</param>
     /// <param name="data">The raw message data (13 bytes).</param>
-    public CanMessage(string sender, byte[] data)
+    /// <param name="index">The starting index in the data array to read from. Default is 0.</param>
+    public CanMessage(string sender, byte[] data, int index = 0)
     {
         Sender = sender;
         Timestamp = DateTime.Now;
-        Array.Copy(data, Buffer, 13);
+        Array.Copy(data, index, Buffer, 0, 13);
 
         // add to DeviceCache & HashCache
         if (Command == Command.SoftwareVersion && DataLength == 8)
@@ -423,7 +424,7 @@ public sealed class CanMessage
     public string ToTrace()
     {
         string timestamp = Timestamp.ToString("HH:mm:ss.ffff");
-        string sender = Dns.GetHostEntry(Sender)?.HostName.Split('.')[0] ?? Sender;
+        string sender = ""; // Dns.GetHostEntry(Sender)?.HostName.Split('.')[0] ?? Sender;
         string data = $"{GetHeader():X8} {DataLength:X} {GetDataByte(0):X2} {GetDataByte(1):X2} {GetDataByte(2):X2} {GetDataByte(3):X2} {GetDataByte(4):X2} {GetDataByte(5):X2} {GetDataByte(6):X2} {GetDataByte(7):X2}";
         string sendReq = IsResponse ? "<--" : "-->";
         string header = $"{Priority,-6} {Command,-20} {sendReq} {HashCache.GetHash(Hash),-20} {Hash:X4}";
