@@ -195,6 +195,11 @@ public sealed class CanMessage
     public ushort Hash => (ushort)GetBits(GetHeader(), 0, 16);
 
     /// <summary>
+    /// Gets a value indicating whether the current format uses the new CS2 and CS3 specification.
+    /// </summary>
+    public bool IsNewFormat => (Hash & 0x0380) == 0x0300;
+
+    /// <summary>
     /// Gets the message in binary hexadecimal format for debugging.
     /// </summary>
     public string Binary => $"{buffer[0]:X2}{buffer[1]:X2}{buffer[2]:X2}{buffer[3]:X2} {buffer[4]:X} " + string.Join(" ", buffer[5..(5 + Math.Min(buffer[4], (byte)8))].Select(b => b.ToString("X2")));
@@ -429,7 +434,8 @@ public sealed class CanMessage
         string sendReq = IsResponse ? "<--" : "-->";
         string header = $"{Priority,-6} {Command,-20} {sendReq} {HashCache.GetHash(Hash),-20} {Hash:X4}";
         string description = Description;
-        return $"{timestamp} {sender,-12} {data} {header} {description}";
+        string format = IsNewFormat ? "CS2" : "CS1";
+        return $"{timestamp} {sender,-12} {format} {data} {header} {description}";
     }
 
     #endregion
