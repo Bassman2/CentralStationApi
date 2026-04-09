@@ -20,6 +20,15 @@ namespace CentralStationApi.Internal;
 
 // 0 07/04/2026 22:13:47 IRP_MJ_WRITE DOWN  aa 55 02 05 02 00 00 00 00 00 00 00 00 00 01 00 00 00 00 0a  ªU.................. 20 20 COM4  
 
+
+// AA Cx 11xx xxxx Variable-length communication protocol format
+// AA E8
+// AA 55 01 01 01   Fixed 20-byte protocol format
+// AA 55 02         Setting (for sending and receiving data with a fixed 20-byte protocol)
+// AA 55 12         Setting (for sending and receiving data with a variable protocol)
+
+
+
 internal sealed class CanHandler : IProtocolHandler, IDisposable
 {
     private const int msgLength = 20;
@@ -36,10 +45,24 @@ internal sealed class CanHandler : IProtocolHandler, IDisposable
     {
         sender = host;
 
-        serialPort = new SerialPort(host, comBaudrate);
+        serialPort = new SerialPort(host, comBaudrate, Parity.None, 8, StopBits.One);
+        serialPort.DataReceived += SerialPort_DataReceived;
+        serialPort.ErrorReceived += SerialPort_ErrorReceived;
+        //serialPort.ReadTimeout = 1000 * 60 * 60;
         serialPort.Open();
-        serialPort.DiscardInBuffer();
-        ConfigureCan();
+        //serialPort.DiscardInBuffer();
+        //serialPort.DiscardOutBuffer();
+        //ConfigureCan();
+    }
+
+    private void SerialPort_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+    {
+        
+    }
+
+    private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+    {
+       
     }
 
     public void Dispose()
@@ -58,13 +81,37 @@ internal sealed class CanHandler : IProtocolHandler, IDisposable
 
         var buffer = new byte[msgLength];
 
-        int len = await serialPort!.BaseStream.ReadAsync(buffer, 0, 20);
-        Console.WriteLine(len);
-        //await serialPort!.BaseStream.ReadExactlyAsync(buffer, 0, msgLength);
+        while (true)
+        {
+            int num = serialPort.BytesToRead;
 
-        string str = buffer.Select(i => i.ToString("X2")).Aggregate("", (a, b) => $"{a} {b}"); // prevent optimization
-        Console.WriteLine(str);
+            if (num >= 20)
+            {
+                Console.WriteLine(num);
+                int len = await serialPort!.BaseStream.ReadAsync(buffer, 0, 20);
+                
+                if (buffer[0] != 0xAA)
+                {
+                    Console.WriteLine("No AA header");
+                }
+                if (buffer[1] != 0x55)
+                {
+                    Console.WriteLine("Not supported format");
+                }
 
+
+                //Console.WriteLine(len);
+                //await serialPort!.BaseStream.ReadExactlyAsync(buffer, 0, msgLength);
+
+                string str = buffer.Select(i => i.ToString("X2")).Aggregate("", (a, b) => $"{a} {b}"); // prevent optimization
+                Console.WriteLine(str);
+            }
+            else
+            {
+                Console.WriteLine($"empty");
+                Thread.Sleep(1000);
+            }
+        }
         return new CanMessage(sender, buffer, 5);
     }
 
