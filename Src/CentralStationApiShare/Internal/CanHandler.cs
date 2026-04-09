@@ -79,41 +79,149 @@ internal sealed class CanHandler : IProtocolHandler, IDisposable
     {
         if (serialPort is null || !serialPort.IsOpen) throw new InvalidOperationException("Serial port is not initialized.");
 
-        var buffer = new byte[msgLength];
-
-        while (true)
+        try
         {
-            int num = serialPort.BytesToRead;
+            var buffer = new byte[msgLength];
+            int num = 0;
 
-            if (num >= 20)
+            while (true)
             {
-                Console.WriteLine(num);
-                int len = await serialPort!.BaseStream.ReadAsync(buffer, 0, 20);
                 
-                if (buffer[0] != 0xAA)
+
+                while (serialPort.BytesToRead == 0)
                 {
-                    Console.WriteLine("No AA header");
+                    //Console.Write(".");
+                    Thread.Sleep(100);
                 }
-                if (buffer[1] != 0x55)
+
+                var b = serialPort.ReadByte();
+
+                switch (num)
                 {
-                    Console.WriteLine("Not supported format");
+                case 0:
+                    if (b == 0xaa)
+                    {
+                        buffer[num++] = (byte)b;
+                    }
+                    else
+                    {
+                        num = 0;
+                    }
+                    break;
+                case 1:
+                    if (b == 0x55)
+                    {
+                        buffer[num++] = (byte)b;
+                    }
+                    else
+                    {
+                        num = 0;
+                    }
+                    break;
+                case 2:
+                    if (b == 0x01)
+                    {
+                        buffer[num++] = (byte)b;
+                    }
+                    else
+                    {
+                        num = 0;
+                    }
+                    break;
+                case 3:
+                    if (b == 0x02)
+                    {
+                        buffer[num++] = (byte)b;
+                    }
+                    else
+                    {
+                        num = 0;
+                    }
+                    break;
+                case 4:
+                    if (b == 0x01)
+                    {
+                        buffer[num++] = (byte)b;
+                    }
+                    else
+                    {
+                        num = 0;
+                    }
+                    break;
+                case 18:
+                    if (b == 0x00)
+                    {
+                        buffer[num++] = (byte)b;
+                    }
+                    else
+                    {
+                        num = 0;
+                    }
+                    break;
+                case 19:
+                    byte c = CalcCheckCode(buffer);
+                    if (b == c)
+                    {
+                        buffer[num++] = (byte)b;
+
+                        string str = buffer.Select(i => i.ToString("X2")).Aggregate("", (a, b) => $"{a} {b}"); // prevent optimization
+                        Console.WriteLine(str);
+                        num = 0;
+                        return new CanMessage(sender, buffer, 5);
+                    }
+                    else
+                    {
+                        num = 0;
+                    }
+                    break;
+                default:
+                    if (num < 20)
+                    {
+                        buffer[num++] = (byte)b;
+                    }
+                    else 
+                    { 
+                    }
+                    break;
                 }
+                
+                //Console.WriteLine();
+
+                //Console.WriteLine(num);
+                //int len = await serialPort!.BaseStream.ReadAsync(buffer, 0, 20);
+
+                //if (buffer[0] != 0xAA)
+                //{
+                //    Console.WriteLine("No AA header");
+                //}
+                //if (buffer[1] != 0x55)
+                //{
+                //    Console.WriteLine("Not supported format");
+                //}
 
 
                 //Console.WriteLine(len);
                 //await serialPort!.BaseStream.ReadExactlyAsync(buffer, 0, msgLength);
 
-                string str = buffer.Select(i => i.ToString("X2")).Aggregate("", (a, b) => $"{a} {b}"); // prevent optimization
-                Console.WriteLine(str);
             }
-            else
-            {
-                Console.WriteLine($"empty");
-                Thread.Sleep(1000);
-            }
+            return new CanMessage(sender, buffer, 5);
         }
-        return new CanMessage(sender, buffer, 5);
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error receiving CAN message: {ex.Message}");
+            throw;
+        }
     }
+
+    private byte CalcCheckCode(byte[] data)
+    {
+        short sum = 0;
+        for (int i = 2; i < 19; i++)
+        {
+            sum += data[i];
+        }
+        return (byte)(sum & 0xff);
+    }   
 
     public void Send(CanMessage msg)
     {
@@ -140,7 +248,7 @@ internal sealed class CanHandler : IProtocolHandler, IDisposable
             0x55,   // Message header: CAN Configuration
             0x02,   // Type: 0x02-Setting (for sending and receiving data with a fixed 20-byte protocol)
             0x05,   // CAN baud rate: 0x05 (250kbps)
-            0x02,   // Frame type: 0x02 Extended frame
+           0x02,   // Frame type: 0x02 Extended frame
             0x00,   // Filter ID1
             0x00,   // Filter ID2
             0x00,   // Filter ID3
