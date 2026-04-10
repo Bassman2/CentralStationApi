@@ -2,5 +2,6 @@
 
 ## Commands
 
-||Command||Value||Description||
+|Command|Value|Description|
+|-------|-----|-----------|
 |STOP|0x00|STOP system|
