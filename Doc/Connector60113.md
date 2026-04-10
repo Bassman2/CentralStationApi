@@ -1,4 +1,4 @@
-# Digital Connector Box 60113.
+# Digital Connector Box 60113
 
 ## Commands
 
