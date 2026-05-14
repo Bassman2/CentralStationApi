@@ -4,16 +4,16 @@ namespace CentralStationDemo.ViewModel;
 
 public partial class DeviceViewModel : ObservableObject
 {
-    public DeviceViewModel(Device device)
-    {
-        DeviceId = device.DeviceId;
-        Version = device.Version;
-        DeviceType = device.DeviceType;
-        DeviceTypeName = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
-        IconUri = device.IconUri;
+    //public DeviceViewModel(Device device)
+    //{
+    //    DeviceId = device.DeviceId;
+    //    Version = device.Version;
+    //    DeviceType = device.DeviceType;
+    //    DeviceTypeName = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
+    //    IconUri = device.IconUri;
 
-        //Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test A" }));
-    }
+    //    //Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test A" }));
+    //}
 
     public void AddDeviceInfo(DeviceInfo deviceInfo)
     {
@@ -35,41 +35,41 @@ public partial class DeviceViewModel : ObservableObject
     #region SoftwareVersion
 
     [ObservableProperty]
-    private uint deviceId;
+    public partial uint DeviceId { get; set; }
 
     [ObservableProperty]
-    private Version version;
-    
-    [ObservableProperty]
-    private DeviceType deviceType;
+    public partial Version Version { get; set; }
 
     [ObservableProperty]
-    private string deviceTypeName;
+    public partial DeviceType DeviceType { get; set; }
 
     [ObservableProperty]
-    private Uri? iconUri;
+    public partial string DeviceTypeName { get; set; }
+
+    [ObservableProperty]
+    public partial Uri? IconUri { get; set; }
 
     #endregion
 
     #region DeviceDescription
 
     [ObservableProperty]
-    private byte numOfMeasuredValues;
+    public partial byte NumOfMeasuredValues { get; set; }
 
     [ObservableProperty]
-    private byte numOfConfigurationChannels;
+    public partial byte NumOfConfigurationChannels { get; set; }
 
     [ObservableProperty]
-    private uint serialNumber;
+    public partial uint SerialNumber { get; set; }
 
     [ObservableProperty]
-    private string articleNumber = string.Empty;
+    public partial string ArticleNumber { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string deviceName = string.Empty;
+    public partial string DeviceName { get; set; } = string.Empty;
 
     #endregion
 
     [ObservableProperty]
-    private ObservableCollection<DeviceMeasurementViewModel> measurements = [];
+    public partial ObservableCollection<DeviceMeasurementViewModel> Measurements { get; set; } = [];
 }

@@ -5,6 +5,9 @@
     <Project Path="Demo/CentralStationImageCache/CentralStationImageCache.csproj" Id="43d9560d-c441-4894-be1f-6fee5e5e8461" />
     <Project Path="Demo/CentralStationTracer/CentralStationTracer.csproj" Id="8a36bfa6-ee92-4d3a-92f8-88c892589561" />
   </Folder>
+  <Folder Name="/Doc/">
+    <File Path="Doc/Connector60113.md" />
+  </Folder>
   <Folder Name="/External/">
     <Project Path="../AutoConverter/AutoConverter/AutoConverter.csproj" />
     <Project Path="../AutoConverter/AutoConverterGenerator/AutoConverterGenerator.csproj" />

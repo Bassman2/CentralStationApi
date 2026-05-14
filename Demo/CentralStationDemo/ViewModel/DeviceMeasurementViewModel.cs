@@ -3,47 +3,47 @@
 public partial class DeviceMeasurementViewModel(DeviceMeasurement deviceMeasurement) : ObservableObject
 {
     [ObservableProperty]
-    private byte channel = deviceMeasurement.Channel;
+    public partial byte Channel { get; set; } = deviceMeasurement.Channel;
 
     [ObservableProperty]
-    private sbyte valuePower = deviceMeasurement.ValuePower;
+    public partial sbyte ValuePower { get; set; } = deviceMeasurement.ValuePower;
 
     [ObservableProperty]
-    private byte colorRange1 = deviceMeasurement.ColorRange1;
+    public partial byte ColorRange1 { get; set; } = deviceMeasurement.ColorRange1;
 
     [ObservableProperty]
-    private byte colorRange2 = deviceMeasurement.ColorRange2;
+    public partial byte ColorRange2 { get; set; } = deviceMeasurement.ColorRange2;
 
     [ObservableProperty]
-    private byte colorRange3 = deviceMeasurement.ColorRange3;
+    public partial byte ColorRange3 { get; set; } = deviceMeasurement.ColorRange3;
 
     [ObservableProperty]
-    private byte colorRange4 = deviceMeasurement.ColorRange4;
+    public partial byte ColorRange4 { get; set; } = deviceMeasurement.ColorRange4;
 
     [ObservableProperty]
-    private ushort zeroPoint = deviceMeasurement.ZeroPoint;
+    public partial ushort ZeroPoint { get; set; } = deviceMeasurement.ZeroPoint;
 
     [ObservableProperty]
-    private ushort endRange1 = deviceMeasurement.EndRange1;
+    public partial ushort EndRange1 { get; set; } = deviceMeasurement.EndRange1;
 
     [ObservableProperty]
-    private ushort endRange2 = deviceMeasurement.EndRange2;
+    public partial ushort EndRange2 { get; set; } = deviceMeasurement.EndRange2;
 
     [ObservableProperty]
-    private ushort endRange3 = deviceMeasurement.EndRange3;
+    public partial ushort EndRange3 { get; set; } = deviceMeasurement.EndRange3;
 
     [ObservableProperty]
-    private ushort endRange4 = deviceMeasurement.EndRange4;
+    public partial ushort EndRange4 { get; set; } = deviceMeasurement.EndRange4;
 
     [ObservableProperty]
-    private string name = deviceMeasurement.Name;
+    public partial string Name { get; set; } = deviceMeasurement.Name;
 
     [ObservableProperty]
-    private string start = deviceMeasurement.Start;
+    public partial string Start { get; set; } = deviceMeasurement.Start;
 
     [ObservableProperty]
-    private string end = deviceMeasurement.End;
+    public partial string End { get; set; } = deviceMeasurement.End;
 
     [ObservableProperty]
-    private string unit = deviceMeasurement.Unit;
+    public partial string Unit { get; set; } = deviceMeasurement.Unit;
 }

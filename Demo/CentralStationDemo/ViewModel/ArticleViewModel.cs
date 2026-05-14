@@ -1,6 +1,6 @@
 ﻿namespace CentralStationDemo.ViewModel;
 
-[AutoConverterClass(nameof(ArticleModel), AdditionalParameter = nameof(CentralStation))]
+//[AutoConverterClass(nameof(ArticleModel), AdditionalParameter = nameof(CentralStation))]
 public partial class ArticleViewModel : ObservableObject
 {
     //private readonly CentralStation cs;
@@ -39,37 +39,37 @@ public partial class ArticleViewModel : ObservableObject
 
     [ObservableProperty]
     [AutoConverterProperty(nameof(ArticleModel.Id))]
-    private uint id;
+    public partial uint Id { get; set; }
 
     [ObservableProperty]
     [AutoConverterProperty(nameof(ArticleModel.Name))]
-    private string? name;
+    public partial string? Name { get; set; }
 
     [ObservableProperty]
     [AutoConverterProperty(nameof(ArticleModel.ArticleType))]
-    private ArticleType articleType;
+    public partial ArticleType ArticleType { get; set; }
 
     [ObservableProperty]
     [AutoConverterProperty(nameof(ArticleModel.ArticleTypeName))]
-    private string? articleTypeName;
+    public partial string? ArticleTypeName { get; set; }
 
     [ObservableProperty]
     [AutoConverterProperty(nameof(ArticleModel.Position))]
-    private uint position;
+    public partial uint Position { get; set; }
 
     [ObservableProperty]
     [AutoConverterProperty(nameof(ArticleModel.SwitchingTime))]
-    private uint switchingTime;
+    public partial uint SwitchingTime { get; set; }
 
     [ObservableProperty]
     [AutoConverterProperty(nameof(ArticleModel.Odd))]
-    private uint odd;
+    public partial uint Odd { get; set; }
 
     [ObservableProperty]
     [AutoConverterProperty(nameof(ArticleModel.DecoderType))]
-    private DecoderType decoderType;
+    public partial DecoderType DecoderType { get; set; }
 
     [ObservableProperty]
     [AutoConverterProperty(nameof(ArticleModel.IconUri))]
-    private Uri? iconUri;
+    public partial Uri? IconUri { get; set; }
 }

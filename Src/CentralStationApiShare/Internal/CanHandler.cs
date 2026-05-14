@@ -164,8 +164,8 @@ internal sealed class CanHandler : IProtocolHandler, IDisposable
                     {
                         buffer[num++] = (byte)b;
 
-                        string str = buffer.Select(i => i.ToString("X2")).Aggregate("", (a, b) => $"{a} {b}"); // prevent optimization
-                        Console.WriteLine(str);
+                        //string str = buffer.Select(i => i.ToString("X2")).Aggregate("", (a, b) => $"{a} {b}"); // prevent optimization
+                        //Console.WriteLine(str);
                         num = 0;
                         return new CanMessage(sender, buffer, 5);
                     }

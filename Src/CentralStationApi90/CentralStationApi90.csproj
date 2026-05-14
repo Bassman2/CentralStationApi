@@ -23,7 +23,7 @@
   <Import Project="..\CentralStationApiShare\CentralStationApiShare.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="System.IO.Ports" Version="10.0.5" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.6" />
   </ItemGroup>
 
   <ItemGroup>

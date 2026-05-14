@@ -3,7 +3,7 @@
 public partial class LocomotiveViewModel : ObservableObject
 {
     //private static MainViewModel mainViewModel = Ioc.Default.GetRequiredService<MainViewModel>();
-    private readonly CentralStation cs;
+    //private readonly CentralStation cs;
 
     //public LocomotiveViewModel(Locomotive loco, CentralStation cs)
     //{
@@ -45,45 +45,45 @@ public partial class LocomotiveViewModel : ObservableObject
     //    //}
     //}
 
-    public LocomotiveViewModel(CentralStation cs, LocomotiveModel loco)
-    {
-        this.cs = cs;
+    //public LocomotiveViewModel(CentralStation cs, LocomotiveModel loco)
+    //{
+    //    this.cs = cs;
 
-        Name = loco.Name;
-        Uid = loco.Uid;
-        MfxUid = loco.MfxUid;
-        Address = loco.Address;
-        IconName = loco.IconName;
-        IconUri = IconName != null ? cs.GetLocoUri(IconName) : null; 
-        Type = loco.Type;
-        MfxType = loco.MfxType;
-        Symbol = loco.Symbol;
+    //    Name = loco.Name;
+    //    Uid = loco.Uid;
+    //    MfxUid = loco.MfxUid;
+    //    Address = loco.Address;
+    //    IconName = loco.IconName;
+    //    IconUri = IconName != null ? cs.GetLocoUri(IconName) : null; 
+    //    Type = loco.Type;
+    //    MfxType = loco.MfxType;
+    //    Symbol = loco.Symbol;
 
-        Sid = loco.Sid;
-        MaxSpeed = loco.MaxSpeed;
-        VMax = loco.VMax;
-        VMin = loco.VMin;
-        Av = loco.Av;
-        Bv = loco.Bv;
-        Volume = loco.Volume;
-        Spa = loco.Spa;
-        Spm = loco.Spm;
-        Velocity = loco.Velocity;
-        Direction = loco.Direction;
+    //    Sid = loco.Sid;
+    //    MaxSpeed = loco.MaxSpeed;
+    //    VMax = loco.VMax;
+    //    VMin = loco.VMin;
+    //    Av = loco.Av;
+    //    Bv = loco.Bv;
+    //    Volume = loco.Volume;
+    //    Spa = loco.Spa;
+    //    Spm = loco.Spm;
+    //    Velocity = loco.Velocity;
+    //    Direction = loco.Direction;
 
-        Functions = loco.Functions!.Select(f => new FunctionViewModel(this, f)).ToList() ?? [];
-            ;
-        //// http://cs3/app/assets/lok/NS%20186%20012-8.png
+    //    Functions = loco.Functions!.Select(f => new FunctionViewModel(this, f)).ToList() ?? [];
+    //        ;
+    //    //// http://cs3/app/assets/lok/NS%20186%20012-8.png
 
-        //if (!string.IsNullOrEmpty(IconName))
-        //{
-        //    Icon = App.Current.Dispatcher.Invoke(() =>
-        //    {
-        //        var uri = new Uri($"http://{host}/app/assets/lok/{IconName}.png");
-        //        return new BitmapImage(uri);
-        //    });
-        //}
-    }
+    //    //if (!string.IsNullOrEmpty(IconName))
+    //    //{
+    //    //    Icon = App.Current.Dispatcher.Invoke(() =>
+    //    //    {
+    //    //        var uri = new Uri($"http://{host}/app/assets/lok/{IconName}.png");
+    //    //        return new BitmapImage(uri);
+    //    //    });
+    //    //}
+    //}
 
     //public void UpdateLocomotive(CanMessage msg)
     //{
@@ -150,68 +150,68 @@ public partial class LocomotiveViewModel : ObservableObject
     //private ImageSource? icon;
 
     [ObservableProperty]
-    private Uri? iconUri;
+    public partial Uri? IconUri { get; set; }
 
     [ObservableProperty]
-    private string? name;
+    public partial string? Name { get; set; }
 
     [ObservableProperty]
-    private uint uid;
+    public partial uint Uid { get; set; }           
 
     [ObservableProperty]
-    private uint mfxUid;
+    public partial uint MfxUid { get; set; }
 
     [ObservableProperty]
-    private uint address;
+    public partial uint Address { get; set; }   
 
     [ObservableProperty]
-    private string? iconName;
+    public partial string? IconName { get; set; }
 
     [ObservableProperty]
-    private DecoderType type;
+    public partial DecoderType Type { get; set; }
 
     [ObservableProperty]
-    private uint mfxType;
+    public partial uint MfxType { get; set; }
 
     [ObservableProperty]
-    private Symbol symbol;
+    public partial Symbol Symbol { get; set; }
 
     [ObservableProperty]
-    private uint sid;
+    public partial uint Sid { get; set; }
 
     [ObservableProperty]
-    private uint maxSpeed;
+    public partial uint MaxSpeed { get; set; }
 
     [ObservableProperty]
-    private uint vMax;
+    public partial uint VMax { get; set; }
 
     [ObservableProperty]
-    private uint vMin;
+    public partial uint VMin { get; set; }
 
     [ObservableProperty]
-    private uint av;
+    public partial uint Av { get; set; }
 
     [ObservableProperty]
-    private uint bv;
+    public partial uint Bv { get; set; }
 
     [ObservableProperty]
-    private uint volume;
+    public partial uint Volume { get; set; }
 
     [ObservableProperty]
-    private uint spa;
+    public partial uint Spa { get; set; }
 
     [ObservableProperty]
-    private uint spm;
+    public partial uint Spm { get; set; }
 
     [ObservableProperty]
-    private ushort velocity;
+    public partial ushort Velocity { get; set; }
 
     [ObservableProperty]
-    private Direction direction;
+    public partial Direction Direction { get; set; }
 
     [ObservableProperty]
-    private List<FunctionViewModel> functions;
-    
+    public partial List<FunctionViewModel> Functions { get; set; }
+
     #endregion
 
     #region control
@@ -225,7 +225,7 @@ public partial class LocomotiveViewModel : ObservableObject
     [RelayCommand]
     private void OnEmergencyHalt()
     {
-        cs.SystemLocomotiveEmergencyHaltAsync(Uid).Start();
+        centralStation.SystemLocomotiveEmergencyHaltAsync(Uid).Start();
     }
 
     [RelayCommand]
@@ -234,7 +234,7 @@ public partial class LocomotiveViewModel : ObservableObject
         //centralStation.SetLocomotiveDirection(Uid, DirectionChange.Toggle);
 
         var direction = Task.Run(async () => 
-        await cs.SetLocomotiveDirectionAsync(Uid, DirectionChange.Toggle)).Result;
+        await centralStation.SetLocomotiveDirectionAsync(Uid, DirectionChange.Toggle)).Result;
     }
 
     [RelayCommand]

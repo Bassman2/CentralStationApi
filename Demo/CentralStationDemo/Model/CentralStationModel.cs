@@ -48,16 +48,10 @@ public class CentralStationModel : IJsonOnDeserialized
     { }
 
     #endregion
+       
 
-    [JsonPropertyName("host")]
-    public string Host { get; set; } = "CS3";
-
-    [JsonPropertyName("protocol")]
-    [JsonConverter(typeof(JsonStringEnumConverter<Protocol>))]
-    public Protocol Protocol { get; set; } = Protocol.TCP;
-
-    [JsonPropertyName("device")]
-    public DeviceModel Device { get; set; } = new DeviceModel() { Id = 0x6D554711, Version = new Version(1, 2), Type = DeviceType.Application, SerialNumber = 11111, ArticleNumber = "22222", Name = "DemoApp" };
+    [JsonPropertyName("connection")]
+    public ConnectionModel Connection { get; set; } = new ConnectionModel();
 
     [JsonPropertyName("locomotives")]
     public List<LocomotiveModel> Locomotives { get; set; } = [];
@@ -65,9 +59,14 @@ public class CentralStationModel : IJsonOnDeserialized
     [JsonPropertyName("articles")]
     public List<ArticleModel> Articles { get; set; } = [];
 
-    [JsonPropertyName("system")]
-    public SystemModel System { get; set; } = new SystemModel();
+    [JsonPropertyName("routes")]
+    public List<RouteModel> Routes { get; set; } = [];
 
+    [JsonPropertyName("tracks")]
+    public List<TrackModel> Tracks { get; set; } = [];
+
+    [JsonPropertyName("devices")]
+    public List<DeviceModel> Devices { get; set; } = [];
 
 }
 

@@ -84,17 +84,20 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.LocomotiveDirection += (s, e) => OnLocomotiveDirection(e.LocomotiveId, e.Direction);
         cs.LocomotiveFunction += (s, e) => OnLocomotiveFunction(e.LocomotiveId, e.Function, e.Value);
 
-        //cs.Connect(model.Host, Protocol.TCP, model.Device);
-        cs.Connect("COM4", Protocol.CAN, model.Device);
+        cs.Connect(model.Connection.Host, Protocol.TCP, model.Connection.Device);
+        //cs.Connect("COM4", Protocol.CAN, model.Device);
 
-        //Locomotives = model.Locomotives.CastModel<LocomotiveViewModel>(cs);
-        Articles = model.Articles.FromArticleModels(cs);
+        Locomotives = model.Locomotives.FromModels(cs);
+        Articles = model.Articles.FromModels(cs);
+        //Routes = model.Routes.FromModels(cs);
+        Devices = model.Devices.FromModels(cs);
+
 
         // load locomotive data 
         //Locomotives = LoadFile<LocomotiveData>(locomotivesFileName)?.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
 
         // load articles data 
-       // Articles = LoadFile<ArticleData>(articlesFileName)?.Articles?.ToViewModelList<ArticleViewModel>(cs);
+        // Articles = LoadFile<ArticleData>(articlesFileName)?.Articles?.ToViewModelList<ArticleViewModel>(cs);
 
         // load routes data 
         Routes = LoadFile<RouteData>(routesFileName)?.Routes?.ToViewModelList<RouteViewModel>();
@@ -145,10 +148,8 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private void OnFileReceived(string fileName, System.IO.Stream stream)
     {
         stream.Position = 0;
-        using (var file = File.Create(fileName))
-        {
-            stream.CopyTo(file);
-        }
+        using var file = File.Create(fileName);
+        stream.CopyTo(file);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,7 +222,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Locomotives
 
     [ObservableProperty]
-    private List<LocomotiveViewModel>? locomotives;
+    public partial List<LocomotiveViewModel>? Locomotives { get; set; }
 
     [RelayCommand]
     private async Task OnUpdateLocomotives()
@@ -319,7 +320,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Articles
 
     [ObservableProperty]
-    private List<ArticleViewModel>? articles;
+    public partial List<ArticleViewModel>? Articles { get; set; }
 
     [RelayCommand]
     private async Task OnUpdateArticles()
@@ -354,7 +355,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Routes
 
     [ObservableProperty]
-    private List<RouteViewModel>? routes;
+    public partial List<RouteViewModel>? Routes { get; set; }
 
     [RelayCommand]
     private async Task OnUpdateRoutes()
@@ -442,14 +443,14 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     #region Devices
 
     [ObservableProperty]
-    private List<DeviceViewModel>? devices;
+    public partial List<DeviceViewModel>? Devices { get; set; }
 
     [RelayCommand]
     private async Task OnUpdateDevices()
     {
         var devices = await cs.GetAllDevicesAsync();
 
-        var vms = devices?.Select(d => new DeviceViewModel(d)).ToList();
+        var vms = devices?.Select(d => new DeviceViewModel(d, cs)).ToList();
         App.Current.Dispatcher.Invoke(() => Devices = vms);
 
         foreach (var device in Devices ?? [])

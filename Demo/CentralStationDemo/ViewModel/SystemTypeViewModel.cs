@@ -2,11 +2,11 @@
 
 namespace CentralStationDemo.ViewModel;
 
-public partial class SystemTypeViewModel(SystemTypes systemTypes) : ObservableObject
+public partial class SystemTypeViewModel : ObservableObject
 {
     [ObservableProperty]
-    private string name;
+    public partial string? Name { get; set; }
 
     [ObservableProperty]
-    private string icom;
+    public partial string? Icom { get; set; }
 }
