@@ -18,7 +18,7 @@ partial class ArticleViewModel
         this.SwitchingTime = mode.SwitchingTime;
         this.Odd = mode.Odd;
         this.DecoderType = mode.DecoderType;
-        this.IconUri = mode.IconUri;
+        this.ImagePath = mode.ImagePath;
     }
 
 

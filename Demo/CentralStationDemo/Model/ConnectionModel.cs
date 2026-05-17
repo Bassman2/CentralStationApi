@@ -14,6 +14,14 @@ public class ConnectionModel
     public Protocol Protocol { get; set; } = Protocol.TCP;
 
     [JsonPropertyName("device")]
-    public DeviceModel Device { get; set; } = new DeviceModel() { Id = 0x6D554711, Version = new Version(1, 2), Type = DeviceType.Application, SerialNumber = 11111, ArticleNumber = "22222", Name = "DemoApp" };
+    public DeviceModel Device { get; set; } = new DeviceModel() 
+    { 
+        Id = 0x6D554711, 
+        Version = new Version(1, 2), 
+        Type = DeviceType.Application,
+        TypeName = "Application",
+        SerialNumber = 11111, 
+        ArticleNumber = "22222", 
+        Name = "DemoApp" };
 
 }

@@ -49,6 +49,9 @@ public partial class DeviceViewModel : ObservableObject
     [ObservableProperty]
     public partial Uri? IconUri { get; set; }
 
+    [ObservableProperty]
+    public partial string? ImagePath { get; set; }
+
     #endregion
 
     #region DeviceDescription

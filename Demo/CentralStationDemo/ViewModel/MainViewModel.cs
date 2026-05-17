@@ -84,7 +84,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
         cs.LocomotiveDirection += (s, e) => OnLocomotiveDirection(e.LocomotiveId, e.Direction);
         cs.LocomotiveFunction += (s, e) => OnLocomotiveFunction(e.LocomotiveId, e.Function, e.Value);
 
-        cs.Connect(model.Connection.Host, Protocol.TCP, model.Connection.Device);
+        cs.Connect(model.Connection.Host, Protocol.TCP); //, model.Connection.Device);
         //cs.Connect("COM4", Protocol.CAN, model.Device);
 
         Locomotives = model.Locomotives.FromModels(cs);
@@ -200,7 +200,7 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     private async Task OnUpdateSystemStatus()
     {
         var devices = await cs.GetAllDevicesAsync();
-        var gfpDevice = devices?.FirstOrDefault(d => d.DeviceType == DeviceType.GFP || d.DeviceType == DeviceType.GFP3);
+        var gfpDevice = devices?.FirstOrDefault(d => d.DeviceType == DeviceType.Booster || d.DeviceType == DeviceType.GFP3);
         if (gfpDevice == null)
         {
             MessageBox.Show("No GFP found");
@@ -233,12 +233,10 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
             StoreFile(locomotivesFileName, stream);
             var data = CsSerializer.Deserialize<LocomotiveData>(stream);
 
-
             model.Locomotives = data.Locomotives?.Select(l => new LocomotiveModel(l)).ToList() ?? [];
             model.Save();
 
-
-            //Locomotives = data.Locomotives?.ToViewModelList<LocomotiveViewModel>(cs);
+            Locomotives = model.Locomotives.FromModels(cs);
         }
     }
 
@@ -448,32 +446,38 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     [RelayCommand]
     private async Task OnUpdateDevices()
     {
-        var devices = await cs.GetAllDevicesAsync();
+        var devices = await cs.GetAllDevicesAsync();    
 
-        var vms = devices?.Select(d => new DeviceViewModel(d, cs)).ToList();
-        App.Current.Dispatcher.Invoke(() => Devices = vms);
+        if (devices == null) return;
 
-        foreach (var device in Devices ?? [])
-        {
-            var deviceInfo = await cs.GetDeviceSystemDataAsync(device.DeviceId);
-            if (deviceInfo != null)
-            {
-                device.AddDeviceInfo(deviceInfo);
-            }
-        }
+        model.Devices = [.. devices.Select(d => new DeviceModel(d))];
+        model.Save();
+        Devices = model.Devices.FromModels(cs); 
 
-        foreach (var device in Devices ?? [])
-        {
-            for (byte index = 1; index < 6; index++)
-            {
-                var deviceMeasurement = await cs.GetMeasurementSystemDataAsync(device.DeviceId, index);
-                //var deviceMeasurement = new DeviceMeasurement() { Name = $"Measurement {index}" };
-                if (deviceMeasurement != null)
-                {
-                    App.Current.Dispatcher.Invoke(() => device.AddDeviceMeasurement(deviceMeasurement, index));
-                }
-            }
-        }
+
+        //App.Current.Dispatcher.Invoke(() => Devices = deviceList);
+
+        //foreach (var device in Devices ?? [])
+        //{
+        //    var deviceInfo = await cs.GetDeviceSystemDataAsync(device.DeviceId);
+        //    if (deviceInfo != null)
+        //    {
+        //        device.AddDeviceInfo(deviceInfo);
+        //    }
+        //}
+
+        //foreach (var device in Devices ?? [])
+        //{
+        //    for (byte index = 1; index < 6; index++)
+        //    {
+        //        var deviceMeasurement = await cs.GetMeasurementSystemDataAsync(device.DeviceId, index);
+        //        //var deviceMeasurement = new DeviceMeasurement() { Name = $"Measurement {index}" };
+        //        if (deviceMeasurement != null)
+        //        {
+        //            App.Current.Dispatcher.Invoke(() => device.AddDeviceMeasurement(deviceMeasurement, index));
+        //        }
+        //    }
+        //}
     }
 
     [RelayCommand]

@@ -5,7 +5,7 @@ namespace CentralStationApi.Internal;
 
 internal static class AttributeExtentions
 {
-    public static string? GetFileName<
+    public static string? GetImagePath<
         [DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicFields |
             DynamicallyAccessedMemberTypes.PublicConstructors |
@@ -18,7 +18,7 @@ internal static class AttributeExtentions
         var memberInfo = typeof(T).GetMember(enu.ToString()).FirstOrDefault();
         if (memberInfo != null)
         {
-            var attr = memberInfo.GetCustomAttributes(typeof(FileNameAttribute), false).OfType<FileNameAttribute>().FirstOrDefault();
+            var attr = memberInfo.GetCustomAttributes(typeof(ImagePathAttribute), false).OfType<ImagePathAttribute>().FirstOrDefault();
             if (attr != null)
             {
                 return attr.FileName;
@@ -27,19 +27,19 @@ internal static class AttributeExtentions
         return null;
     }
 
-    public static Uri? GetFileNamePath<
-        [DynamicallyAccessedMembers(
-            DynamicallyAccessedMemberTypes.PublicFields |
-            DynamicallyAccessedMemberTypes.PublicConstructors |
-            DynamicallyAccessedMemberTypes.PublicMethods |
-            DynamicallyAccessedMemberTypes.PublicNestedTypes |
-            DynamicallyAccessedMemberTypes.PublicProperties |
-            DynamicallyAccessedMemberTypes.PublicEvents
-        )] T>(this T enu, Uri uri) where T : Enum
-    {
-        string? fileName = GetFileName(enu);
-        return fileName is null ? null : new Uri(uri, fileName);
-    }
+    //public static Uri? GetFileNamePath<
+    //    [DynamicallyAccessedMembers(
+    //        DynamicallyAccessedMemberTypes.PublicFields |
+    //        DynamicallyAccessedMemberTypes.PublicConstructors |
+    //        DynamicallyAccessedMemberTypes.PublicMethods |
+    //        DynamicallyAccessedMemberTypes.PublicNestedTypes |
+    //        DynamicallyAccessedMemberTypes.PublicProperties |
+    //        DynamicallyAccessedMemberTypes.PublicEvents
+    //    )] T>(this T enu, Uri uri) where T : Enum
+    //{
+    //    string? fileName = GetImagePath(enu);
+    //    return fileName is null ? null : new Uri(uri, fileName);
+    //}
 
     public static string GetDescription<
         [DynamicallyAccessedMembers(

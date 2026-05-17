@@ -24,9 +24,9 @@ public enum DeviceType : ushort
     /// <item><description>60174 Booster (2010 - 2016)</description></item>
     /// </list>
     /// </remarks>
-    [Description("GFP")]
-    [FileName("dashboard_gfp3.png")]
-    GFP = 0x0000,
+    [Description("Booster")]
+    [ImagePath("/images/gui/dashboard_booster.png")]
+    Booster = 0x0000,
 
     /// <summary>
     /// Gleis Format Prozessor 2 (Track Format Processor 2) / GFP2 from Central Station 2.
@@ -35,7 +35,7 @@ public enum DeviceType : ushort
     /// Specific device type details are unknown.
     /// </remarks>
     [Description("GFP2")]
-    [FileName("dashboard_gfp3.png")]
+    [ImagePath("/images/gui/dashboard_gfp3.png")]
     GFP2 = 0x0001, // ?????????
 
     /// <summary>
@@ -49,14 +49,14 @@ public enum DeviceType : ushort
     /// </list>
     /// </remarks>
     [Description("Digital Connector Box")]
-    [FileName("dashboard_cs1.png")]
+    [ImagePath("/images/gui/dashboard_cs1.png")]
     DCB = 0x0010,
 
     /// <summary>
     /// Digital Connector Box variant 1.
     /// </summary>
     [Description("Digital Connector Box")]
-    [FileName("dashboard_cs2.png")]
+    [ImagePath("/images/gui/dashboard_cs2.png")]
     DCB1 = 0x0011,
 
     /// <summary>
@@ -64,7 +64,7 @@ public enum DeviceType : ushort
     /// Adapter for connecting legacy 6021 control units to the digital system.
     /// </summary>
     [Description("Connect 6021")]
-    [FileName("dashboard_cs2.png")]
+    [ImagePath("/images/gui/dashboard_cs2.png")]
     Connect = 0x0020,
 
     /// <summary>
@@ -72,21 +72,21 @@ public enum DeviceType : ushort
     /// Compact handheld control station.
     /// </summary>
     [Description("Mobile Station 2")]
-    [FileName("dashboard_ms1.png")]
+    [ImagePath("/images/gui/dashboard_ms1.png")]
     MS2 = 0x0030,
 
     /// <summary>
     /// Mobile Station 2 variant 1 (60653).
     /// </summary>
     [Description("Mobile Station 2")]
-    [FileName("dashboard_ms1.png")]
+    [ImagePath("/images/gui/dashboard_ms1.png")]
     MS2_1 = 0x0031,
 
     /// <summary>
     /// Mobile Station 2 variant 2 (60653).
     /// </summary>
     [Description("Mobile Station 2")]
-    [FileName("dashboard_ms2.png")] 
+    [ImagePath("/images/gui/dashboard_ms2.png")] 
     MS2_2 = 0x0032,
 
     /// <summary>
@@ -94,14 +94,14 @@ public enum DeviceType : ushort
     /// Software version 5.6 confirmed on actual device.
     /// </summary>
     [Description("Mobile Station 2")]
-    [FileName("dashboard_ms2.png")] 
+    [ImagePath("/images/gui/dashboard_ms2.png")] 
     MS2_3 = 0x0033,
 
     /// <summary>
     /// Mobile Station 2 variant 4 (60653).
     /// </summary>
     [Description("Mobile Station 2")]
-    [FileName("dashboard_ms2.png")] 
+    [ImagePath("/images/gui/dashboard_ms2.png")] 
     MS2_4 = 0x0034,
 
     /// <summary>
@@ -109,7 +109,7 @@ public enum DeviceType : ushort
     /// Mobile Station 2 with integrated wireless network connectivity.
     /// </summary>
     [Description("Mobile Station WLAN")]
-    [FileName("dashboard_ms2.png")]
+    [ImagePath("/images/gui/dashboard_ms2.png")]
     MS_WLAN = 0x0035,
 
     /// <summary>
@@ -119,7 +119,7 @@ public enum DeviceType : ushort
     /// SRSEII (non-Märklin product) compatible S88 feedback interface.
     /// </remarks>
     [Description("S88 Link")]
-    [FileName("dashboard_links88.png")]
+    [ImagePath("/images/gui/dashboard_links88.png")]
     LinkS88 = 0x0040,
 
     /// <summary>
@@ -133,7 +133,7 @@ public enum DeviceType : ushort
     /// </list>
     /// </remarks>
     [Description("GFP3 from CS3")]
-    [FileName("dashboard_gfp3.png")]
+    [ImagePath("/images/gui/dashboard_gfp3.png")]
     GFP3 = 0x0050,
 
     /// <summary>
@@ -147,7 +147,7 @@ public enum DeviceType : ushort
     /// Software GUI application running on Central Station 2.
     /// </summary>
     [Description("Central Station 2")]
-    [FileName("dashboard_cs2.png")]
+    [ImagePath("/images/gui/dashboard_cs2.png")]
     CS2 = 0xeeee,
 
     /// <summary>
@@ -155,7 +155,7 @@ public enum DeviceType : ushort
     /// Mobile applications connecting via WiFi to control the layout.
     /// </summary>
     [Description("Wireless Controllers")]
-    [FileName("dashboard_tablet.png")]
+    [ImagePath("/images/gui/dashboard_tablet.png")]
     Wireless = 0xffe0,
 
     /// <summary>
@@ -163,7 +163,7 @@ public enum DeviceType : ushort
     /// Physical wired controller connected to the Central Station.
     /// </summary>
     [Description("Wired")]
-    [FileName("dashboard_cs3.png")]
+    [ImagePath("/images/gui/dashboard_cs3.png")]
     Wired = 0xfff0,
 
     /// <summary>
@@ -179,6 +179,6 @@ public enum DeviceType : ushort
     /// </list>
     /// </remarks>
     [Description("GUI")]
-    [FileName("dashboard_cs3.png")]
+    [ImagePath("/images/gui/dashboard_cs3.png")]
     GUI = 0xffff        
 }

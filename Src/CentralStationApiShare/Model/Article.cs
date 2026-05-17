@@ -30,6 +30,11 @@ public partial class Article
     public string ArticleTypeName => ArticleType.GetDescription();
 
     /// <summary>
+    /// Gets the decoder identifier or configuration string.
+    /// </summary>
+    public string? ImagePath => ArticleType.GetImagePath();
+
+    /// <summary>
     /// Current position
     /// </summary>
     [CsProperty("stellung")]
@@ -59,8 +64,5 @@ public partial class Article
     [CsProperty("decoder")]
     public string? Decoder { get; private set; }
 
-    /// <summary>
-    /// Gets the decoder identifier or configuration string.
-    /// </summary>
-    public Uri? IconUri => ArticleType.GetFileNamePath(CentralStation.MagUri);
+    
   }

@@ -9,7 +9,7 @@
 /// the SVG icon filename for each article type (e.g., "magicon_a_005_01.svg" for turnouts).
 /// </remarks>
 [AttributeUsage(AttributeTargets.Field)]
-public class FileNameAttribute(string fileName) : Attribute
+public class ImagePathAttribute(string fileName) : Attribute
 {
     /// <summary>
     /// Gets the filename associated with the enumeration member.

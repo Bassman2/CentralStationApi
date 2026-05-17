@@ -90,7 +90,7 @@ public partial class TrackFormatProcessorViewModel: ObservableObject
         if (gfpDevice == null)
         {
             var devices = await cs.GetAllDevicesAsync();
-            gfpDevice = devices?.FirstOrDefault(d => d.DeviceType == DeviceType.GFP || d.DeviceType == DeviceType.GFP3);
+            gfpDevice = devices?.FirstOrDefault(d => d.DeviceType == DeviceType.Booster || d.DeviceType == DeviceType.GFP3);
             if (gfpDevice == null)
             {
                 MessageBox.Show("No TFP/GFP found");

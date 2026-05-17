@@ -37,7 +37,7 @@ public partial class ArticleModel
     [AutoConverterProperty(nameof(Article.DecoderType))]
     public DecoderType DecoderType { get; set; }
 
-    [JsonPropertyName("iconUri")]
-    [AutoConverterProperty(nameof(Article.IconUri))]
-    public Uri? IconUri { get; set; }
+    [JsonPropertyName("imagePath")]
+    [AutoConverterProperty(nameof(Article.ImagePath))]
+    public string? ImagePath { get; set; }
 }

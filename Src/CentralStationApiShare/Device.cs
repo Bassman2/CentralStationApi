@@ -25,7 +25,7 @@ public class Device
         Version = version;
         DeviceType = deviceType;
         DeviceTypeName = DeviceType.GetDescription();
-        IconUri = DeviceType.GetFileNamePath(CentralStation.GuiUri);
+        ImagePath = DeviceType.GetImagePath();
     }
 
     /// <summary>
@@ -79,5 +79,5 @@ public class Device
     /// A URI pointing to the icon image file on the Central Station web server,
     /// or null if no icon is available for this device type.
     /// </value>
-    public Uri? IconUri { get; internal set; }
+    public string? ImagePath { get; internal set; }
 }

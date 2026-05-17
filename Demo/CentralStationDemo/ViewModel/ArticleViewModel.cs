@@ -70,6 +70,6 @@ public partial class ArticleViewModel : ObservableObject
     public partial DecoderType DecoderType { get; set; }
 
     [ObservableProperty]
-    [AutoConverterProperty(nameof(ArticleModel.IconUri))]
-    public partial Uri? IconUri { get; set; }
+    [AutoConverterProperty(nameof(ArticleModel.ImagePath))]
+    public partial string? ImagePath { get; set; }
 }

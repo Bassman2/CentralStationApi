@@ -8,19 +8,18 @@ partial class DeviceViewModel
 {
     private readonly CentralStation centralStation;
 
-    public DeviceViewModel(Device device, CentralStation centralStation)
-    {
-        this.centralStation = centralStation;
+    //public DeviceViewModel(Device device, CentralStation centralStation)
+    //{
+    //    this.centralStation = centralStation;
 
-        DeviceId = device.DeviceId;
-        Version = device.Version;
-        DeviceType = device.DeviceType;
-        DeviceTypeName = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
-        IconUri = device.IconUri;
+    //    DeviceId = device.DeviceId;
+    //    Version = device.Version;
+    //    DeviceType = device.DeviceType;
+    //    DeviceTypeName = Enum.IsDefined<DeviceType>(device.DeviceType) ? device.DeviceType.ToString() : ((ushort)device.DeviceType).ToString("X4");
+    //    IconUri = device.IconUri;
 
-        //Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test A" }));
-    }
-
+    //    //Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test A" }));
+    //}
     public DeviceViewModel(DeviceModel model, CentralStation centralStation)
     {
         this.centralStation = centralStation;
@@ -29,6 +28,8 @@ partial class DeviceViewModel
         Version = model.Version;
         DeviceType = model.Type;
         DeviceTypeName = "XXX"; // Enum.IsDefined<DeviceType>(model.DeviceType) ? model.DeviceType.ToString() : ((ushort)model.DeviceType).ToString("X4");
+        ImagePath = model.ImagePath;
+
         //IconUri = model.IconUri;
 
         //Measurements.Add(new DeviceMeasurementViewModel(new DeviceMeasurement() { Name = "Test A" }));

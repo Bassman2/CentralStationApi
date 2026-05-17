@@ -10,6 +10,39 @@ public static class ImageCache
 {
     private readonly static string appPath = AppDomain.CurrentDomain.BaseDirectory.Trim('\\');
 
+    public static Uri? Host { get; set; } = new Uri("http://cs3/");
+
+    public static ImageSource GetImageFromPath(string path)
+    {
+        //string filePath = path.Replace('/', '\\').Trim('\\');
+        //string fileName = Path.GetFileName(path);
+        string fileExt = Path.GetExtension(path);
+        //string folderName = Path.GetFileName(Path.GetDirectoryName(path))!;
+
+        string filePath = Path.Combine(appPath, "ImageCache", path.Replace('/', '\\').Trim('\\'));
+
+        if (!File.Exists(filePath))
+        {
+            DownloadFile(new Uri(Host!, path), filePath);
+        }
+
+        var local = new Uri(filePath);
+
+        if (fileExt == ".png")
+        {
+            return new BitmapImage(local);
+        }
+        else if (fileExt == ".svg")
+        {
+            return SvgConverter.ConvertSvg(local);
+        }
+        else
+        {
+            throw new InvalidDataException();
+        }
+
+    }
+
     public static ImageSource GetImage(Uri uri)
     {
         string path = uri.LocalPath.Replace('/', '\\').Trim('\\'); 
@@ -24,7 +57,7 @@ public static class ImageCache
             DownloadFile(uri, filePath);
         }
 
-        Uri local = new Uri(filePath);
+        var local = new Uri(filePath);
 
         if (fileExt == ".png")
         {

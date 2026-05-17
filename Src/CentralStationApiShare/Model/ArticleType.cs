@@ -19,7 +19,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "licht_str_lampe")]
     [Description("Park")]
-    [FileName("magicon_a_033_01.svg")]
+    [ImagePath("magicon_a_033_01.svg")]
     LightStreetLamp,
 
     /// <summary>
@@ -27,7 +27,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "licht_str_neon")]
     [Description("Track")]
-    [FileName("magicon_a_034_01.svg")]
+    [ImagePath("magicon_a_034_01.svg")]
     LightStreetNeon,
 
     /// <summary>
@@ -35,7 +35,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "licht_mast")]
     [Description("Street")]
-    [FileName("magicon_a_035_01.svg")]
+    [ImagePath("magicon_a_035_01.svg")]
     LightStreet,
 
     /// <summary>
@@ -43,7 +43,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "licht_lampe")]
     [Description("House")]
-    [FileName("magicon_a_036_01.svg")]
+    [ImagePath("magicon_a_036_01.svg")]
     LightLamp,
 
     /// <summary>
@@ -51,7 +51,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "licht_neon")]
     [Description("Save")]
-    [FileName("magicon_a_037_01.svg")]
+    [ImagePath("magicon_a_037_01.svg")]
     LightNeon,
 
     /// <summary>
@@ -59,7 +59,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "licht_park")]
     [Description("Vintage Park")]
-    [FileName("magicon_a_056_01.svg")]
+    [ImagePath("magicon_a_056_01.svg")]
     LightParkClassic,
 
     /// <summary>
@@ -67,7 +67,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "licht_aussen")]
     [Description("Outside")]
-    [FileName("magicon_a_062_01.svg")]
+    [ImagePath("magicon_a_062_01.svg")]
     LightOutside,
 
     /// <summary>
@@ -75,7 +75,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "signallampe_ge")]
     [Description("Yellow")]
-    [FileName("magicon_a_058_01.svg")]
+    [ImagePath("magicon_a_058_01.svg")]
     LightYellow,
 
     /// <summary>
@@ -83,7 +83,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "signallampe_rt")]
     [Description("Red")]
-    [FileName("magicon_a_059_01.svg")]
+    [ImagePath("magicon_a_059_01.svg")]
     LightRed,
 
     /// <summary>
@@ -91,7 +91,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "signallampe_gn")]
     [Description("Green")]
-    [FileName("magicon_a_060_01.svg")]
+    [ImagePath("magicon_a_060_01.svg")]
     LightGreen,
 
     /// <summary>
@@ -99,7 +99,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "signallampe_bl")]
     [Description("Blue")]
-    [FileName("magicon_a_061_01.svg")]
+    [ImagePath("magicon_a_061_01.svg")]
     LightBlue,
 
     /// <summary>
@@ -113,7 +113,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "profi_signallampe_4")]
     [Description("Quadcolor")]
-    [FileName("magicon_a_057_01.svg")]
+    [ImagePath("magicon_a_057_01.svg")]
     LightQuadcolor,
 
 
@@ -133,7 +133,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "rechtsweiche")]
     [Description("Right Turnout")]
-    [FileName("magicon_a_005_01.svg")]
+    [ImagePath("magicon_a_005_01.svg")]
     RightTurnout,
 
     /// <summary>
@@ -141,7 +141,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "linksweiche")]
     [Description("Left Turnout")]
-    [FileName("magicon_a_006_01.svg")]
+    [ImagePath("magicon_a_006_01.svg")]
     LeftTurnout,
 
     /// <summary>
@@ -149,7 +149,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "y_weiche")]
     [Description("Y Turnout")]
-    [FileName("magicon_a_007_01.svg")]
+    [ImagePath("magicon_a_007_01.svg")]
     YSwitch,
 
     /// <summary>
@@ -157,7 +157,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "dkw_2antriebe")]
     [Description("Double Slip Switch 2")]
-    [FileName("magicon_a_011_01.svg")]
+    [ImagePath("magicon_a_011_01.svg")]
     DKW2Drive,
 
     /// <summary>
@@ -165,7 +165,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "dkw_1antrieb")]
     [Description("Double Slip Switch")]
-    [FileName("magicon_a_012_01.svg")]
+    [ImagePath("magicon_a_012_01.svg")]
     DKW1Drive,
 
     /// <summary>
@@ -173,7 +173,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "dreiwegweiche")]
     [Description("Three Way")]
-    [FileName("magicon_a_010_01.svg")]
+    [ImagePath("magicon_a_010_01.svg")]
     ThreeWaySwitch,
 
     /// <summary>
@@ -181,7 +181,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "hosentraeger")]
     [Description("Scissors Crossing")]
-    [FileName("magicon_a_070_01.svg")]
+    [ImagePath("magicon_a_070_01.svg")]
     ScissorsCrossing,
 
     /// <summary>
@@ -189,7 +189,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "digitaldrehscheibe")]
     [Description("Turntable 7686/7")]
-    [FileName("magicon_a_118_00.svg")]
+    [ImagePath("magicon_a_118_00.svg")]
     TurntableDigital,
 
     /// <summary>
@@ -197,7 +197,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "drehscheibe_mfx")]
     [Description("Turntable 74861 66861 mfx")]
-    [FileName("magicon_a_118_00.svg")]
+    [ImagePath("magicon_a_118_00.svg")]
     TurntableMfx,
 
     #endregion
@@ -209,7 +209,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "lichtsignal_HP01")]
     [Description("Light Hp0/1")]
-    [FileName("magicon_a_015_01.svg")]
+    [ImagePath("magicon_a_015_01.svg")]
     LightSignalHp01,
     
     /// <summary>
@@ -217,7 +217,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "lichtsignal_HP02")]
     [Description("Light Hp0/2")]
-    [FileName("magicon_a_016_01.svg")]
+    [ImagePath("magicon_a_016_01.svg")]
     LightSignalHp02,
 
     /// <summary>
@@ -225,7 +225,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "lichtsignal_HP012")]
     [Description("Light Hp0/1/2")]
-    [FileName("magicon_a_017_01.svg")]
+    [ImagePath("magicon_a_017_01.svg")]
     LightSignalHp012,   
 
     /// <summary>
@@ -233,7 +233,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "lichtsignal_HP012_SH01")]
     [Description("Light Hp0/1/2 + Sh0/1")]
-    [FileName("magicon_a_018_01.svg")]
+    [ImagePath("magicon_a_018_01.svg")]
     LightSignalHp012Sh01,
 
     /// <summary>
@@ -241,7 +241,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "lichtsignal_SH01")]
     [Description("Light Sh0/1")]
-    [FileName("magicon_a_019_01.svg")]
+    [ImagePath("magicon_a_019_01.svg")]
     LightSignalSh01,
 
     /// <summary>
@@ -249,7 +249,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "lichtvorsignal_VR012")]
     [Description("Light Vr0/1/2")]
-    [FileName("magicon_a_029_01.svg")]
+    [ImagePath("magicon_a_029_01.svg")]
     LightSignalVr012,
 
     // Scale
@@ -258,7 +258,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "urc_lichtsignal_HP01")]
     [Description("Light Hp0/1 Scale")]
-    [FileName("magicon_a_015_01.svg")]
+    [ImagePath("magicon_a_015_01.svg")]
     ScaleLightSignalHp01,
 
     /// <summary>
@@ -266,7 +266,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "urc_lichtsignal_HP012")]
     [Description("Light Hp0/1/2 Scale")]
-    [FileName("magicon_a_017_01.svg")]
+    [ImagePath("magicon_a_017_01.svg")]
     ScaleLightSignalHp012,
     
     /// <summary>
@@ -274,7 +274,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "urc_lichtsignal_HP012_SH01")]
     [Description("Light Hp0/1/2 + SH0/1 Scale")]
-    [FileName("magicon_a_027_01.svg")]
+    [ImagePath("magicon_a_027_01.svg")]
     ScaleLightSignalHp012Sh01,
 
     /// <summary>
@@ -282,7 +282,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "urc_lichtsignal_SH01")]
     [Description("Light Sh0/1 Scale")]
-    [FileName("magicon_a_019_01.svg")]
+    [ImagePath("magicon_a_019_01.svg")]
     ScaleLightSignalSh01,
 
     /// <summary>
@@ -290,7 +290,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "urc_lichtsignal_VR012")]
     [Description("Light Vr0/1/2 Scale")]
-    [FileName("magicon_a_029_01.svg")]
+    [ImagePath("magicon_a_029_01.svg")]
     ScaleLightSignalVr012,
 
     /// <summary>
@@ -298,7 +298,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "ueberwachungs_signal")]
     [Description("Bü 100/101")]
-    [FileName("magicon_a_040_01.svg")]
+    [ImagePath("magicon_a_040_01.svg")]
     MonitoringSignal,
 
     /// <summary>
@@ -306,7 +306,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "abfahrtsignal")]
     [Description("Zp9")]
-    [FileName("magicon_a_063_01.svg")]
+    [ImagePath("magicon_a_063_01.svg")]
     DepartureSignal,
     
     #endregion
@@ -318,7 +318,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "formsignal_HP01")]
     [Description("Hp0/1")]
-    [FileName("magicon_a_020_01.svg")]
+    [ImagePath("magicon_a_020_01.svg")]
     SemaphoreSignalHp01,
 
     /// <summary>
@@ -326,7 +326,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "formsignal_HP02")]
     [Description("Hp0/2")]
-    [FileName("magicon_a_021_01.svg")]
+    [ImagePath("magicon_a_021_01.svg")]
     SemaphoreSignalHp02,
 
 
@@ -335,7 +335,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "formsignal_HP012")]
     [Description("Hp0/1/2")]
-    [FileName("magicon_a_022_01.svg")]
+    [ImagePath("magicon_a_022_01.svg")]
     SemaphoreSignalHp012,
 
     /// <summary>
@@ -343,7 +343,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "formsignal_HP012_SH01")]
     [Description("Hp0/1/2+Sh0/1")]
-    [FileName("magicon_a_023_01.svg")]
+    [ImagePath("magicon_a_023_01.svg")]
     SemaphoreSignalHp012Sh01,
 
     /// <summary>
@@ -351,7 +351,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "formsignal_SH01")]
     [Description("Sh0/1")]
-    [FileName("magicon_a_024_01.svg")]
+    [ImagePath("magicon_a_024_01.svg")]
     SemaphoreSignalSh01,
 
     /// <summary>
@@ -359,7 +359,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "profi_formsignal_HP01")]
     [Description("Hp0/1 Scale")]
-    [FileName("magicon_a_020_01.svg")]
+    [ImagePath("magicon_a_020_01.svg")]
     ProfiSemaphoreSignalHp01,
 
     /// <summary>
@@ -367,7 +367,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "profi_formsignal_HP012")]
     [Description("Hp0/1/2 Scale")]
-    [FileName("magicon_a_022_01.svg")]
+    [ImagePath("magicon_a_022_01.svg")]
     ProfiSemaphoreSignalHp021,
 
     /// <summary>
@@ -375,7 +375,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "profi_formsignal_SH01")]
     [Description("Sh0/1 Scale")]
-    [FileName("magicon_a_024_01.svg")]
+    [ImagePath("magicon_a_024_01.svg")]
     ProfiSemaphoreSignalSh01,
 
     /// <summary>
@@ -383,7 +383,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "profi_vorsignal_HP01")]
     [Description("Vr0/1 Scale")]
-    [FileName("magicon_a_044_01.svg")]
+    [ImagePath("magicon_a_044_01.svg")]
     ProfiSemaphoreSignalVr01,
 
     /// <summary>
@@ -391,7 +391,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "profi_vorsignal_HP012")]
     [Description("Vr0/1/2 Scale")]
-    [FileName("magicon_a_045_02.svg")]
+    [ImagePath("magicon_a_045_02.svg")]
     ProfiSemaphoreSignalVr012,
 
     /// <summary>
@@ -399,7 +399,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "wartesignal")]
     [Description("Ra11")]
-    [FileName("magicon_a_064_01.svg")]
+    [ImagePath("magicon_a_064_01.svg")]
     ProfiSemaphoreSignalWait,
 
 
@@ -442,7 +442,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "std_rot_gruen")]
     [Description("Standard")]
-    [FileName("magicon_a_000_00.svg")]
+    [ImagePath("magicon_a_000_00.svg")]
     StdRedGreen,
 
     /// <summary>
@@ -450,7 +450,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "std_rot")]
     [Description("Standard Red")]
-    [FileName("magicon_a_001_01.svg")]
+    [ImagePath("magicon_a_001_01.svg")]
     StdRed,
 
     //[EnumMember(Value = "std_gruen")]
@@ -462,7 +462,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "entkupplungsgleis")]
     [Description("Coupling")]
-    [FileName("magicon_a_003_01.svg")]
+    [ImagePath("magicon_a_003_01.svg")]
     Uncoupler,
 
     /// <summary>
@@ -470,7 +470,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "entkupplungsgleis_1")]
     [Description("Coupling G1")]
-    [FileName("magicon_a_004_01.svg")]
+    [ImagePath("magicon_a_004_01.svg")]
     Uncoupler1,
 
     /// <summary>
@@ -478,7 +478,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "k84_ausgang")]
     [Description("K84")]
-    [FileName("magicon_a_008_01.svg")]
+    [ImagePath("magicon_a_008_01.svg")]
     K84Exit,
 
     /// <summary>
@@ -486,7 +486,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "k84_doppelausgang")]
     [Description("Double K84")]
-    [FileName("magicon_a_009_01.svg")]
+    [ImagePath("magicon_a_009_01.svg")]
     K84DoubleExit,
 
     /// <summary>
@@ -494,7 +494,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "schiebebuehne")]
     [Description("Transfer")]
-    [FileName("magicon_a_030_01.svg")]
+    [ImagePath("magicon_a_030_01.svg")]
     K84Slideway,
 
     /// <summary>
@@ -502,7 +502,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "drehscheibe_alt")]
     [Description("Turntable K84")]
-    [FileName("magicon_a_031_00.svg")]
+    [ImagePath("magicon_a_031_00.svg")]
     K84Turntable,
 
     /// <summary>
@@ -510,7 +510,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "andreas")]
     [Description("Crossing Signal")]
-    [FileName("magicon_a_038_01.svg")]
+    [ImagePath("magicon_a_038_01.svg")]
     CrossingSignal,
 
     /// <summary>
@@ -518,7 +518,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "schranke")]
     [Description("Barrier")]
-    [FileName("magicon_a_039_01.svg")]
+    [ImagePath("magicon_a_039_01.svg")]
     Barrier,
 
     /// <summary>
@@ -526,7 +526,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "sound_betrieb")]
     [Description("Sound Operating")]
-    [FileName("magicon_a_048_01.svg")]
+    [ImagePath("magicon_a_048_01.svg")]
     SoundOperation,
 
     /// <summary>
@@ -534,7 +534,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "sound_warn")]
     [Description("Sound Warn")]
-    [FileName("magicon_a_049_01.svg")]
+    [ImagePath("magicon_a_049_01.svg")]
     SoundWarning,
 
     /// <summary>
@@ -542,7 +542,7 @@ public enum ArticleType
     /// </summary>
     [EnumMember(Value = "sound_misc")]
     [Description("Sound Misc")]
-    [FileName("magicon_a_050_01.svg")]
+    [ImagePath("magicon_a_050_01.svg")]
     SoundMisc,
 
     #endregion

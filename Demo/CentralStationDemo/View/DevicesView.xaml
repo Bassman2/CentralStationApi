@@ -31,7 +31,7 @@
         <ItemsControl.ItemTemplate>
             <DataTemplate>
                 <StackPanel Width="160" VerticalAlignment="Top">
-                    <Image Grid.Row="0" Source="{Binding IconUri, Converter={StaticResource UriToImageSourceConverter}}" Width="160" Height="160" Stretch="Uniform" ToolTip="{Binding IconUri}"/>
+                    <Image Grid.Row="0" Source="{Binding ImagePath, Converter={StaticResource PathToImageSourceConverter}}" Width="160" Height="160" Stretch="Uniform" ToolTip="{Binding IconUri}"/>
 
                     <TextBlock Text="{Binding DeviceId, StringFormat=UID: {0:x4}}" HorizontalAlignment="Center"/>
                     <TextBlock Text="{Binding DeviceType}" HorizontalAlignment="Center"/>
