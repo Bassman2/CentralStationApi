@@ -47,6 +47,9 @@ public partial class DeviceViewModel : ObservableObject
     public partial string DeviceTypeName { get; set; }
 
     [ObservableProperty]
+    public partial ushort DeviceTypeNum { get; set; }
+
+    [ObservableProperty]
     public partial Uri? IconUri { get; set; }
 
     [ObservableProperty]

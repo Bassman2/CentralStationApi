@@ -8,7 +8,10 @@ namespace CentralStationDemo.Misc;
 
 public static class ImageCache
 {
-    private readonly static string appPath = AppDomain.CurrentDomain.BaseDirectory.Trim('\\');
+    private readonly static string cachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CentralStationDemo", "Cache");
+
+
+    //AppDomain.CurrentDomain.BaseDirectory.Trim('\\');
 
     public static Uri? Host { get; set; } = new Uri("http://cs3/");
 
@@ -19,7 +22,7 @@ public static class ImageCache
         string fileExt = Path.GetExtension(path);
         //string folderName = Path.GetFileName(Path.GetDirectoryName(path))!;
 
-        string filePath = Path.Combine(appPath, "ImageCache", path.Replace('/', '\\').Trim('\\'));
+        string filePath = Path.Combine(cachePath, path.Replace('/', '\\').Trim('\\'));
 
         if (!File.Exists(filePath))
         {
@@ -50,7 +53,7 @@ public static class ImageCache
         string fileExt  = Path.GetExtension(path);
         string folderName = Path.GetFileName(Path.GetDirectoryName(path))!;
 
-        string filePath = Path.Combine(appPath, "ImageCache", folderName, fileName);
+        string filePath = Path.Combine(cachePath, folderName, fileName);
 
         if (!File.Exists(filePath))
         {

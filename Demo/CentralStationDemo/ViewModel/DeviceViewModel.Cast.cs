@@ -28,6 +28,7 @@ partial class DeviceViewModel
         Version = model.Version;
         DeviceType = model.Type;
         DeviceTypeName = "XXX"; // Enum.IsDefined<DeviceType>(model.DeviceType) ? model.DeviceType.ToString() : ((ushort)model.DeviceType).ToString("X4");
+        DeviceTypeNum = (ushort)model.Type;
         ImagePath = model.ImagePath;
 
         //IconUri = model.IconUri;
