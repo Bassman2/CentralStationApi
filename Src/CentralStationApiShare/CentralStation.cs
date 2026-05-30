@@ -228,32 +228,32 @@ public sealed class CentralStation : INotifyPropertyChanged, INotifyPropertyChan
                 Debug.WriteLineIf(TraceSwitches.CanReceiveSwitch.TraceInfo, $"Received: {msg}");
                 messageReceivedQueue.Add(msg);
 
-                if (msg.Command == Command.SoftwareVersion && msg.IsResponse == false)
-                {
-                    var res = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash, true).AddUInt32(Device.DeviceId).AddByte((byte)Device.Version.Major).AddByte((byte)Device.Version.Minor).AddUInt16((ushort)DeviceType.Application);
-                    SendMessage(res);
-                }
-                if (msg.Command == Command.StatusData && msg.IsResponse == false && msg.DeviceId == Device.DeviceId && msg.IsResponse == false)
-                {
-                    byte num = 2;
-                    var res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0301, true).AddUInt32(0).AddUInt32(Device.SerialNumber);
-                    SendMessage(res);
+                //if (msg.Command == Command.SoftwareVersion && msg.IsResponse == false)
+                //{
+                //    var res = new CanMessage(Priority.Prio1, Command.SoftwareVersion, hash, true).AddUInt32(Device.DeviceId).AddByte((byte)Device.Version.Major).AddByte((byte)Device.Version.Minor).AddUInt16((ushort)DeviceType.Application);
+                //    SendMessage(res);
+                //}
+                //if (msg.Command == Command.StatusData && msg.IsResponse == false && msg.DeviceId == Device.DeviceId && msg.IsResponse == false)
+                //{
+                //    byte num = 2;
+                //    var res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0301, true).AddUInt32(0).AddUInt32(Device.SerialNumber);
+                //    SendMessage(res);
 
-                    res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0302, true).AddString(Device.ArticleNumber);
-                    SendMessage(res);
+                //    res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0302, true).AddString(Device.ArticleNumber);
+                //    SendMessage(res);
 
-                    string name = Device.DeviceName;
-                    while (!string.IsNullOrEmpty(name))
-                    {
-                        res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0300, true).AddString(name.Substring(0, Math.Min(name.Length, 8)));
-                        SendMessage(res);
-                        num++;
-                        name = name.Length > 8 ? name.Substring(8) : string.Empty;
-                    }
+                //    string name = Device.DeviceName;
+                //    while (!string.IsNullOrEmpty(name))
+                //    {
+                //        res = new CanMessage(Priority.Prio1, Command.StatusData, 0x0300, true).AddString(name.Substring(0, Math.Min(name.Length, 8)));
+                //        SendMessage(res);
+                //        num++;
+                //        name = name.Length > 8 ? name.Substring(8) : string.Empty;
+                //    }
 
-                    res = new CanMessage(Priority.Prio1, Command.StatusData, hash, true).AddUInt32(Device.DeviceId).AddByte(0).AddByte(num);
-                    SendMessage(res);
-                }
+                //    res = new CanMessage(Priority.Prio1, Command.StatusData, hash, true).AddUInt32(Device.DeviceId).AddByte(0).AddByte(num);
+                //    SendMessage(res);
+                //}
 
                 ReceiveHandler(msg);
             }

@@ -446,38 +446,58 @@ public sealed partial class MainViewModel : AppViewModel, IDisposable
     [RelayCommand]
     private async Task OnUpdateDevices()
     {
-        var devices = await cs.GetAllDevicesAsync();    
+        try
+        {
+            var devices = await cs.GetAllDevicesAsync();
 
-        if (devices == null) return;
+            if (devices == null) return;
 
-        model.Devices = [.. devices.Select(d => new DeviceModel(d))];
-        model.Save();
-        Devices = model.Devices.FromModels(cs); 
+            model.Devices = [.. devices.Select(d => new DeviceModel(d))];
+            model.Save();
+            Devices = model.Devices.FromModels(cs);
 
+            foreach (var device in Devices)
+            {
+                var deviceInfo = await cs.GetDeviceSystemDataAsync(device.DeviceId);
+                if (deviceInfo != null)
+                {
+                    device.AddDeviceInfo(deviceInfo);
+                }
+                else
+                {
+                    Debug.WriteLine($"GetDeviceSystemDataAsync({device.DeviceId:X}) failed");
+                }
+            }
 
-        //App.Current.Dispatcher.Invoke(() => Devices = deviceList);
+            //App.Current.Dispatcher.Invoke(() => Devices = deviceList);
 
-        //foreach (var device in Devices ?? [])
-        //{
-        //    var deviceInfo = await cs.GetDeviceSystemDataAsync(device.DeviceId);
-        //    if (deviceInfo != null)
-        //    {
-        //        device.AddDeviceInfo(deviceInfo);
-        //    }
-        //}
+            //foreach (var device in Devices ?? [])
+            //{
+            //    var deviceInfo = await cs.GetDeviceSystemDataAsync(device.DeviceId);
+            //    if (deviceInfo != null)
+            //    {
+            //        device.AddDeviceInfo(deviceInfo);
+            //    }
+            //}
 
-        //foreach (var device in Devices ?? [])
-        //{
-        //    for (byte index = 1; index < 6; index++)
-        //    {
-        //        var deviceMeasurement = await cs.GetMeasurementSystemDataAsync(device.DeviceId, index);
-        //        //var deviceMeasurement = new DeviceMeasurement() { Name = $"Measurement {index}" };
-        //        if (deviceMeasurement != null)
-        //        {
-        //            App.Current.Dispatcher.Invoke(() => device.AddDeviceMeasurement(deviceMeasurement, index));
-        //        }
-        //    }
-        //}
+            //foreach (var device in Devices ?? [])
+            //{
+            //    for (byte index = 1; index < 6; index++)
+            //    {
+            //        var deviceMeasurement = await cs.GetMeasurementSystemDataAsync(device.DeviceId, index);
+            //        //var deviceMeasurement = new DeviceMeasurement() { Name = $"Measurement {index}" };
+            //        if (deviceMeasurement != null)
+            //        {
+            //            App.Current.Dispatcher.Invoke(() => device.AddDeviceMeasurement(deviceMeasurement, index));
+            //        }
+            //    }
+            //}
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error updating devices: {ex}");
+            MessageBox.Show($"Error updating devices: {ex.Message}");
+        }
     }
 
     [RelayCommand]

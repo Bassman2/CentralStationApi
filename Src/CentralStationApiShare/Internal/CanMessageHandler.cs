@@ -14,7 +14,7 @@ internal class CanMessageHandler(CentralStation cs)
 
 
     public TimeSpan MessageTimeout { get; set; } = TimeSpan.FromMilliseconds(10000);
-    public TimeSpan CollectionTimeout { get; set; } = TimeSpan.FromSeconds(20);
+    public TimeSpan CollectionTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
     public async Task<CanMessage?> SendMessageAsync(CanMessage req, CancellationToken cancellationToken = default)
     {
@@ -92,7 +92,7 @@ internal class CanMessageHandler(CentralStation cs)
 
         // Create a combined cancellation token source for both timeout and cancellation
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        //cts.CancelAfter(CollectionTimeout);
+        cts.CancelAfter(CollectionTimeout);
         var ct = cts.Token;
 
         try
