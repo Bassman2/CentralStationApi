@@ -36,5 +36,9 @@ public enum Protocol
     /// specialized interface hardware to connect to the CAN bus. It is not commonly used
     /// for standard network communication scenarios.
     /// </remarks>
-    CAN
+    CAN,
+
+   // Waveshare,
+
+
 }

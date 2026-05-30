@@ -1,0 +1,57 @@
+﻿<Window x:Class="CentralStationDemo.View.ConnectionView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CentralStationDemo.View"
+        xmlns:tbc="clr-namespace:WpfToolbox.Converter;assembly=WpfToolbox"
+        xmlns:cs="clr-namespace:CentralStationApi;assembly=CentralStationApi"
+        mc:Ignorable="d"
+        Title="Connection Settings" Height="180" Width="300">
+    <DockPanel>
+        <DialogButtonsView DockPanel.Dock="Bottom" Margin="3"/>
+        <Grid Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>               
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Content="Connection Type:"/>
+            <EnumComboBox Grid.Row="0" Grid.Column="1" x:Uid="connectionType" EnumType="{x:Type cs:Protocol}" SelectedValue="{Binding ConnectionType}" Margin="3"/>
+            <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding ElementName=connectionType, Converter={StaticResource EnumToVisibilityCollapsedConverter}, ConverterParameter=TCP|UDP}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Content="Host:"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Host}" Margin="3"/>
+                <Label Grid.Row="1" Grid.Column="0" Content="Port:"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Port}" Margin="3"/>
+            </Grid>
+            <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding ElementName=connectionType, Converter={StaticResource EnumToVisibilityCollapsedConverter}, ConverterParameter=CAN}" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Content="COM Port:"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding BaudRate}" Margin="3"/>
+                <Label Grid.Row="1" Grid.Column="0" Content="Baud Rate:"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding BaudRate}" Margin="3"/>
+                <Label Grid.Row="2" Grid.Column="0" Content="Image Host:"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Host}" Margin="3"/>
+              </Grid>
+        </Grid>
+    </DockPanel>
+</Window>

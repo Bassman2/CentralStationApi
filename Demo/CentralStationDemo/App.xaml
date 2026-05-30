@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:CentralStationDemo"
              xmlns:conv="clr-namespace:CentralStationDemo.Converter"
+             xmlns:tbconv="clr-namespace:WpfToolbox.Converter;assembly=WpfToolbox"
              Startup="OnApplicationStartup">
     <Application.Resources>
         <!--<conv:DeviceToDescriptionConverter x:Key="DeviceToDescriptionConverter"/>-->
@@ -11,5 +12,7 @@
         <conv:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
         <conv:UriToImageSourceConverter x:Key="UriToImageSourceConverter"/>
         <conv:PathToImageSourceConverter x:Key="PathToImageSourceConverter"/>
+        
+        <tbconv:EnumToVisibilityCollapsedConverter x:Key="EnumToVisibilityCollapsedConverter"/>
     </Application.Resources>
 </Application>

@@ -28,7 +28,7 @@ public class DeviceModel
     public DeviceType Type { get; set; }
 
     [JsonPropertyName("typeName")]
-    public string TypeName { get; set; }
+    public string TypeName { get; set; } = string.Empty;
 
     [JsonPropertyName("imagePath")]
     public string? ImagePath { get; set; }
@@ -40,10 +40,10 @@ public class DeviceModel
     // StatusData
 
     [JsonPropertyName("article")]
-    public string ArticleNumber { get; set; } = null!;
+    public string ArticleNumber { get; set; } = string.Empty;
 
     [JsonPropertyName("name")]
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } = string.Empty;
 
 
     [JsonPropertyName("numOfMeasurements")]

@@ -13,6 +13,8 @@
     <Project Path="../AutoConverter/AutoConverterGenerator/AutoConverterGenerator.csproj" />
     <Project Path="../GeneratorLibrary/GeneratorLibrary/GeneratorLibrary.csproj" />
     <Project Path="../GeneratorLibrary/GeneratorLibraryShare/GeneratorLibraryShare.shproj" Id="dca7dd44-310c-48bd-bc75-c4203d5c3200" />
+    <Project Path="../WpfToolbox/Src/WpfToolbox100/WpfToolbox100.csproj" />
+    <Project Path="../WpfToolbox/Src/WpfToolboxShare/WpfToolboxShare.shproj" Id="dbb26377-986a-418b-8793-f6f499aeb39f" />
   </Folder>
   <Folder Name="/Generator/">
     <Project Path="Generator/CsSerializerGenerator/CsSerializerGenerator.csproj" />
